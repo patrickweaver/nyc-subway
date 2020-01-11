@@ -1,0 +1,23 @@
+{
+  "id": "000001G",
+  "tripUpdate": {
+    "trip": {
+      "tripId": "096350_G..N",
+      "startTime": "16:03:30",
+      "startDate": "20200111",
+      "routeId": "G"
+    },
+    "stopTimeUpdate": [
+      {
+        "arrival": { "time": "1578779447" },
+        "departure": { "time": "1578779447" },
+        "stopId": "G24N"
+      },
+      {
+        "arrival": { "time": "1578779537" },
+        "departure": { "time": "1578779537" },
+        "stopId": "G22N"
+      }
+    ]
+  }
+}

@@ -3,24 +3,26 @@ const app = express();
 app.use(express.static('server/public'));
 
 const rp = require('request-promise');
+const GtfsRealtimeBindings = require('gtfs-realtime-bindings');
 
 async function getFeed(feedId) {
-
+  
   var options = {
     uri: 'http://datamine.mta.info/mta_esi.php',
     qs: {
       key: process.env.MTA_API_KEY,
       feed_id: feedId
     },
+    encoding: null,
     headers: {
       'User-Agent': 'Request-Promise'
-    },
-    json: true
+    }
   };
 
   try {
     const feedResponse = await rp(options);
-    return feedResponse
+    const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(feedResponse);
+    return feed;
   } catch (error) {
     console.log(error);
     return {error: error}

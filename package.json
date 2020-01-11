@@ -26,6 +26,7 @@
     "@rollup/plugin-replace": "^2.3.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "gtfs-realtime-bindings": "0.0.5",
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
     "rollup": "^1.29.0",
