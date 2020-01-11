@@ -5,7 +5,7 @@
   "main": "server/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && PORT=3000 node server/server.js",
+    "start": "node -r dotenv/config server/server.js && npm run build && node server/server.js",
     "build": "rollup -c",
     "watch": "rollup -c -w"
   },
@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@rollup/plugin-replace": "^2.3.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
