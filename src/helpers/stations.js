@@ -3652,7 +3652,7 @@ const stations = [
     "Line": "6th Av - Culver",
     "Stop Name": "Church Av",
     "Borough": "Bk",
-    "Daytime Routes": "F",
+    "Daytime Routes": "F G",
     "Structure": "Subway",
     "GTFS Latitude": 40.644041,
     "GTFS Longitude": -73.979678,
@@ -7456,23 +7456,24 @@ function findByGTFS(gtfsId) {
   const station = stations[index];
   // Store direction and split Daytime Routes into array
   station.direction = direction;
-  station.daytimeRoutesArray = station['Daytime Routes'].split(' ');
+  station.daytimeRoutesArray = String(station['Daytime Routes']).split(' ');
   return station;
 }
 
 function getLineStops(line) {
   // Filter out all stations where train doesn't stop:
   const lineStations = stations.filter(station => {
-    const linesArray = station['Daytime Routes'].split(' ');
-    if (linesArray.indexOf(line) > -1) {
+    const linesArray = String(station['Daytime Routes']).split(' ');
+    if (linesArray.indexOf(line.toUpperCase()) > -1) {
       return true
     }
   });
   // Split Daytime Routes into array
-  lineStations.map(station => {
-    station.daytimeRoutesArray = station['Daytime Routes'].split(' ');
+  const formattedLineStations = lineStations.map(station => {
+    station.daytimeRoutesArray = String(station['Daytime Routes']).split(' ');
     return station;
   })
+  return formattedLineStations;
 }
 
 module.exports = {

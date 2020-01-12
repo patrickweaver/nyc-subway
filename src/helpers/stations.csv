@@ -242,7 +242,7 @@ Station ID,Complex ID,GTFS Stop ID,Division,Line,Stop Name,Borough,Daytime Route
 240,240,F24,IND,6th Av - Culver,7 Av,Bk,F G,Subway,40.666271,-73.980305,Manhattan - Queens,Church Av - Coney Island
 241,241,F25,IND,6th Av - Culver,15 St - Prospect Park,Bk,F G,Subway,40.660365,-73.979493,Manhattan - Queens,Church Av - Coney Island
 242,242,F26,IND,6th Av - Culver,Fort Hamilton Pkwy,Bk,F G,Subway,40.650782,-73.975776,Manhattan - Queens,Church Av - Coney Island
-243,243,F27,IND,6th Av - Culver,Church Av,Bk,F,Subway,40.644041,-73.979678,Manhattan,Coney Island
+243,243,F27,IND,6th Av - Culver,Church Av,Bk,F G,Subway,40.644041,-73.979678,Manhattan,Coney Island
 244,244,F29,IND,6th Av - Culver,Ditmas Av,Bk,F,Elevated,40.636119,-73.978172,Manhattan,Coney Island
 245,245,F30,IND,6th Av - Culver,18 Av,Bk,F,Elevated,40.629755,-73.976971,Manhattan,Coney Island
 246,246,F31,IND,6th Av - Culver,Avenue I,Bk,F,Elevated,40.625322,-73.976127,Manhattan,Coney Island

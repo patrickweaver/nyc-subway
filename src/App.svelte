@@ -6,13 +6,15 @@
 
   let gFeed = [];
   let apiTime = (new Date()).getTime();
+  
+  let gStops = stations.getLineStops('G');
 
   async function lineSync() {
     const response = (await api.getFeed('g'));
     gFeed = response.entity;
     apiTime = response.header.timestamp;
     console.log(gFeed)
-    setTimeout(lineSync, 5000);
+    //setTimeout(lineSync, 5000);
   }
 
   function getStopName(gtfsId) {
@@ -22,6 +24,24 @@
     }
     return `${station['Stop Name']} -- ${station['direction']}`;
   }
+  
+  function getTripUpdate(stopTimeUpdates, gtfsId) {
+   
+    let filteredStops = stopTimeUpdates.filter(update => {
+      const updateGtfs = update.stopId.substring(0, update.stopId.length - 1);
+      //console.log(updateGtfs, gtfsId, typeof updateGtfs, typeof gtfsId);
+      if (updateGtfs === gtfsId) {
+        return true;
+      }
+    });
+    
+    if (filteredStops[0]) {
+      let arrivalTime = filteredStops[0].arrival.time;
+      return formatDistanceStrict(fromUnixTime(arrivalTime), fromUnixTime(apiTime))
+    } else {
+      return ' ';
+    }
+  }
 
   lineSync();
 
@@ -30,43 +50,34 @@
 <div id="app">
   <h1>NYC Subway</h1>
 
-  <ul id="feed">
+  <table>
+    <tr>
+      <th>
+        Train Id
+      </th>
+      {#each gStops as station}
+      <th>
+        {station['Stop Name']}
+      </th>
+      {/each}
+    </tr>
     {#each gFeed as train}
-      <li class="train-trip">
-        <h4>
-          {train.id}
-        </h4>
+    <tr>
+      <td>
+        {train.id}
+      </td>
+      {#each gStops as station}
+      <th>
+        {#if train.tripUpdate && train.tripUpdate.stopTimeUpdate}
+        <!--{}-->
         
-        <ol>
-          {#if train.tripUpdate && train.tripUpdate.stopTimeUpdate }
-          {#each train.tripUpdate.stopTimeUpdate as stopTimeUpdateEntry}
-            <li>
-              <h5>Train:</h5>
-              <ul>
-                <!--
-                {#if stopTimeUpdateEntry.stopId}
-                <li>
-                  Stop Id: {stopTimeUpdateEntry.stopId}
-                </li>
-                {/if}
-                -->
-                <li>
-                  Station: {getStopName(stopTimeUpdateEntry.stopId)}
-                </li>
-                <li>
-                  Time: {formatDistanceStrict(fromUnixTime(stopTimeUpdateEntry.arrival.time), fromUnixTime(apiTime))}
-                </li>
-                
-              </ul>
-            </li>
-          {/each}
-          {/if}
-        </ol>
-        
-      </li>
+        {getTripUpdate(train.tripUpdate.stopTimeUpdate, station['GTFS Stop ID'], apiTime)}
+        {/if}
+      </th>
+      {/each}
+    </tr>
     {/each}
-  </ul>
-
+  </table>
 </div>
 
 <style>
