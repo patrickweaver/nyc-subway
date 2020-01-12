@@ -1,0 +1,3 @@
+- G Daytime Route missing from Church Ave F/G
+- feedEntity.id is not consistently the same train between responses
+- Sorting G by latitude "Hoyt - Schermerhorn Sts" is mis-sorted
