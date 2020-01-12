@@ -10,7 +10,10 @@ export default {
     name: 'app'
   },
   plugins: [
-    svelte({css: css => css.write('server/public/bundle.css')}),
+    svelte({
+      dev: true,
+      css: css => css.write('server/public/bundle.css')
+    }),
     resolve(),
     commonjs(),
   ]

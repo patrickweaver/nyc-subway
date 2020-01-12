@@ -5,4 +5,6 @@
 body {
   margin: 0;
   font-family: 'Ariel', sans-serif;
+  overflow-x: scroll;
+  /*max-height: 100vh;*/
 }

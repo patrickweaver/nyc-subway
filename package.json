@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && node -r dotenv/config server/server.js && node server/server.js",
+    "dev": "node -r dotenv/config server/server.js && node server/server.js",
     "build": "echo '**building**' && rollup -c",
     "watch": "rollup -c -w"
   },
@@ -24,6 +25,7 @@
   },
   "dependencies": {
     "@rollup/plugin-replace": "^2.3.0",
+    "date-fns": "^2.9.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "gtfs-realtime-bindings": "0.0.5",
