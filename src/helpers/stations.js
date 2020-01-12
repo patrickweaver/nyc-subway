@@ -7442,21 +7442,41 @@ const stations = [
 ]
 
 function findByGTFS(gtfsId) {
+  // Split GTFS Id from station direction
   const stationGtfsId = gtfsId.substring(0, gtfsId.length - 1);
   const direction = gtfsId.substring(gtfsId.length - 1, gtfsId.length);
+  // Create array of just GTFS Ids and find index of station
   const gtfsArray = stations.map(i => i['GTFS Stop ID'])
   const index = gtfsArray.indexOf(stationGtfsId);
   if (index === -1) {
     console.log('🦞 Station not found');
     return null;
   }
+  // Get full station data using index
   const station = stations[index];
+  // Store direction and split Daytime Routes into array
   station.direction = direction;
   station.daytimeRoutesArray = station['Daytime Routes'].split(' ');
   return station;
 }
 
+function getLineStops(line) {
+  // Filter out all stations where train doesn't stop:
+  const lineStations = stations.filter(station => {
+    const linesArray = station['Daytime Routes'].split(' ');
+    if (linesArray.indexOf(line) > -1) {
+      return true
+    }
+  });
+  // Split Daytime Routes into array
+  lineStations.map(station => {
+    station.daytimeRoutesArray = station['Daytime Routes'].split(' ');
+    return station;
+  })
+}
+
 module.exports = {
   stations: stations,
-  findByGTFS: findByGTFS
+  findByGTFS: findByGTFS,
+  getLineStops: getLineStops
 }
