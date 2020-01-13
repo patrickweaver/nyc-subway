@@ -1,3 +1,4 @@
 - G Daytime Route missing from Church Ave F/G
 - feedEntity.id is not consistently the same train between responses
 - Sorting G by latitude "Hoyt - Schermerhorn Sts" is mis-sorted
+- Trip start/stop times are in HH:MM:SS, but arrival and departure times are in Unix Time
