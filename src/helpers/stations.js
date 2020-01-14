@@ -7452,7 +7452,7 @@ function findByGTFS(gtfsId, containsDirection=false) {
   const gtfsArray = stations.map(i => i['GTFS Stop ID'])
   const index = gtfsArray.indexOf(stationGtfsId);
   if (index === -1) {
-    console.log('🦞 Station not found');
+    console.log('🦞 Station not found: ', stationGtfsId);
     return null;
   }
   // Get full station data using index
