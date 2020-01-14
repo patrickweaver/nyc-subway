@@ -15,7 +15,7 @@
     gFeed = response.entity;
     apiTime = response.header.timestamp;
     console.log(gFeed)
-    //setTimeout(lineSync, 5000);
+    setTimeout(lineSync, 5000);
   }
   
   function getTripUpdate(stopTimeUpdates, gtfsId) {
@@ -34,7 +34,22 @@
     }
   }
 
+  function drawMap() {
+    map = L.map("map")
+      .setView(MAP_CENTER, MAP_ZOOM);
+    map.zoomControl.setPosition('bottomleft');
+    L.tileLayer("TILE_LAYER", {
+      attribution: '<a href="/map-attribution" target="_blank">Map Attribution</a> &#124; <a href="/terms-of-use" target="_blank">Terms of Use</a>',
+      maxZoom: 18
+    }).addTo(map);
+  }
+
   lineSync();
+
+  (async function main() {
+    // Draw the map
+    drawMap();
+  })();
 
 </script>
 

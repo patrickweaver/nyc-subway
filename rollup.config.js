@@ -1,6 +1,9 @@
-import svelte from 'rollup-plugin-svelte'
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
+import svelte from 'rollup-plugin-svelte';
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+import replace from '@rollup/plugin-replace';
+
+const config = require('./config.js');
 
 export default {
   input: './src/main.js',
@@ -16,5 +19,6 @@ export default {
     }),
     resolve(),
     commonjs(),
+    replace(config),
   ]
 }
