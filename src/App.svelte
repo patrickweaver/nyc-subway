@@ -166,30 +166,7 @@
       drawPlace(station, false);
     }
   })();
-
-
-
 </script>
-
-<div id="app">
-  <h1>NYC Subway G Line Realtime Train Diagram</h1>
-
-  <ul class="line-diagram">
-    {#each lines['G'] as stationGtfsId}
-    <li>{stationGtfsId} - {stations.findByGTFS(stationGtfsId)['Stop Name']}</li>
-    <li>
-    {#each gFeed as train}
-
-      {#if train.tripUpdate && train.tripUpdate.stopTimeUpdate}
-        {#if train.tripUpdate.stopTimeUpdate[0].stopId.substring(0, train.tripUpdate.stopTimeUpdate[0].stopId.length - 1) === stationGtfsId}
-          🚇{#if train.tripUpdate.stopTimeUpdate[0].stopId.substring( train.tripUpdate.stopTimeUpdate[0].stopId.length - 1, train.tripUpdate.stopTimeUpdate[0].stopId.length) === 'S'}⬇️{:else if train.tripUpdate.stopTimeUpdate[0].stopId.substring( train.tripUpdate.stopTimeUpdate[0].stopId.length - 1, train.tripUpdate.stopTimeUpdate[0].stopId.length) === 'N'}⬆️{/if}&nbsp;&nbsp;
-        {/if}
-      {/if}
-    {/each}
-    </li>
-    {/each}
-  </ul>
-</div>
 
 <style>
 
