@@ -19,7 +19,7 @@
     apiTime = response.header.timestamp;
     console.log(gFeed)
     drawTrains(gFeed);
-    setTimeout(lineSync, 5000);
+    //setTimeout(lineSync, 5000);
   }
   
   function getTripUpdate(stopTimeUpdates, gtfsId) {
@@ -57,6 +57,14 @@
     if (recenter) {
       //recenterOnPlace(place);
     }
+  }
+
+  function connectPlaces(place1, place2) {
+    var latlngs = [
+      [place1.lat, place1.long],
+      [place2.lat, place2.long]
+  ];
+  var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
   }
 
   var ngIcon = L.icon({
@@ -121,7 +129,7 @@
           let trainLat = (nextStation['GTFS Latitude'] + prevStation['GTFS Latitude']) / 2;
           let trainLong = (nextStation['GTFS Longitude'] + prevStation['GTFS Longitude']) / 2;
 
-          console.log("Train:", trainLat, trainLong, dataStopId)
+          console.log("Train!!:", trainLat, trainLong, dataStopId)
 
           let bounds = L.latLng(trainLat, trainLong).toBounds(250);
 
@@ -158,12 +166,18 @@
     // Draw the map
     drawMap();
     // Draw all the stations
-    for (var i in gStops) {
+    for (let i = 0; i < gStops.length; i++) {
       let station = {
         lat: gStops[i]['GTFS Latitude'],
         long: gStops[i]['GTFS Longitude']
       }
       drawPlace(station, false);
+      if (gStops[i + 1]) {
+        connectPlaces(station, {
+          lat: gStops[i + 1]['GTFS Latitude'],
+          long: gStops[i + 1]['GTFS Longitude']
+        })
+      }
     }
   })();
 </script>

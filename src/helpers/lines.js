@@ -1,4 +1,4 @@
-const G = [
+export const G = [
   'G22',
   'G24',
   'G26',
@@ -21,8 +21,3 @@ const G = [
   'F26',
   'F27'
 ]
-
-
-module.exports = {
-  G: G
-}
