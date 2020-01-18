@@ -81,9 +81,6 @@ function getLineStops(line) {
 
   let compareByGOrder = compareByLineOrder.bind(this, lines['G']);
   lineStations.sort(compareByGOrder);
-
-  console.log("** LINE STATIONS:")
-  console.log(lineStations.map(i => i['Stop Name']));
   
   // Split Daytime Routes into array
   const formattedLineStations = lineStations.map(station => {
