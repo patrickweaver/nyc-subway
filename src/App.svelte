@@ -24,7 +24,7 @@
     apiTime = response.header.timestamp;
     console.log(gFeed)
     drawEachTrain(gFeed);
-    //setTimeout(lineSync, 5000);
+    setTimeout(lineSync, 5000);
   }
   
   // 🚧 This is not used
@@ -159,11 +159,20 @@
         // might be the nextStation + 1 instead of - 1.
         let nextStationIndex = lines[route].indexOf(nextStation['GTFS Stop ID']);
         let prevStation;
-        if (nextStationIndex > 0) {
-          prevStation = stations.findByGTFS(lines[route][nextStationIndex - 1])
+
+        // Previous Station index will be different relative to next
+        // Station depending on direction of train.
+        let prevStationOffset = 1; // N default
+        if (direction === 'S') {
+          prevStationOffset = -1;
+        }
+        let prevStationIndex = nextStationIndex + prevStationOffset;
+
+
+        if (prevStationIndex >= 0 && prevStationIndex < lines[route].length) {
+          prevStation = stations.findByGTFS(lines[route][prevStationIndex])
         } else {
-          // 🚧 Maybe if -1 should throw an error
-          prevStation = null;
+          throw 'Invalid previous station index.'
         }
 
         console.log('nextStopId:', nextStopId, "| next Station GTFS: ", nextStation['GTFS Stop ID'], '| next station name:', nextStation['Stop Name'], '| Next Station Index:', nextStationIndex);
