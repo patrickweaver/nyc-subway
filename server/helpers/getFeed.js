@@ -31,7 +31,8 @@ const feeds = {
   '6': '',
   '123456': '',
   '7': '-7',
-  'sir': '-si'
+  'sir': '-si',
+  'si': '-si'
 }
 
 module.exports = async function(feedId) {
