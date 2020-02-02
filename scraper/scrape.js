@@ -120,7 +120,7 @@ const db = new sqlite3.Database(dbFile);
 
 async function getFeedData() {
   var options = {
-    uri: `http://localhost:${process.env.PORT}/api/all`,
+    uri: `http://localhost:${process.env.PORT}/api/g`,
     json: true
   };
 

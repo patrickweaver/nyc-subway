@@ -1,25 +1,57 @@
 const rp = require('request-promise');
 const GtfsRealtimeBindings = require('gtfs-realtime-bindings');
 
-module.exports = async function(feedId=false) {
-  
-  var options = {
-    uri: 'http://datamine.mta.info/mta_esi.php',
-    qs: {
-      key: process.env.MTA_API_KEY,
-    },
-    encoding: null,
-    headers: {
-      'User-Agent': 'Request-Promise'
-    }
-  };
+const baseUri = 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs';
 
-  // Default is data from all routes
-  if (feedId) {
-    options.qs.feed_id = feedId;
-  }
+const feeds = {
+  'a': '-ace',
+  'c': '-ace',
+  'e': '-ace',
+  'ace': '-ace',
+  'b': '-bdfm',
+  'd': '-bdfm',
+  'f': '-bdfm',
+  'm': '-bdfm',
+  'bdfm': '-bdfm',
+  'g': '-g',
+  'j': '-jz',
+  'z': '-jz',
+  'jz': '-jz',
+  'n': '-nqrw',
+  'q': '-nqrw',
+  'r': '-nqrw',
+  'w': '-nqrw',
+  'nqrw': '-nqrw',
+  'l': '-l',
+  '1': '',
+  '2': '',
+  '3': '',
+  '4': '',
+  '5': '',
+  '6': '',
+  '123456': '',
+  '7': '-7',
+  'sir': '-si'
+}
+
+module.exports = async function(feedId) {
 
   try {
+
+    if (feeds[feedId] === undefined) {
+      throw "Invalid feedId"
+    }
+    
+    var options = {
+      uri: baseUri + feeds[feedId],
+      encoding: null,
+      headers: {
+        'User-Agent': 'Request-Promise',
+        'x-api-key': process.env.NEW_MTA_API_KEY
+      }
+    };
+
+  
     const feedResponse = await rp(options);
     const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(feedResponse);
     return feed;
@@ -27,5 +59,4 @@ module.exports = async function(feedId=false) {
     console.log(error);
     return {error: error}
   }
-  
 }

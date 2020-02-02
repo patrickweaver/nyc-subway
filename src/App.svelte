@@ -99,7 +99,7 @@
 
   // Draw each train on map
   function drawEachTrain(trains) {
-
+    console.log("Updating Train Positions at", apiTime);
     // Remove previous positions of trains
     for (var i in trainsOnMap) {
       trainsOnMap[i].remove();
