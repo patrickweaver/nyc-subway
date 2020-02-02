@@ -19,11 +19,16 @@
 
   // Get data from API, parse data, draw train data on map
   async function lineSync() {
-    const response = (await api.getFeed('g'));
-    gFeed = response.entity;
-    apiTime = response.header.timestamp;
-    console.log(gFeed)
-    drawEachTrain(gFeed);
+    try {
+      const response = (await api.getFeed('g'));
+      gFeed = response.entity;
+      apiTime = parseInt(response.header.timestamp);
+      //console.log(gFeed)
+      drawEachTrain(gFeed);
+    } catch (error) {
+      console.log("Error:");
+      console.log(error);
+    }
     setTimeout(lineSync, 5000);
   }
   
@@ -104,7 +109,8 @@
     console.log('drawing', trains.length, 'trains')
     for (var i in trains) {
       let train = trains[i];
-
+      console.log("Train Data:");
+      console.log(train);
       // Check for a whole bunch of stuff in the JSON
       // The API response has lots of objects that don't
       // represent trains currently between stations.
@@ -172,21 +178,52 @@
         if (prevStationIndex >= 0 && prevStationIndex < lines[route].length) {
           prevStation = stations.findByGTFS(lines[route][prevStationIndex])
         } else {
+          // 🚧 Trains waiting to begin journey have next stop as first or last
+          // but will not have a previous station index.
           throw 'Invalid previous station index.'
         }
 
-        console.log('nextStopId:', nextStopId, "| next Station GTFS: ", nextStation['GTFS Stop ID'], '| next station name:', nextStation['Stop Name'], '| Next Station Index:', nextStationIndex);
+        console.log(train.tripUpdate.trip.tripId, 'nextStopId:', nextStopId, "| next Station GTFS: ", nextStation['GTFS Stop ID'], '| next station name:', nextStation['Stop Name'], '| Next Station Index:', nextStationIndex, '| in', (parseInt(train.tripUpdate.stopTimeUpdate[0].arrival.time) - apiTime), 'seconds');
+        let nsu = train.tripUpdate.stopTimeUpdate[0];
+        let at = parseInt(nsu.arrival.time);
+        let dt = parseInt(nsu.departure.time);
 
+        
+        console.log(train.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at, '(', at - apiTime, 'seconds)', '| departing:', dt, '(', dt - apiTime, 'seconds)', nsu.stopId);
+
+        if (train.tripUpdate.stopTimeUpdate[1]) {
+          let nsu1 = train.tripUpdate.stopTimeUpdate[1];
+          var at1 = parseInt(nsu1.arrival.time);
+          var dt1 = parseInt(nsu1.departure.time);
+          console.log(train.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at1, '(', at1 - apiTime, 'seconds)', '| departing:', dt1, '(', dt1 - apiTime, 'seconds)', nsu1.stopId);
+        }
+
+        if (train.tripUpdate.stopTimeUpdate[2]) {
+          let nsu2 = train.tripUpdate.stopTimeUpdate[2];
+          var at2 = parseInt(nsu2.arrival.time);
+          var dt2 = parseInt(nsu2.departure.time);
+          console.log(train.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at2, '(', at2 - apiTime, 'seconds)', '| departing:', dt2, '(', dt2 - apiTime, 'seconds)', nsu2.stopId, '|', at2 - at1);
+        }
+
+        if (train.tripUpdate.stopTimeUpdate[3]) {
+          let nsu3 = train.tripUpdate.stopTimeUpdate[3];
+          var at3 = parseInt(nsu3.arrival.time);
+          var dt3 = parseInt(nsu3.departure.time);
+          console.log(train.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at3, '(', at3 - apiTime, 'seconds)', '| departing:', dt3, '(', dt3 - apiTime, 'seconds)', nsu3.stopId,  '|', at3 - at2);
+        }
+
+        // Can decide where to place train with next and previous station.
         if (prevStation) {
-          console.log("                | prev Station GTFS: ", prevStation['GTFS Stop ID'], '| prev station name:', prevStation['Stop Name'], '| Prev Station Index:', nextStationIndex - 1)
+          console.log(train.tripUpdate.trip.tripId, "                      | prev Station GTFS: ", prevStation['GTFS Stop ID'], '| prev station name:', prevStation['Stop Name'], '| Prev Station Index:', nextStationIndex - 1)
 
           //🚧 Calculate lat/long mid-way between the next statio and the previous
           // station.
           let trainLat = (nextStation['GTFS Latitude'] + prevStation['GTFS Latitude']) / 2;
           let trainLong = (nextStation['GTFS Longitude'] + prevStation['GTFS Longitude']) / 2;
 
-          console.log("Drawing Train:", nextStopIdAndDirection, "at", trainLat, trainLong, )
+          console.log("Drawing Train:", train.tripUpdate.trip.tripId, "at", trainLat, trainLong, 'next stop:', nextStopIdAndDirection, nextStation['Stop Name'])
           drawTrain(direction, trainLat, trainLong);
+
         } else {
           throw "Can't find previous station, can't draw train."
         }
