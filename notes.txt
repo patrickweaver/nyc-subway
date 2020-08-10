@@ -9,3 +9,7 @@
   - Items with a stopTimeUpdate property show where the train will be at each stop down the line.
   - Items with a vehicle property show where the train is currently, and additional information on some feeds.
 - %2F confusion on new api url
+
+
+New To Dos August 2020:
+- Figure out frontend error: Error: index 7 train has no "tripUpdate" property.

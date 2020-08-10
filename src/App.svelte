@@ -9,27 +9,32 @@
   import * as lines from './helpers/lines.js';
 
   // Initialize variables
-  let gFeed = []; // Most recent API response
+  let trainData = []; // Most recent API response
   let apiTime = (new Date()).getTime(); // Local server time gets overwritten with timestamp from API.
   let map; // Map var for leaflet
   let trainsOnMap = []; // Trains to draw
   
   // Station data is hard coded
+  // See stationData.js, which is generated form stationData.csv
+  // 🚸 Currently limiting scope to the G line.
   let gStops = stations.getLineStops('G');
 
   // Get data from API, parse data, draw train data on map
   async function lineSync() {
+    console.log("Syncing!")
     try {
-      const response = (await api.getFeed('g'));
-      gFeed = response.entity;
-      apiTime = parseInt(response.header.timestamp);
-      //console.log(gFeed)
-      drawEachTrain(gFeed);
+      const apiResponse = (await api.getFeed('g'));
+
+      console.log(apiResponse);
+
+      trainData = apiResponse.entity;
+      apiTime = parseInt(apiResponse.header.timestamp);
+      //console.log(trainData)
+      drawEachTrain(trainData);
     } catch (error) {
       console.log("Error:");
       console.log(error);
     }
-    setTimeout(lineSync, 5000);
   }
   
   // 🚧 This is not used
@@ -258,6 +263,7 @@
   }
 
   lineSync();
+  setInterval(lineSync, 15000);
 
   (async function main() {
     // Draw the map

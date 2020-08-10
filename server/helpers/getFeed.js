@@ -3,6 +3,7 @@ const GtfsRealtimeBindings = require('gtfs-realtime-bindings');
 
 const baseUri = 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs';
 
+// Values are the MTA urls for each line
 const feeds = {
   'a': '-ace',
   'c': '-ace',
@@ -29,6 +30,8 @@ const feeds = {
   '4': '',
   '5': '',
   '6': '',
+  '123': '',
+  '456': '',
   '123456': '',
   '7': '-7',
   'sir': '-si',
@@ -54,10 +57,12 @@ module.exports = async function(feedId) {
 
   
     const feedResponse = await rp(options);
+    // The response is a GTFS object, which needs to be decoded:
     const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(feedResponse);
     return feed;
   } catch (error) {
-    console.log(error);
+    console.log("Error: " + error.substr(0, 50));
+    //console.log(error);
     return {error: error}
   }
 }
