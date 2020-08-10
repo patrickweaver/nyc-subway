@@ -8,3 +8,4 @@
 - tripUpdate.entity items will either have a stopTimeUpdate property OR a vehicle property.
   - Items with a stopTimeUpdate property show where the train will be at each stop down the line.
   - Items with a vehicle property show where the train is currently, and additional information on some feeds.
+- %2F confusion on new api url
