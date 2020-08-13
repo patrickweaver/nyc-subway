@@ -6,7 +6,7 @@
   // Import helpers
   import api from './helpers/api.js';
   import stations from './helpers/stations.js';
-  import * as lines from './helpers/lines.js';
+  import lines from './helpers/lines.js';
 
   // Initialize variables
   let trainData = []; // Most recent API response
@@ -21,15 +21,17 @@
 
   // Get data from API, parse data, draw train data on map
   async function lineSync() {
-    console.log("Syncing!")
+    const syncDate = new Date()
+    console.log(`Syncing! at ${syncDate.getHours()}:${syncDate.getMinutes()}:${syncDate.getSeconds()}`)
     try {
+      // Get data from server API
       const apiResponse = (await api.getFeed('g'));
 
-      console.log(apiResponse);
-
+      // Update most recent train data and API time
       trainData = apiResponse.entity;
       apiTime = parseInt(apiResponse.header.timestamp);
-      //console.log(trainData)
+
+      // Draw each train at its updated position on the map
       drawEachTrain(trainData);
     } catch (error) {
       console.log("Error:");
@@ -56,25 +58,27 @@
 
   // Draw stations on map (happens on first load)
   function drawPlace(place, recenter=false) {
-    //console.log(place);
     if (!place.lat || !place.long) {
       return;
     }
 
     // Leaflet.js circle options
     const placeOptions = {
-    color: '#3cb44b',
-    fillColor: '#43CC53',
-    fillOpacity: 0.5,
-    radius: 80,
+      color: '#3cb44b',
+      fillColor: '#43CC53',
+      fillOpacity: 0.5,
+      radius: 80,
     }
 
     var circle = L.circle([place.lat, place.long], placeOptions)
       .addTo(map)
+      // 🚸 Can implement functionality when a station is clicked on.
       //.on("click", onMarkerClick);
+    /*
     if (recenter) {
       //recenterOnPlace(place);
     }
+    */
   }
 
   // Draw connecting line between stations
@@ -188,6 +192,7 @@
           throw 'Invalid previous station index.'
         }
 
+        // Log the next few stations this train will be at:
         console.log(train.tripUpdate.trip.tripId, 'nextStopId:', nextStopId, "| next Station GTFS: ", nextStation['GTFS Stop ID'], '| next station name:', nextStation['Stop Name'], '| Next Station Index:', nextStationIndex, '| in', (parseInt(train.tripUpdate.stopTimeUpdate[0].arrival.time) - apiTime), 'seconds');
         let nsu = train.tripUpdate.stopTimeUpdate[0];
         let at = parseInt(nsu.arrival.time);

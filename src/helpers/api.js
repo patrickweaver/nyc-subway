@@ -1,3 +1,5 @@
+// Gets feed from backend
+
 async function getFeed(line=false) {
   if (!line) {
     line = 'all';

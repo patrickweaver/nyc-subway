@@ -1,6 +1,8 @@
 import { stations } from './stationData.js';
-import * as lines from './lines.js';
+import lines from './lines.js';
 
+
+// Find a full station object from a GTFS Stop Id
 function findByGTFS(gtfsId, containsDirection=false) {
   let stationGtfsId = gtfsId;
   if (containsDirection) {
@@ -25,6 +27,8 @@ function findByGTFS(gtfsId, containsDirection=false) {
   return station;
 }
 
+// 🚸 Not currently used (was an early hack for order)
+// Compare two stations by latitude
 function compareByLatitude(a, b) {
   let aLong = a['GTFS Latitude'];
   let bLong = b['GTFS Latitude'];
@@ -37,6 +41,7 @@ function compareByLatitude(a, b) {
   return 0;
 }
 
+// Compare two stations by where they are in the train's route
 function compareByLineOrder(lineOrder, a, b) {
   try {
     // Isolate GTFS Stop Id
@@ -70,6 +75,9 @@ function compareByLineOrder(lineOrder, a, b) {
   }
 }
 
+
+// Get the stations where the train currently stops
+// 🚸 Implementation has 'Daytime Routes' hard coded.
 function getLineStops(line) {
   // Filter out all stations where train doesn't stop:
   let lineStations = stations.filter(station => {

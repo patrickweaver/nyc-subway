@@ -1,51 +1,23 @@
 const rp = require('request-promise');
 const GtfsRealtimeBindings = require('gtfs-realtime-bindings');
+const feeds = require('./feeds')
 
 const baseUri = 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs';
 
-// Values are the MTA urls for each line
-const feeds = {
-  'a': '-ace',
-  'c': '-ace',
-  'e': '-ace',
-  'ace': '-ace',
-  'b': '-bdfm',
-  'd': '-bdfm',
-  'f': '-bdfm',
-  'm': '-bdfm',
-  'bdfm': '-bdfm',
-  'g': '-g',
-  'j': '-jz',
-  'z': '-jz',
-  'jz': '-jz',
-  'n': '-nqrw',
-  'q': '-nqrw',
-  'r': '-nqrw',
-  'w': '-nqrw',
-  'nqrw': '-nqrw',
-  'l': '-l',
-  '1': '',
-  '2': '',
-  '3': '',
-  '4': '',
-  '5': '',
-  '6': '',
-  '123': '',
-  '456': '',
-  '123456': '',
-  '7': '-7',
-  'sir': '-si',
-  'si': '-si'
-}
-
-module.exports = async function(feedId) {
+module.exports = async function(feedId=null) {
 
   try {
 
-    if (feeds[feedId] === undefined) {
+    // Passed feedId does not correspond to any line
+    if (feedId && feeds[feedId] === undefined) {
       throw "Invalid feedId"
     }
-    
+  
+    // 🚸 TODO: Build feed for all lines
+    if (!feedId) {
+      throw "Not implemented yet."
+    }
+
     var options = {
       uri: baseUri + feeds[feedId],
       encoding: null,
