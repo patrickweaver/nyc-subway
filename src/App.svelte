@@ -1,12 +1,18 @@
 <script>
+  import L from 'leaflet';
 
   // Import External Dependencies
   import { format, fromUnixTime, formatDistanceStrict } from 'date-fns';
+
+  // Import Classes
+  import Train from './classes/Train.js';
 
   // Import helpers
   import api from './helpers/api.js';
   import stations from './helpers/stations.js';
   import lines from './helpers/lines.js';
+  import checkIfValidTrip from "./helpers/checkIfValidTrip.js";
+  import leaflet from "./helpers/leaflet.js"
 
   // Initialize variables
   let trainData = []; // Most recent API response
@@ -90,26 +96,14 @@
     var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
   }
 
-  // 🚧 Placeholder for train North Bound Train Icon
-  var ngIcon = L.icon({
-    iconUrl: '/images/NG.png',
-
-    iconSize:     [24, 24], // size of the icon
-    iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
-  });
-
-  // 🚧 Placeholder for train South Bound Train Icon
-  var sgIcon = L.icon({
-    iconUrl: '/images/SG.png',
-
-    iconSize:     [24, 24], // size of the icon
-    iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
-  });
+  const ngIcon = leaflet.icons.ngIcon;
+  const sgIcon = leaflet.icons.sgIcon;
 
   // Draw each train on map
   function drawEachTrain(trains) {
     console.log("Updating Train Positions at", apiTime);
-    // Remove previous positions of trains
+
+    // Remove previous positions of all trains
     for (var i in trainsOnMap) {
       trainsOnMap[i].remove();
     }
@@ -118,33 +112,20 @@
     console.log('drawing', trains.length, 'trains')
     for (var i in trains) {
       let train = trains[i];
-      console.log("Train Data:");
-      console.log(train);
+      console.log(i, "Train Data:");
+      //console.log(train);
+
       // Check for a whole bunch of stuff in the JSON
       // The API response has lots of objects that don't
       // represent trains currently between stations.
       // Objects that have all of the following are trains
       // that we can draw.
       try {
-        if (!train.tripUpdate) {
-          throw `index ${i} train has no "tripUpdate" property.`
-        }
-        if (!train.tripUpdate.trip) {
-          throw `index ${i} train.tripUpdate has no "trip" property.`
-        }
-        if (!train.tripUpdate.trip.routeId) {
-          throw `index ${i} train.tripUpdate.trip has no "routeId" property.`
-        }
-        if (!train.tripUpdate.stopTimeUpdate) {
-          throw `index ${i} train.tripUpdate has no "stopTimeUpdate" property.`
-        }
-        // Only need information about the next stop
-        // 🚧 Sometimes the first stop is in the recent past
-        if (!train.tripUpdate.stopTimeUpdate[0]) {
-          throw `index ${i} train.tripUpdate.stopTimeUpdate is empty or not an array.`
-        }
-        if (!train.tripUpdate.stopTimeUpdate[0].stopId) {
-          throw `index ${i} train.tripUpdate.stopTimeUpdate[0] has no "stopId" property.`
+        
+        // Check for required properties in train.tripUpdate
+        const tripCheck = checkIfValidTrip(i, train.tripUpdate)
+        if (!tripCheck.valid) {
+          throw tripCheck.error
         }
 
         // Parse first train stop stopId which contains train direction
@@ -193,7 +174,7 @@
         }
 
         // Log the next few stations this train will be at:
-        console.log(train.tripUpdate.trip.tripId, 'nextStopId:', nextStopId, "| next Station GTFS: ", nextStation['GTFS Stop ID'], '| next station name:', nextStation['Stop Name'], '| Next Station Index:', nextStationIndex, '| in', (parseInt(train.tripUpdate.stopTimeUpdate[0].arrival.time) - apiTime), 'seconds');
+        //console.log(train.tripUpdate.trip.tripId, 'nextStopId:', nextStopId, "| next Station GTFS: ", nextStation['GTFS Stop ID'], '| next station name:', nextStation['Stop Name'], '| Next Station Index:', nextStationIndex, '| in', (parseInt(train.tripUpdate.stopTimeUpdate[0].arrival.time) - apiTime), 'seconds');
         let nsu = train.tripUpdate.stopTimeUpdate[0];
         let at = parseInt(nsu.arrival.time);
         let dt = parseInt(nsu.departure.time);
