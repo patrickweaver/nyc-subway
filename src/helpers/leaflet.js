@@ -26,7 +26,7 @@ const markers = {
 }
 
 // Draw stations on map (happens on first load)
-function drawStation(map, station, recenter=false) {
+function drawStation(station, recenter=false) {
   if (!station.lat || !station.long) {
     return;
   }
@@ -43,28 +43,36 @@ function drawStation(map, station, recenter=false) {
 }
 
 // Draw connecting line between stations
-function drawLine(map, station1, station2) {
+function drawLine(station1, station2) {
   var latlngs = [
     [station1.lat, station1.long],
     [station2.lat, station2.long]
   ];
   L.polyline(latlngs, {color: 'green'}).addTo(map);
 }
-/*
-function drawTrain(map, train) {
+
+function drawTrain(train) {
   console.log("🚇 New Train:", train.id, "at", train.latitude, ",", train.longitude, "going", train.direction)
 
   let bounds = L.latLng(train.latitude, train.longitude).toBounds(250);
   
-  let trainIcon = sgIcon;
+  let trainIcon = markers.sgIcon;
   if (train.direction === "N") {
-    trainIcon = ngIcon;
+    trainIcon = markers.ngIcon;
   }
   
   var trainMarker = L.marker([train.latitude, train.longitude], {icon: trainIcon}).addTo(map);
   return(trainMarker)
 }
-*/
+
+function moveTrain(train) {
+  console.log("🛎 Moving train:", train.id, "to", train.latitude, ",", train.longitude, "going", train.direction)
+  train.marker.slideTo([train.latitude, train.longitude], {
+    duration: 5000,
+    keepAtCenter: false
+  });
+}
+
 
 function drawMap() {
   map = L.map("map")
@@ -83,6 +91,7 @@ export default {
   markers: markers,
   drawStation: drawStation,
   drawLine: drawLine,
-  //drawTrain: drawTrain,
+  drawTrain: drawTrain,
+  moveTrain: moveTrain,
   drawMap: drawMap,
 }

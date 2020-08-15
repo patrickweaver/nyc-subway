@@ -35,21 +35,15 @@
     drawEachTrain(trainData);
   }
 
-  const ngIcon = leaflet.markers.ngIcon;
-  const sgIcon = leaflet.markers.sgIcon;
-
   // Draw each train on map
-  function drawEachTrain(trains) {
-    console.log("Updating Train Positions at", apiTime);
-
-    // Draw an individual train:
-    console.log('drawing', trains.length, 'trains')
-    for (var i in trains) {
-      let train = trains[i];
-
-
+  function drawEachTrain(trainUpdates) {
+    console.log("⏰ Updating Train Positions at", apiTime);
+    console.log('🧮 Received data for', trainUpdates.length, 'trains')
+    
+    for (var i in trainUpdates) {
+      let trainUpdate = trainUpdates[i];
       //console.log(i, "Train Data:");
-      //console.log(train);
+      //console.log(trainUpdate);
 
       // Check for a whole bunch of stuff in the JSON
       // The API response has lots of objects that don't
@@ -58,15 +52,15 @@
       // that we can draw.
       try {
         
-        // Check for required properties in train.tripUpdate
-        const tripCheck = checkIfValidTrip(i, train.tripUpdate)
+        // Check for required properties in trainUpdate.tripUpdate
+        const tripCheck = checkIfValidTrip(i, trainUpdate.tripUpdate)
         if (!tripCheck.valid) {
           throw tripCheck.error
         }
 
         // Parse first train stop stopId which contains train direction
-        let route = train.tripUpdate.trip.routeId;
-        let nextStopIdAndDirection = train.tripUpdate.stopTimeUpdate[0].stopId
+        let route = trainUpdate.tripUpdate.trip.routeId;
+        let nextStopIdAndDirection = trainUpdate.tripUpdate.stopTimeUpdate[0].stopId
 
         // Split apart direction and nextStopId
         let dL = nextStopIdAndDirection.length;
@@ -109,38 +103,38 @@
         }
 
         // Log the next few stations this train will be at:
-        //console.log(train.tripUpdate.trip.tripId, 'nextStopId:', nextStopId, "| next Station GTFS: ", nextStation['GTFS Stop ID'], '| next station name:', nextStation['Stop Name'], '| Next Station Index:', nextStationIndex, '| in', (parseInt(train.tripUpdate.stopTimeUpdate[0].arrival.time) - apiTime), 'seconds');
-        let nsu = train.tripUpdate.stopTimeUpdate[0];
+        //console.log(trainUpdate.tripUpdate.trip.tripId, 'nextStopId:', nextStopId, "| next Station GTFS: ", nextStation['GTFS Stop ID'], '| next station name:', nextStation['Stop Name'], '| Next Station Index:', nextStationIndex, '| in', (parseInt(trainUpdate.tripUpdate.stopTimeUpdate[0].arrival.time) - apiTime), 'seconds');
+        let nsu = trainUpdate.tripUpdate.stopTimeUpdate[0];
         let at = parseInt(nsu.arrival.time);
         let dt = parseInt(nsu.departure.time);
 
         
-        // 🔇 console.log(train.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at, '(', at - apiTime, 'seconds)', '| departing:', dt, '(', dt - apiTime, 'seconds)', nsu.stopId);
+        // 🔇 console.log(trainUpdate.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at, '(', at - apiTime, 'seconds)', '| departing:', dt, '(', dt - apiTime, 'seconds)', nsu.stopId);
 
-        if (train.tripUpdate.stopTimeUpdate[1]) {
-          let nsu1 = train.tripUpdate.stopTimeUpdate[1];
+        if (trainUpdate.tripUpdate.stopTimeUpdate[1]) {
+          let nsu1 = trainUpdate.tripUpdate.stopTimeUpdate[1];
           var at1 = parseInt(nsu1.arrival.time);
           var dt1 = parseInt(nsu1.departure.time);
-          //🔇 console.log(train.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at1, '(', at1 - apiTime, 'seconds)', '| departing:', dt1, '(', dt1 - apiTime, 'seconds)', nsu1.stopId);
+          //🔇 console.log(trainUpdate.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at1, '(', at1 - apiTime, 'seconds)', '| departing:', dt1, '(', dt1 - apiTime, 'seconds)', nsu1.stopId);
         }
 
-        if (train.tripUpdate.stopTimeUpdate[2]) {
-          let nsu2 = train.tripUpdate.stopTimeUpdate[2];
+        if (trainUpdate.tripUpdate.stopTimeUpdate[2]) {
+          let nsu2 = trainUpdate.tripUpdate.stopTimeUpdate[2];
           var at2 = parseInt(nsu2.arrival.time);
           var dt2 = parseInt(nsu2.departure.time);
-          // 🔇 console.log(train.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at2, '(', at2 - apiTime, 'seconds)', '| departing:', dt2, '(', dt2 - apiTime, 'seconds)', nsu2.stopId, '|', at2 - at1);
+          // 🔇 console.log(trainUpdate.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at2, '(', at2 - apiTime, 'seconds)', '| departing:', dt2, '(', dt2 - apiTime, 'seconds)', nsu2.stopId, '|', at2 - at1);
         }
 
-        if (train.tripUpdate.stopTimeUpdate[3]) {
-          let nsu3 = train.tripUpdate.stopTimeUpdate[3];
+        if (trainUpdate.tripUpdate.stopTimeUpdate[3]) {
+          let nsu3 = trainUpdate.tripUpdate.stopTimeUpdate[3];
           var at3 = parseInt(nsu3.arrival.time);
           var dt3 = parseInt(nsu3.departure.time);
-          // 🔇 console.log(train.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at3, '(', at3 - apiTime, 'seconds)', '| departing:', dt3, '(', dt3 - apiTime, 'seconds)', nsu3.stopId,  '|', at3 - at2);
+          // 🔇 console.log(trainUpdate.tripUpdate.trip.tripId, '| apiTime:', apiTime, '| arriving:', at3, '(', at3 - apiTime, 'seconds)', '| departing:', dt3, '(', dt3 - apiTime, 'seconds)', nsu3.stopId,  '|', at3 - at2);
         }
 
         // Can decide where to place train with next and previous station.
         if (prevStation) {
-          // 🔇 console.log(train.tripUpdate.trip.tripId, "                      | prev Station GTFS: ", prevStation['GTFS Stop ID'], '| prev station name:', prevStation['Stop Name'], '| Prev Station Index:', nextStationIndex - 1)
+          // 🔇 console.log(trainUpdate.tripUpdate.trip.tripId, "                      | prev Station GTFS: ", prevStation['GTFS Stop ID'], '| prev station name:', prevStation['Stop Name'], '| Prev Station Index:', nextStationIndex - 1)
 
           //🚧 Calculate lat/long mid-way between the next statio and the previous
           // station.
@@ -149,19 +143,19 @@
 
           // 🔇 console.log("Drawing Train:", train.tripUpdate.trip.tripId, "at", trainLat, trainLong, 'next stop:', nextStopIdAndDirection, nextStation['Stop Name'])
 
-          let trainObject = trainsArray.filter(i => i.id === train.tripUpdate.trip.tripId)[0]
+          let trainObject = trainsArray.filter(i => i.id === trainUpdate.tripUpdate.trip.tripId)[0]
           
           // If train is new add to trains array:
           if (!trainObject) {
-            trainObject = new Train(train.tripUpdate.trip.tripId, trainLat, trainLong, direction)
-            trainObject.marker = drawTrain(trainObject);
+            trainObject = new Train(trainUpdate.tripUpdate.trip.tripId, trainLat, trainLong, direction)
+            trainObject.marker = leaflet.drawTrain(trainObject);
             trainsArray.push(trainObject);
           } else {
             if (trainObject.latitude !== trainLat || trainObject.longitude !== trainLong) {
               console.log("Moving From:", trainObject.latitude, "to:", trainLat)
               trainObject.latitude = trainLat;
               trainObject.longitude = trainLong;
-              moveTrain(trainObject);
+              leaflet.moveTrain(trainObject);
             }
           }
 
@@ -176,28 +170,6 @@
     }
   }
 
-  function drawTrain(train) {
-    console.log("🚇 New Train:", train.id, "at", train.latitude, ",", train.longitude, "going", train.direction)
-
-    let bounds = L.latLng(train.latitude, train.longitude).toBounds(250);
-    
-    let trainIcon = sgIcon;
-    if (train.direction === "N") {
-      trainIcon = ngIcon;
-    }
-    
-    var trainMarker = L.marker([train.latitude, train.longitude], {icon: trainIcon}).addTo(map);
-    return(trainMarker)
-  }
-
-  function moveTrain(train) {
-    console.log("🛎 Moving train:", train.id, "to", train.latitude, ",", train.longitude, "going", train.direction)
-    train.marker.slideTo([train.latitude, train.longitude], {
-      duration: 2000,
-      keepAtCenter: false
-    });
-  }
-
   (async function main() {
     // Draw the map
     map = leaflet.drawMap();
@@ -207,16 +179,15 @@
         lat: gStops[i]['GTFS Latitude'],
         long: gStops[i]['GTFS Longitude']
       }
-      leaflet.drawStation(map, station, false);
+      leaflet.drawStation(station, false);
       if (gStops[i + 1]) {
-        leaflet.drawLine(map, station, {
+        leaflet.drawLine(station, {
           lat: gStops[i + 1]['GTFS Latitude'],
           long: gStops[i + 1]['GTFS Longitude']
         })
       }
     }
 
-    
     drawLoop();
     setInterval(drawLoop, 5000);
 
