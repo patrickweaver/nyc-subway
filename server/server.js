@@ -6,7 +6,7 @@ app.use(express.static('server/public'));
 // 🚸 Not implemented currently, but will allow collecting data
 // to determine how long to expect a train to spend between
 // each stop.
-const LOG_LOCATIONS = process.env.LOG_LOCATIONS;
+const LOG_LOCATIONS = process.env.LOG_LOCATIONS === "true";
 
 // Get the current feed from the MTA API
 const getFeed = require('./helpers/getFeed.js');

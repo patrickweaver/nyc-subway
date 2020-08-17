@@ -3,13 +3,19 @@ export default class Train {
     id,
     latitude,
     longitude,
-    direction
+    direction,
+    scheduledAt=false
   ) {
     this.id = id;
     this.latitude = latitude;
     this.longitude = longitude;
     this.direction = direction;
+    this.scheduledAt = scheduledAt;
     this.marker = null;
+  }
+
+  static newScheduledTrain(scheduledAt) {
+    return new Train(null, null, null, null, scheduledAt);
   }
 
 }

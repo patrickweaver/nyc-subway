@@ -1,0 +1,52 @@
+import lines from './lines.js';
+import stations from './stations.js';
+
+export default function findTrainPosition(nextStopId, routeId, direction) {
+
+  try {
+
+    // Find next station stationId in list of stations
+    // for the route. Then use index of next station to
+    // find the previous station on the route.
+    if (!lines[routeId]) {
+      throw "Invalid routeId: " + routeId;
+    }
+
+    let nextStation = stations.findByGTFS(nextStopId);
+
+    let nextStationIndex = lines[routeId].indexOf(nextStation['GTFS Stop ID']);
+    let prevStation;
+
+    // Previous Station index will be different relative to next
+    // Station depending on direction of train.
+    let prevStationOffset = 1; // N default
+    if (direction === 'S') {
+      prevStationOffset = -1;
+    }
+    let prevStationIndex = nextStationIndex + prevStationOffset;
+
+
+    if (prevStationIndex >= 0 && prevStationIndex < lines[routeId].length) {
+      prevStation = stations.findByGTFS(lines[routeId][prevStationIndex])
+    } else {
+      // 🚧 Trains waiting to begin journey have next stop as first or last
+      // but will not have a previous station index.
+      throw 'Invalid previous station index.'
+    }
+
+    if (!prevStation) {
+      throw "Can't find previous station"
+    }
+
+    //🚧 Calculate lat/long mid-way between the next statio and the previous
+    // station.
+    let trainLat = (nextStation['GTFS Latitude'] + prevStation['GTFS Latitude']) / 2;
+    let trainLong = (nextStation['GTFS Longitude'] + prevStation['GTFS Longitude']) / 2;
+
+    return { lat: trainLat, long: trainLong }
+
+  } catch (error) {
+    console.log("Error finding train location:\n", error)
+    return null;
+  }
+}

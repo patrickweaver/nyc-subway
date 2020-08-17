@@ -18,19 +18,18 @@ function parseFeed(apiResponse) {
   console.log(`Syncing! at ${syncDate.getHours()}:${syncDate.getMinutes()}:${syncDate.getSeconds()}`)
 
   // Update most recent train data and API time
-  const trainData = apiResponse.entity;
+  const tripEntities = apiResponse.entity;
   const apiTime = parseInt(apiResponse.header.timestamp);
 
   return {
-    trainData: trainData,
+    tripEntities: tripEntities,
     apiTime: apiTime
   }
 }
 
 async function getMtaFeed() {
   const apiResponse = await getFeed("g");
-  const trainDataAndTime = parseFeed(apiResponse);
-  return trainDataAndTime;
+  return parseFeed(apiResponse);
 }
 
 module.exports = {

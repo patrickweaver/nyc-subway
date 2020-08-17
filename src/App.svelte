@@ -5,18 +5,24 @@
   // Import External Dependencies
   import { format, fromUnixTime, formatDistanceStrict } from 'date-fns';
 
+  // Import classes
+  import TripEntity from "./classes/TripEntity.js";
+
   // Import helpers
   import api from './helpers/api.js';
   import stations from './helpers/stations.js';
   import lines from './helpers/lines.js';
   import leaflet from "./helpers/leaflet.js";
-  import parseTrainUpdate from "./helpers/parseTrainUpdate";
+  import parseCurrentTrips from "./helpers/parseCurrentTrips";
 
   // Initialize variables
-  let trainData = []; // Most recent API response
+  let tripEntities = []; // Most recent API response
   let trainsArray = []; // Array of Train objects
   let apiTime = (new Date()).getTime(); // Local server time gets overwritten with timestamp from API.
   let map; // Map var for leaflet
+
+  const updateFreqency = 60 // seconds
+  * 1000;
   
   // Station data is hard coded
   // See stationData.js, which is generated form stationData.csv
@@ -26,33 +32,37 @@
   // This function will be run every 🚸(?) 10 seconds
   async function drawLoop() {
     // Get data from API, parse data, draw train data on map
-    ( { trainData, apiTime } = await api.getMtaFeed() )
+    ( { tripEntities, apiTime } = await api.getMtaFeed() )
+
+    const tripEntityObjects = tripEntities.map(i => new TripEntity(i, apiTime));
+
+    const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
+
+    console.log("NUMBER OF CURRENT TRIPS:", currentTrips.length, "of", tripEntityObjects.length)
+    console.log(tripEntityObjects.map(i => i.type));
 
     //Draw each train at its updated position on the map
-    drawEachTrain(trainData);
+    drawEachTrain(currentTrips);
   }
 
   // Draw each train on map
-  function drawEachTrain(trainUpdates) {
+  function drawEachTrain(currentTrips) {
     console.log("⏰ Updating Train Positions at", apiTime);
-    console.log('🧮 Received data for', trainUpdates.length, 'trains')
+    console.log('🧮 Received data for', currentTrips.length, 'trains')
     
-    for (var i in trainUpdates) {
-      let trainUpdate = trainUpdates[i];
-      //console.log(i, "Train Data:");
-      //console.log(trainUpdate);
-
-      // Check for a whole bunch of stuff in the JSON
-      // The API response has lots of objects that don't
-      // represent trains currently between stations.
-      // Objects that have all of the following are trains
-      // that we can draw.
+    for (var i in currentTrips) {
+      let trainUpdate = currentTrips[i];
       try {
         
         let trainObject, newTrain;
-        ( { trainObject, newTrain } = parseTrainUpdate(trainUpdate, i, trainsArray) );
+        ( { trainObject, newTrain } = parseCurrentTrips(trainUpdate, i, trainsArray) );
 
         if (trainObject) {
+
+          if (trainObject.scheduledAt) {
+            // Scheduled train
+            continue;
+          }
 
           if (newTrain) {
             console.log(i, "New Train:", trainObject.id)
@@ -71,7 +81,7 @@
           }
         
         } else {
-          throw "Can't parse train at index " + i;
+          //throw "Can't parse train at index " + i;
         }
         
       } catch (error) {
@@ -100,7 +110,7 @@
     }
 
     drawLoop();
-    setInterval(drawLoop, 5000);
+    setInterval(drawLoop, updateFreqency);
 
   })();
 </script>

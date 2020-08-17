@@ -1,9 +1,25 @@
-// Check for required properties in train.tripUpdate
+// Check for required properties in trainUpdate.tripUpdate
 
-export default function checkIfValidTrip(index, tripUpdate) {
+export default function checkIfValidTrip(index, trainUpdate) {
+
+  const tripUpdate = trainUpdate.tripUpdate;
+
   try {
     if (!tripUpdate) {
-      throw `index ${index} train has no "tripUpdate" property.`
+
+      if (
+        trainUpdate.vehicle
+        && trainUpdate.vehicle.trip
+        && trainUpdate.vehicle.trip.startTime
+      ) {
+        return {
+          inProgress: false,
+          scheduled: trainUpdate.vehicle.trip.startTime,
+          error: false
+        }
+      }
+
+      throw `index ${index} train has no "tripUpdate" property and no "trainUpdate.vehicle.trip.startTime" property. Vehicle: ${JSON.stringify(trainUpdate.vehicle)}`
     }
     if (!tripUpdate.trip) {
       throw `index ${index} train.tripUpdate has no "trip" property.`
@@ -22,8 +38,8 @@ export default function checkIfValidTrip(index, tripUpdate) {
     if (!tripUpdate.stopTimeUpdate[0].stopId) {
       throw `index ${index} train.tripUpdate.stopTimeUpdate[0] has no "stopId" property.`
     }
-    return { valid: true, error: false }
+    return { inProgress: true, scheduled: false, error: false }
   } catch (error) {
-    return { valid: false, error: error }
+    return { inProgress: false, scheduled: false, error: error }
   }
 }
