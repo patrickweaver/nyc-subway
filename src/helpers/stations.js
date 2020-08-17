@@ -87,6 +87,8 @@ function getLineStops(line) {
     }
   });
 
+  // 🚸 Will want to want to do this programmatically when showing
+  // more than one line.
   let compareByGOrder = compareByLineOrder.bind(this, lines['G']);
   lineStations.sort(compareByGOrder);
   
