@@ -12,6 +12,7 @@ export default class Train {
     this.direction = direction;
     this.scheduledAt = scheduledAt;
     this.marker = null;
+    this.move = false;
   }
 
   static newScheduledTrain(scheduledAt) {

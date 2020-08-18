@@ -2,7 +2,7 @@ import Train from '../classes/Train.js';
 
 import findTrainPosition from "./findTrainPosition.js";
 
-export default function parseCurrentTrips(tripEntity, index, trainsArray) {
+export default function parseCurrentTrips(tripEntity, trainsArray) {
 
   try {
     const trip = tripEntity.trip
@@ -26,12 +26,18 @@ export default function parseCurrentTrips(tripEntity, index, trainsArray) {
     if (!trainObject) {
       newTrain = true;
       trainObject = new Train(trip.tripId, trainPos.lat, trainPos.long, direction)
+    } else {
+      if (trainObject.latitude != trainPos.lat || trainObject.longitude != trainPos.long) {
+        trainObject.latitude = trainPos.lat;
+        trainObject.longitude = trainPos.long;
+        trainObject.move = true;
+      }
     }
 
     return { trainObject: trainObject, newTrain: newTrain }
 
   } catch(error) {
-    console.log("Error parsing train update:\n", error)
+    console.log(`Error parsing train at index ${tripEntity.index} update:\n`, error)
 
     return { trainObject: null, newTrain: null }
   }

@@ -1,8 +1,13 @@
+import { DateTime } from "luxon";
+const timezone = TIMEZONE;
+
 export default class TripEntity {
-  constructor(tripEntity, timestamp = null) {
+  constructor(tripEntity, index, timestamp = null) {
     const te = tripEntity;
-    let type = "Invalid" // Default
+    let valid = false;
+    let type = "Invalid"; // Default
     let tripObject = null;
+    
     if (
       te.tripUpdate
       && te.tripUpdate.trip
@@ -18,7 +23,7 @@ export default class TripEntity {
       && te.tripUpdate.stopTimeUpdate[0].departure.time
       && te.tripUpdate.stopTimeUpdate[0].stopId
     ) {
-      type = "Current"
+      type = "Current" // May change to future
       tripObject = te.tripUpdate.trip;
     } else if (
       te.vehicle
@@ -28,51 +33,31 @@ export default class TripEntity {
       && te.vehicle.trip.startDate
       && te.vehicle.trip.routeId
       && te.vehicle.currentStopSequence
-      && te.vehicle.timestamp
+      //&& te.vehicle.timestamp // This is missing on some
       && te.vehicle.stopId
     ) {
       type = "Scheduled";
       tripObject = te.vehicle.trip;
     } else {
-      /*
-      console.log("📌\n", te)
-      console.log(".tripUpdate", te.tripUpdate)
-      if (te.tripUpdate) {
-        console.log(".trip", te.tripUpdate.trip)
-        if (te.tripUpdate.trip) {
-          console.log(".tripId", te.tripUpdate.trip.tripId)
-          console.log(".startTime", te.tripUpdate.trip.startTime)
-          console.log(".startDate", te.tripUpdate.trip.startDate)
-          console.log(".routeId", te.tripUpdate.trip.routeId)
-        }
-      }
-      console.log(".stopTimeUpdate", te.tripUpdate.stopTimeUpdate)
-      if (te.tripUpdate.stopTimeUpdate) {
-        console.log("[0]", te.tripUpdate.stopTimeUpdate[0])
-        if (te.tripUpdate.stopTimeUpdate[0]) {
-          console.log(".arrival", te.tripUpdate.stopTimeUpdate[0].arrival)
-          if (te.tripUpdate.stopTimeUpdate[0].arrival) {
-            console.log(".time", te.tripUpdate.stopTimeUpdate[0].arrival.time)
-          }
-          console.log(".departure", te.tripUpdate.stopTimeUpdate[0].departure)
-          if (te.tripUpdate.stopTimeUpdate[0].departure) {
-            console.log(".time", te.tripUpdate.stopTimeUpdate[0].departure.time)
-          }
-          console.log(".stopId", te.tripUpdate.stopTimeUpdate[0].stopId)
-        }
-      }
-      */
+      console.log("OTHER at index:", index)
+      // Not on a current trip or scheduled.
     }
 
+    this.index = index;
     this.timestamp = timestamp;
-    this.type = type;
+    
+    let trip = null
     if (type === "Current" || type === "Scheduled") {
-      this.trip = new Trip(tripObject.tripId, tripObject.startTime, tripObject.startDate, tripObject.routeId)
-    } else {
-      this.trip = null;
+      trip = new Trip(tripObject.tripId, tripObject.startTime, tripObject.startDate, tripObject.routeId);
     }
+
+    this.trip = trip;
     
     if (type === "Current") {
+      if (trip.startTimestamp > timestamp) {
+        type = "Future"
+      }
+
       this.stopTimeUpdates = te.tripUpdate.stopTimeUpdate.map((i, index) => new StopTimeUpdate(index, i))
     } else {
       this.stopTimeUpdates = null;
@@ -87,6 +72,8 @@ export default class TripEntity {
       this.vehicleTimestamp = null;
       this.vehicleStopId = null;
     }
+
+    this.type = type;
     
   };
 
@@ -100,6 +87,17 @@ class Trip {
     this.routeId = routeId;
 
     this.direction = this.tripId.split("..")[1] ? this.tripId.split("..")[1] : null;
+    
+    const startTimestampDT = DateTime.fromObject({
+      year: startDate.substring(0, 4),
+      month: startDate.substring(4, 6),
+      day: startDate.substring(6, 8),
+      hour: startTime.substring(0, 2),
+      minute: startTime.substring(3, 5),
+      second: startTime.substring(6, 8),
+      zone: timezone
+    })
+    this.startTimestamp = (new Date(startTimestampDT.toISO())).getTime() / 1000;
   }
 }
 

@@ -21,7 +21,7 @@
   let apiTime = (new Date()).getTime(); // Local server time gets overwritten with timestamp from API.
   let map; // Map var for leaflet
 
-  const updateFreqency = 60 // seconds
+  const updateFreqency = 10 // seconds
   * 1000;
   
   // Station data is hard coded
@@ -34,12 +34,15 @@
     // Get data from API, parse data, draw train data on map
     ( { tripEntities, apiTime } = await api.getMtaFeed() )
 
-    const tripEntityObjects = tripEntities.map(i => new TripEntity(i, apiTime));
+    // 🔇 console.log(tripEntities);
+
+    const tripEntityObjects = tripEntities.map((i, index) => new TripEntity(i, index, apiTime));
+
+    // 🔇 console.log(tripEntityObjects);
 
     const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
 
-    console.log("NUMBER OF CURRENT TRIPS:", currentTrips.length, "of", tripEntityObjects.length)
-    console.log(tripEntityObjects.map(i => i.type));
+    console.log("🎛 NUMBER OF CURRENT TRIPS:", currentTrips.length, "of", tripEntityObjects.length)
 
     //Draw each train at its updated position on the map
     drawEachTrain(currentTrips);
@@ -55,27 +58,19 @@
       try {
         
         let trainObject, newTrain;
-        ( { trainObject, newTrain } = parseCurrentTrips(trainUpdate, i, trainsArray) );
+        ( { trainObject, newTrain } = parseCurrentTrips(trainUpdate, trainsArray) );
 
         if (trainObject) {
 
-          if (trainObject.scheduledAt) {
-            // Scheduled train
-            continue;
-          }
-
           if (newTrain) {
-            console.log(i, "New Train:", trainObject.id)
             // New train is drawn on map:
             trainObject.marker = leaflet.drawTrain(trainObject);
             trainsArray.push(trainObject);
 
           } else {
-            console.log(i, "Moving Train:", trainObject.id)
             // Existing train is moved if lat or long has changed: 
-            if (trainObject.latitude !== trainLat || trainObject.longitude !== trainLong) {
-              trainObject.latitude = trainLat;
-              trainObject.longitude = trainLong;
+            if (trainObject.move) {
+              trainObject.move = false;
               leaflet.moveTrain(trainObject);
             }
           }

@@ -31,6 +31,7 @@ export default function findTrainPosition(nextStopId, routeId, direction) {
     } else {
       // 🚧 Trains waiting to begin journey have next stop as first or last
       // but will not have a previous station index.
+      console.log("⏱ Next Stop:", nextStopId, "Route Id:", routeId, "Direction:", direction);
       throw 'Invalid previous station index.'
     }
 
