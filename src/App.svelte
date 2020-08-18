@@ -21,7 +21,7 @@
   let apiTime = (new Date()).getTime(); // Local server time gets overwritten with timestamp from API.
   let map; // Map var for leaflet
 
-  const updateFreqency = 10 // seconds
+  const updateFreqency = UPDATE_FREQUENCY_IN_SECONDS // seconds
   * 1000;
   
   // Station data is hard coded

@@ -1,31 +1,53 @@
-fs = require("fs");
+const fs = require("fs");
+const timestampFromDateAndTime = require("./timestampFromDateAndTime.js");
 
 module.exports = function (apiResponse) {
   // Log data to figure out time between stops
-
-  const filename = "./.data/logs/trips.csv";
 
   if (!apiResponse) {
     return;
   }
 
+  const tripsFilename = "./.data/logs/trips.csv";
+  const stuFilename = "./.data/logs/stopTimeUpdates.csv";
+
   let timestamp = "Unknown"
   if (apiResponse.header && apiResponse.header.timestamp) {
-    timestamp = apiResponse.header.timestamp;
+    timestamp = parseInt(apiResponse.header.timestamp);
   }
 
-  const headers = "Timestamp, Entity Id, Type, TU Trip Id, TU Start Time, TU Start Date, TU Route Id, TU Stop Time Updates Count, TU STU0 Arrival, TU STU0 Departure, TU STU0 Stop Id, TU STU1 Arrival, TU STU1 Departure, TU STU1 Stop Id, V Trip Id, V Start Time, V Start Date, V Route Id, V Current Stop Sequence, V Timestamp, V Stop Id,\n"
+  const tripsHeaders = "Timestamp, Entity Id, Type, TU Trip Id, TU Start Time, TU Start Date, TU Route Id, TU Start Timestamp, TU Index, TU Stop Time Updates Count, TU STU0 Arrival, TU STU0 Departure, TU STU0 Stop Id, TU STU1 Arrival, TU STU1 Departure, TU STU1 Stop Id, V Trip Id, V Start Time, V Start Date, V Route Id, V Current Stop Sequence, V Timestamp, V Stop Id,\n"
 
+  const stuHeaders = "timestamp, entityId, type, tripId, startTime, startDate, routeId, startTimestamp, entityIndex, entityCount, stuIndex, stuCount, arrival, arrivalOffset, departure, departureOffset, stopId,\n";
+
+  // Add headers to trip file if file doesn't exist
   try {
-    if (fs.existsSync(filename)) {
+    if (fs.existsSync(tripsFilename)) {
     } else {
       try {
-        fs.appendFile(filename, headers, function (err) {
+        fs.appendFile(tripsFilename, tripsHeaders, function (err) {
           if (err) throw err;
-          console.log('Saved Headers');
+          console.log('Saved trip headers');
         });
       } catch (error) {
-        console.log("Error adding headers:", error);
+        console.log("Error adding trip headers:", error);
+      }
+    }
+  } catch(err) {
+    console.log(err)
+  }
+
+  // Add headers to STU file if file doesn't exist
+  try {
+    if (fs.existsSync(stuFilename)) {
+    } else {
+      try {
+        fs.appendFile(stuFilename, stuHeaders, function (err) {
+          if (err) throw err;
+          console.log('Saved stop time update headers');
+        });
+      } catch (error) {
+        console.log("Error adding stop time update headers:", error);
       }
     }
   } catch(err) {
@@ -33,44 +55,64 @@ module.exports = function (apiResponse) {
   }
 
   if (apiResponse.entity && apiResponse.entity[0]) {
-    const rows = apiResponse.entity.map(e => {
+    let tripRows = "";
+    let newStuRows = "";
+    apiResponse.entity.forEach((e, index) => {
       const type = e.tripUpdate ? "Trip Update" : e.vehicle ? "Vehicle" : "Unknown";
-      let row = `${timestamp}, ${e.id}, ${type}, `
+
+      let tripRow = `${timestamp}, ${e.id}, ${type}, `
+      let stuMetaRow = `${timestamp}, ${e.id}, ${type}, `
+      
 
       if (type === "Trip Update") {
         const tu = e.tripUpdate
-        row += `${tu.trip.tripId}, ${tu.trip.startTime}, ${tu.trip.startDate}, ${tu.trip.routeId}, ${tu.stopTimeUpdate.length},`
+        const startTimestamp = timestampFromDateAndTime(tu.trip.startDate, tu.trip.startTime);
+        tripRow += `${tu.trip.tripId}, ${tu.trip.startTime}, ${tu.trip.startDate}, ${tu.trip.routeId}, ${startTimestamp}, ${index}, ${apiResponse.entity.length}, `
+        stuMetaRow += `${tu.trip.tripId}, ${tu.trip.startTime}, ${tu.trip.startDate}, ${tu.trip.routeId}, ${startTimestamp}, ${index}, ${apiResponse.entity.length}, `
 
         if (tu.stopTimeUpdate[0]) {
-          row += `${tu.stopTimeUpdate[0].arrival.time}, ${tu.stopTimeUpdate[0].departure.time}, ${tu.stopTimeUpdate[0].stopId},`
+          tripRow += `${tu.stopTimeUpdate[0].arrival.time}, ${tu.stopTimeUpdate[0].departure.time}, ${tu.stopTimeUpdate[0].stopId},`
         } else {
-          row += ", , ,"
+          tripRow += ", , , "
         }
 
         if (tu.stopTimeUpdate[1]) {
-          row += `${tu.stopTimeUpdate[1].arrival.time}, ${tu.stopTimeUpdate[1].departure.time}, ${tu.stopTimeUpdate[1].stopId}`
+          tripRow += `${tu.stopTimeUpdate[1].arrival.time}, ${tu.stopTimeUpdate[1].departure.time}, ${tu.stopTimeUpdate[1].stopId}`
         } else {
-          row += ", , ,"
+          tripRow += ", , , "
         }
 
-        row += ", , , , , , ,"
+        tripRow += ", , , , , , , "
+
+        // Log all STUs as rows
+        const stuCount = tu.stopTimeUpdate.length;
+        for (let i in tu.stopTimeUpdate) {
+          const stu = tu.stopTimeUpdate[i];
+          let stuRow = stuMetaRow + `${i}, ${stuCount}, ${stu.arrival.time}, ${parseInt(stu.arrival.time) - timestamp}, ${stu.departure.time}, ${parseInt(stu.departure.time) - timestamp}, ${stu.stopId},\n`
+          newStuRows += stuRow;
+        }
+
+
       } else if (type === "Vehicle") {
         const v = e.vehicle
-        row += ", , , , , , , , , , , "
-        row += `${v.trip.tripId}, ${v.trip.startTime}, ${v.trip.startDate}, ${v.trip.routeId}, ${v.currentStopSequence}, ${v.timestamp}, ${v.stopId}`
+        tripRow += ", , , , , , , , , , , , , "
+        tripRow += `${v.trip.tripId}, ${v.trip.startTime}, ${v.trip.startDate}, ${v.trip.routeId}, ${v.currentStopSequence}, ${v.timestamp}, ${v.stopId}`
       } else {
 
       }
 
-      return row;
+      tripRows += tripRow + "\n";
     })
 
-    const rowsString = rows.join("\n");
-
-    fs.appendFile(filename, rowsString, function (err) {
+    fs.appendFile(tripsFilename, tripRows, function (err) {
       if (err) throw err;
-      console.log('Saved!');
+      console.log("Saved new trips! at ", new Date());
     });
+
+    fs.appendFile(stuFilename, newStuRows, function(err) {
+      if (err) throw err;
+      console.log("Saved new stop time updates")
+    })
   }
 
   else {
@@ -80,6 +122,8 @@ module.exports = function (apiResponse) {
       console.log("ENTITY BUT EMPTY")
     }
   }
+
+
 
   /*
   fs.writeFile(filename, JSON.stringify(apiResponse), function (err) {
