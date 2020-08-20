@@ -13,3 +13,4 @@
 
 New To Dos August 2020:
 - Figure out frontend error: Error: index 7 train has no "tripUpdate" property.
+- Trains sometimes go negative on the line toward the next station

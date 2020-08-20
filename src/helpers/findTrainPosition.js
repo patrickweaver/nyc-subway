@@ -54,7 +54,7 @@ export default function findTrainPosition(nextStopId, routeId, direction, waitTi
     const nextLat = nextStation['GTFS Latitude'];
     const nextLong = nextStation['GTFS Longitude'];
     const prevLat = prevStation['GTFS Latitude'];
-    const prevLong = prevStation['GTFS Longitude']
+    const prevLong = prevStation['GTFS Longitude'];
     const dLat = progress * (nextLat - prevLat);
     const dLong = progress * (nextLong - prevLong);
     let trainLat = prevLat + dLat;

@@ -44,7 +44,7 @@ async function main() {
 
   console.log(JSON.stringify(allLinesWaitTimes));
 
-  const data = new Uint8Array(Buffer.from("export const stationWaitTimes = " + JSON.stringify(allLinesWaitTimes)));
+  const data = new Uint8Array(Buffer.from("export default " + JSON.stringify(allLinesWaitTimes)));
   fs.writeFile('./src/helpers/stationWaitTimes.js', data, (err) => {
     if (err) throw err;
     console.log('The file has been saved!');

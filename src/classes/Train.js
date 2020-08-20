@@ -9,6 +9,7 @@ export default class Train {
     this.id = id;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.intermediateDestinations = [];
     this.direction = direction;
     this.scheduledAt = scheduledAt;
     this.marker = null;

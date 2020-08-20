@@ -3,5 +3,5 @@ module.exports = {
   MAP_ZOOM: 13,
   TILE_LAYER: 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
   TIMEZONE: '"' + process.env.TIMEZONE + '"',
-  UPDATE_FREQUENCY_IN_SECONDS: '60',
+  UPDATE_FREQUENCY_IN_SECONDS: '10',
 }
