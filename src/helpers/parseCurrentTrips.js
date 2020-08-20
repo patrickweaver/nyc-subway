@@ -51,7 +51,7 @@ export default function parseCurrentTrips(tripEntity, trainsArray) {
     // If train is new add to trains array:
     if (!trainObject) {
       newTrain = true;
-      trainObject = new Train(trip.tripId, trainPos.lat, trainPos.long, direction)
+      trainObject = new Train(trip.tripId, trainPos.lat, trainPos.long, direction);
     } else {
       if (trainObject.latitude != trainPos.lat || trainObject.longitude != trainPos.long) {
         trainObject.latitude = trainPos.lat;

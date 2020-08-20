@@ -16,8 +16,8 @@ export default function findTrainPosition(nextStopId, routeId, direction, waitTi
     let nextStation = stations.findByGTFS(nextStopId);
 
     let nextStationIndex = lines[routeId].indexOf(nextStation["GTFS Stop ID"]);
+    
     let prevStation;
-
     // Previous Station index will be different relative to next
     // Station depending on direction of train.
     let prevStationOffset = 1; // N default
