@@ -7,15 +7,18 @@ export default function parseCurrentTrips(tripEntity, trainsArray) {
   try {
     const trip = tripEntity.trip
     // Locate train:
-    const nextStopId = tripEntity.stopTimeUpdates[0].GtfsStopId;
+    // 🚸 Something different if this is negative
+    const nextStopUpdate = tripEntity.stopTimeUpdates[0]
+    const nextStopId = nextStopUpdate.GtfsStopId;
     const routeId = trip.routeId;
     const direction = trip.direction
+    const waitTimeEstimate = nextStopUpdate.arrival.time - tripEntity.timestamp;
     // All trains are either N or S (uptown/downtown)
     if (!(direction === 'N' || direction === 'S')) {
       throw 'Invalid train direction: ' + direction;
     }
 
-    const trainPos = findTrainPosition(nextStopId, routeId, direction)
+    const trainPos = findTrainPosition(nextStopId, routeId, direction, waitTimeEstimate);
 
     
     // Find or create train object

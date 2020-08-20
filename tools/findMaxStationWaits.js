@@ -23,7 +23,7 @@ async function main() {
     const line = lines[i];
     line.forEach((stop, index) => {
       const stopWaitTimes = {
-        n: null, s: null
+        N: null, S: null
       }
       nStation = line[index - 1];
       sStation = line[index + 1];

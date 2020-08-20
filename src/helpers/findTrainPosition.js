@@ -1,7 +1,8 @@
-import lines from './lines.js';
-import stations from './stations.js';
+import lines from "./lines.js";
+import stations from "./stations.js";
+import stationWaitTimes from "./stationWaitTimes.js";
 
-export default function findTrainPosition(nextStopId, routeId, direction) {
+export default function findTrainPosition(nextStopId, routeId, direction, waitTimeEstimate) {
 
   try {
 
@@ -14,13 +15,13 @@ export default function findTrainPosition(nextStopId, routeId, direction) {
 
     let nextStation = stations.findByGTFS(nextStopId);
 
-    let nextStationIndex = lines[routeId].indexOf(nextStation['GTFS Stop ID']);
+    let nextStationIndex = lines[routeId].indexOf(nextStation["GTFS Stop ID"]);
     let prevStation;
 
     // Previous Station index will be different relative to next
     // Station depending on direction of train.
     let prevStationOffset = 1; // N default
-    if (direction === 'S') {
+    if (direction === "S") {
       prevStationOffset = -1;
     }
     let prevStationIndex = nextStationIndex + prevStationOffset;
@@ -41,8 +42,23 @@ export default function findTrainPosition(nextStopId, routeId, direction) {
 
     //🚧 Calculate lat/long mid-way between the next statio and the previous
     // station.
-    let trainLat = (nextStation['GTFS Latitude'] + prevStation['GTFS Latitude']) / 2;
-    let trainLong = (nextStation['GTFS Longitude'] + prevStation['GTFS Longitude']) / 2;
+    const waitTimes = stationWaitTimes[routeId][nextStopId][direction];
+    let progress = waitTimeEstimate / waitTimes.avg;
+    if (progress > 1) {
+      progress = waitTimeEstimate / waitTimes.max;
+      if (progress > 1) {
+        // 🚸 There may be a way to look into data here to see what might cause this situation
+        progress = 0;
+      }
+    }
+    const nextLat = nextStation['GTFS Latitude'];
+    const nextLong = nextStation['GTFS Longitude'];
+    const prevLat = prevStation['GTFS Latitude'];
+    const prevLong = prevStation['GTFS Longitude']
+    const dLat = progress * (nextLat - prevLat);
+    const dLong = progress * (nextLong - prevLong);
+    let trainLat = prevLat + dLat;
+    let trainLong = prevLong + dLong;
 
     return { lat: trainLat, long: trainLong }
 
