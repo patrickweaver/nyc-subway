@@ -1,6 +1,6 @@
 // A list of station Ids
 
-export default {
+module.exports = {
   G: [
     'G22',
     'G24',
