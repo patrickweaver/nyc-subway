@@ -3,6 +3,7 @@ const fs = require("fs");
 const tripsCsvFilePath = "./.data/logs/trips.csv";
 const csv = require('csvtojson');
 const lines = require("./lines.js");
+const saveFilePath = "./src/data/stationWaitTimes.js"
 
 let avg = (array) => Math.round(array.reduce((a, b) => a + b) / array.length);
 let max = (array) => Math.max(...array);
@@ -45,7 +46,7 @@ async function main() {
   console.log(JSON.stringify(allLinesWaitTimes));
 
   const data = new Uint8Array(Buffer.from("export default " + JSON.stringify(allLinesWaitTimes)));
-  fs.writeFile('./src/helpers/stationWaitTimes.js', data, (err) => {
+  fs.writeFile(saveFilePath, data, (err) => {
     if (err) throw err;
     console.log('The file has been saved!');
   });

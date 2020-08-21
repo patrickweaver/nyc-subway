@@ -1,5 +1,5 @@
-import { stationData } from './stationData.js';
-import lines from './lines.js';
+import stationData from "../data/stationData.js";
+import lines from "../data/lines.js";
 
 
 // Find a full station object from a GTFS Stop Id

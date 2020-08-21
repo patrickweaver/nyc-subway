@@ -1,6 +1,6 @@
-import lines from "./lines.js";
+import lines from "../data/lines.js";
 import stations from "./stations.js";
-import stationWaitTimes from "./stationWaitTimes.js";
+import stationWaitTimes from "../data/stationWaitTimes.js";
 
 export default function findTrainPosition(nextStopId, routeId, direction, waitTimeEstimate) {
 

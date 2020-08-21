@@ -16,7 +16,7 @@
   const updateFreqency = UPDATE_FREQUENCY_IN_SECONDS * 1000;
 
   // Station data is hard coded
-  // See stationData.js, which is generated form tools/stationData.csv
+  // See ./data/stationData.js, which is generated form tools/stationData.csv
   // 🚸 Currently limiting scope to the G line.
   let gStops = stations.getLineStops('G');
 
