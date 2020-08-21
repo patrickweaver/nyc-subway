@@ -47,6 +47,8 @@
           throw "Can't parse train at index " + i;
         }
 
+        trainObject.locate()
+
         if (!trainObject.marker) {
           // New train is drawn on map:
           trainObject.marker = leaflet.drawTrain(trainObject);

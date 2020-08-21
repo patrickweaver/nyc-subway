@@ -59,7 +59,7 @@ export default function findTrainPosition(nextStopId, routeId, direction, waitTi
     let trainLat = prevLat + dLat;
     let trainLong = prevLong + dLong;
 
-    return { lat: trainLat, long: trainLong }
+    return { latitude: trainLat, longitude: trainLong }
 
   } catch (error) {
     console.log("Error finding train location:\n", error)
