@@ -1,3 +1,6 @@
+import L from 'leaflet';
+import * as leafletMarkerSlideTo from 'leaflet.marker.slideto';
+
 let map; // Map var for leaflet
 
 const markers = {

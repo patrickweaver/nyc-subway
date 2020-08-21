@@ -13,20 +13,23 @@ async function getFeed(line=false) {
   }
 }
 
+// Add in timestamp to each entity:
 function parseFeed(apiResponse) {
-  const syncDate = new Date()
-  console.log(`Syncing! at ${syncDate.getHours()}:${syncDate.getMinutes()}:${syncDate.getSeconds()}`)
+  const timestamp = parseInt(apiResponse.header.timestamp);
 
-  // Update most recent train data and API time
-  const tripEntities = apiResponse.entity;
-  const apiTime = parseInt(apiResponse.header.timestamp);
+  const syncDate = new Date();
+  const timestampDate = new Date(timestamp);
+  console.log(`Syncing! at ${syncDate.getHours()}:${syncDate.getMinutes()}:${syncDate.getSeconds()} and API thinks it's ${timestampDate.getHours()}:${timestampDate.getMinutes()}:${timestampDate.getSeconds()}`)
 
-  return {
-    tripEntities: tripEntities,
-    apiTime: apiTime
-  }
+  const tripEntities = apiResponse.entity.map(i => {
+    i.timestamp = timestamp;
+    return i;
+  });
+
+  return tripEntities;
 }
 
+// 🚸 Can deal with more lines here later.
 async function getMtaFeed() {
   const apiResponse = await getFeed("g");
   return parseFeed(apiResponse);

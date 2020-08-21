@@ -1,10 +1,4 @@
 <script>
-  import L from 'leaflet';
-  import * as leafletMarkerSlideTo from 'leaflet.marker.slideto';
-
-  // Import External Dependencies
-  import { format, fromUnixTime, formatDistanceStrict } from 'date-fns';
-
   // Import classes
   import Station from "./classes/Station.js";
   import TripEntity from "./classes/TripEntity.js";
@@ -12,16 +6,13 @@
   // Import helpers
   import api from './helpers/api.js';
   import stations from './helpers/stations.js';
-  import lines from './helpers/lines.js';
   import leaflet from "./helpers/leaflet.js";
-  import parseTripEntity from "./helpers/parseTripEntity";
 
   // Initialize variables
   let tripEntities = []; // Most recent API response
   let trainsArray = []; // Array of Train objects
-  let apiTime = (new Date()).getTime(); // Local server time gets overwritten with timestamp from API.
-  let map; // Map var for leaflet
 
+  // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
   const updateFreqency = UPDATE_FREQUENCY_IN_SECONDS * 1000;
 
   // Station data is hard coded
@@ -29,31 +20,26 @@
   // 🚸 Currently limiting scope to the G line.
   let gStops = stations.getLineStops('G');
 
-  // This function will be run every 🚸(?) 10 seconds
+  // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds
   async function drawLoop() {
     // Get data from API
-    ( { tripEntities, apiTime } = await api.getMtaFeed() )
-
+    tripEntities = await api.getMtaFeed()
     // Validate data and create TripEntity objects
-    const tripEntityObjects = tripEntities.map((i, index) => new TripEntity(i, index, apiTime));
-
+    const tripEntityObjects = tripEntities.map((i, index) => new TripEntity(i, index));
     // 🚸 Only use "Current" type trips for map
     const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
-
     //Draw each train at its updated position on the map
     drawEachTrain(currentTrips);
   }
 
   // Draw each train on map
   function drawEachTrain(currentTrips) {
-    console.log("⏰ Updating Train Positions at", apiTime);
     console.log('🧮 Received data for', currentTrips.length, 'trains')
     
     for (var i in currentTrips) {
       let trainUpdate = currentTrips[i];
       try {
         
-        //let trainObject = parseTripEntity(trainUpdate, trainsArray);
         let trainObject = trainUpdate.createTrainFrom(trainsArray);
 
         // 🚸 What are the cases that cause this?
@@ -82,7 +68,7 @@
 
   (async function main() {
     // Draw the map
-    map = leaflet.drawMap();
+    leaflet.drawMap();
 
     // Draw all the stations
     let prevStation = null;

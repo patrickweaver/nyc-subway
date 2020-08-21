@@ -4,7 +4,7 @@ import Trip from "./Trip.js"
 import findTrainPosition from "../helpers/findTrainPosition.js";
 
 export default class TripEntity {
-  constructor(tripEntity, index, timestamp = null) {
+  constructor(tripEntity, index) {
     const te = tripEntity;
     let valid = false;
     let type = "Invalid"; // Default
@@ -46,7 +46,7 @@ export default class TripEntity {
     }
 
     this.index = index;
-    this.timestamp = timestamp;
+    this.timestamp = te.timestamp;
     
     let trip = null
     if (type === "Current" || type === "Scheduled") {
@@ -56,7 +56,7 @@ export default class TripEntity {
     this.trip = trip;
     
     if (type === "Current") {
-      if (trip.startTimestamp > timestamp) {
+      if (trip.startTimestamp > te.timestamp) {
         type = "Future"
       }
 
