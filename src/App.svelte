@@ -56,6 +56,7 @@
         let trainObject, newTrain;
         ( { trainObject, newTrain } = parseTripEntity(trainUpdate, trainsArray) );
 
+        // 🚸 What are the cases that cause this?
         if (!trainObject) {
           throw "Can't parse train at index " + i;
         }
