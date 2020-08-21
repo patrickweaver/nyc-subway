@@ -2,7 +2,7 @@ import Train from '../classes/Train.js';
 
 import findTrainPosition from "./findTrainPosition.js";
 
-export default function parseCurrentTrips(tripEntity, trainsArray) {
+export default function parseTripEntity(tripEntity, trainsArray) {
 
   try {
     const trip = tripEntity.trip

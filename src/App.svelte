@@ -14,7 +14,7 @@
   import stations from './helpers/stations.js';
   import lines from './helpers/lines.js';
   import leaflet from "./helpers/leaflet.js";
-  import parseCurrentTrips from "./helpers/parseCurrentTrips";
+  import parseTripEntity from "./helpers/parseTripEntity";
 
   // Initialize variables
   let tripEntities = []; // Most recent API response
@@ -22,9 +22,8 @@
   let apiTime = (new Date()).getTime(); // Local server time gets overwritten with timestamp from API.
   let map; // Map var for leaflet
 
-  const updateFreqency = UPDATE_FREQUENCY_IN_SECONDS // seconds
-  * 1000;
-  
+  const updateFreqency = UPDATE_FREQUENCY_IN_SECONDS * 1000;
+
   // Station data is hard coded
   // See stationData.js, which is generated form tools/stationData.csv
   // 🚸 Currently limiting scope to the G line.
@@ -55,30 +54,27 @@
       try {
         
         let trainObject, newTrain;
-        ( { trainObject, newTrain } = parseCurrentTrips(trainUpdate, trainsArray) );
+        ( { trainObject, newTrain } = parseTripEntity(trainUpdate, trainsArray) );
 
-        if (trainObject) {
+        if (!trainObject) {
+          throw "Can't parse train at index " + i;
+        }
 
-          if (newTrain) {
-            // New train is drawn on map:
-            trainObject.marker = leaflet.drawTrain(trainObject);
-            trainsArray.push(trainObject);
+        if (newTrain) {
+          // New train is drawn on map:
+          trainObject.marker = leaflet.drawTrain(trainObject);
+          trainsArray.push(trainObject);
 
-          } else {
-            // Existing train is moved if lat or long has changed: 
-            if (trainObject.move) {
-              trainObject.move = false;
-              leaflet.moveTrain(trainObject);
-            }
-          }
-        
         } else {
-          //throw "Can't parse train at index " + i;
+          // Existing train is moved if lat or long has changed: 
+          if (trainObject.move) {
+            trainObject.move = false;
+            leaflet.moveTrain(trainObject);
+          }
         }
         
       } catch (error) {
-        console.log("Error:");
-        console.log(error);
+        console.log("Error:", error);
       }
     }
   }
