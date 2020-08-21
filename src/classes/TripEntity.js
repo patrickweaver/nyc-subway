@@ -6,7 +6,6 @@ import findTrainPosition from "../helpers/findTrainPosition.js";
 export default class TripEntity {
   constructor(tripEntity, index) {
     const te = tripEntity;
-    let valid = false;
     let type = "Invalid"; // Default
     let tripObject = null;
     
@@ -78,6 +77,7 @@ export default class TripEntity {
     this.type = type;
   };
 
+  // Creates a Train object from the data in a TrainEntity object
   createTrainFrom(trainsArray) {
     try {
       const trip = this.trip

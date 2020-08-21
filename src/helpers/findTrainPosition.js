@@ -5,7 +5,6 @@ import stationWaitTimes from "../data/stationWaitTimes.js";
 export default function findTrainPosition(nextStopId, routeId, direction, waitTimeEstimate) {
 
   try {
-
     // Find next station stationId in list of stations
     // for the route. Then use index of next station to
     // find the previous station on the route.
