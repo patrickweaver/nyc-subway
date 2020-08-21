@@ -53,15 +53,15 @@
       let trainUpdate = currentTrips[i];
       try {
         
-        let trainObject, newTrain;
-        ( { trainObject, newTrain } = parseTripEntity(trainUpdate, trainsArray) );
+        //let trainObject = parseTripEntity(trainUpdate, trainsArray);
+        let trainObject = trainUpdate.createTrainFrom(trainsArray);
 
         // 🚸 What are the cases that cause this?
         if (!trainObject) {
           throw "Can't parse train at index " + i;
         }
 
-        if (newTrain) {
+        if (!trainObject.marker) {
           // New train is drawn on map:
           trainObject.marker = leaflet.drawTrain(trainObject);
           trainsArray.push(trainObject);
