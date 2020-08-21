@@ -1,4 +1,4 @@
-import { te } from "date-fns/locale";
+//import { te } from "date-fns/locale";
 
 import findTrainPosition from "../helpers/findTrainPosition.js";
 
@@ -34,7 +34,7 @@ export default class Train {
         throw "Incomplete train data."
       }
 
-      te = this.mostRecentTripEntity
+      let te = this.mostRecentTripEntity
         
       let nextStopUpdate = te.stopTimeUpdates[0];
       let arrivalEstimate = nextStopUpdate.arrival;

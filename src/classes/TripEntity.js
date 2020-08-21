@@ -84,7 +84,6 @@ export default class TripEntity {
       // Find or create Train object
       let trainObject = trainsArray.filter(i => i.id === trip.tripId)[0];
       if (!trainObject) {
-        newTrain = true;
         trainObject = new Train(trip.tripId, this);
       }
   
