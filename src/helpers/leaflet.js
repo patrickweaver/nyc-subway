@@ -27,11 +27,11 @@ const markers = {
 
 // Draw stations on map (happens on first load)
 function drawStation(station, recenter=false) {
-  if (!station.lat || !station.long) {
+  if (!station.latitude || !station.longitude) {
     return;
   }
 
-  L.circle([station.lat, station.long], markers.stationCircle)
+  L.circle([station.latitude, station.longitude], markers.stationCircle)
     .addTo(map)
     // 🚸 Can implement functionality when a station is clicked on.
     //.on("click", onMarkerClick);
@@ -44,11 +44,11 @@ function drawStation(station, recenter=false) {
 
 // Draw connecting line between stations
 function drawLine(station1, station2) {
-  var latlngs = [
-    [station1.lat, station1.long],
-    [station2.lat, station2.long]
+  var latlongs = [
+    [station1.latitude, station1.longitude],
+    [station2.latitude, station2.longitude]
   ];
-  L.polyline(latlngs, {color: 'green'}).addTo(map);
+  L.polyline(latlongs, {color: 'green'}).addTo(map);
 }
 
 function drawTrain(train) {

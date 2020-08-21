@@ -1,4 +1,4 @@
-import { stations } from './stationData.js';
+import { stationData } from './stationData.js';
 import lines from './lines.js';
 
 
@@ -11,14 +11,14 @@ function findByGTFS(gtfsId, containsDirection=false) {
     const direction = gtfsId.substring(gtfsId.length - 1, gtfsId.length);
   }
   // Create array of just GTFS Ids and find index of station
-  const gtfsArray = stations.map(i => i['GTFS Stop ID'])
+  const gtfsArray = stationData.map(i => i['GTFS Stop ID'])
   const index = gtfsArray.indexOf(stationGtfsId);
   if (index === -1) {
     console.log('🦞 Station not found: ', stationGtfsId);
     return null;
   }
   // Get full station data using index
-  const station = stations[index];
+  const station = stationData[index];
   if (containsDirection) {
     // Store direction and split Daytime Routes into array
     station.direction = direction;
@@ -80,7 +80,7 @@ function compareByLineOrder(lineOrder, a, b) {
 // 🚸 Implementation has 'Daytime Routes' hard coded.
 function getLineStops(line) {
   // Filter out all stations where train doesn't stop:
-  let lineStations = stations.filter(station => {
+  let lineStations = stationData.filter(station => {
     const linesArray = String(station['Daytime Routes']).split(' ');
     if (linesArray.indexOf(line.toUpperCase()) > -1) {
       return true
@@ -101,7 +101,6 @@ function getLineStops(line) {
 }
 
 export default {
-  stations: stations,
   findByGTFS: findByGTFS,
   getLineStops: getLineStops
 }

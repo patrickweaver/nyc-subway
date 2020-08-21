@@ -6,6 +6,7 @@
   import { format, fromUnixTime, formatDistanceStrict } from 'date-fns';
 
   // Import classes
+  import Station from "./classes/Station.js";
   import TripEntity from "./classes/TripEntity.js";
 
   // Import helpers
@@ -31,18 +32,14 @@
 
   // This function will be run every 🚸(?) 10 seconds
   async function drawLoop() {
-    // Get data from API, parse data, draw train data on map
+    // Get data from API
     ( { tripEntities, apiTime } = await api.getMtaFeed() )
 
-    // 🔇 console.log(tripEntities);
-
+    // Validate data and create TripEntity objects
     const tripEntityObjects = tripEntities.map((i, index) => new TripEntity(i, index, apiTime));
 
-    // 🔇 console.log(tripEntityObjects);
-
+    // 🚸 Only use "Current" type trips for map
     const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
-
-    console.log("🎛 NUMBER OF CURRENT TRIPS:", currentTrips.length, "of", tripEntityObjects.length)
 
     //Draw each train at its updated position on the map
     drawEachTrain(currentTrips);
@@ -89,19 +86,23 @@
   (async function main() {
     // Draw the map
     map = leaflet.drawMap();
+
     // Draw all the stations
+    let prevStation = null;
     for (let i = 0; i < gStops.length; i++) {
-      let station = {
-        lat: gStops[i]['GTFS Latitude'],
-        long: gStops[i]['GTFS Longitude']
+
+      // Create station object
+      const s = gStops[i];
+      const station = new Station(s["GTFS Stop ID"], s["GTFS Latitude"], s["GTFS Longitude"]);
+
+      // Draw station on map
+      leaflet.drawStation(station);
+
+      // Connect new station to previous station:
+      if (prevStation) {
+        leaflet.drawLine(prevStation, station);
       }
-      leaflet.drawStation(station, false);
-      if (gStops[i + 1]) {
-        leaflet.drawLine(station, {
-          lat: gStops[i + 1]['GTFS Latitude'],
-          long: gStops[i + 1]['GTFS Longitude']
-        })
-      }
+      prevStation = station;
     }
 
     drawLoop();

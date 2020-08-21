@@ -1,4 +1,4 @@
-export const stations = [
+export const stationData = [
   {
     "Station ID": 1,
     "Complex ID": 1,
