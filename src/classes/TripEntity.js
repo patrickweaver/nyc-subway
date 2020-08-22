@@ -77,7 +77,7 @@ export default class TripEntity {
   };
 
   // Creates a Train object from the data in a TrainEntity object
-  createTrainFrom(trainsArray) {
+  createTrainOrFindTrainIn(trainsArray) {
     try {
       const trip = this.trip
   
@@ -85,6 +85,8 @@ export default class TripEntity {
       let trainObject = trainsArray.filter(i => i.id === trip.tripId)[0];
       if (!trainObject) {
         trainObject = new Train(trip.tripId, this);
+      } else {
+        trainObject.mostRecentTripEntity = this;
       }
   
       return trainObject;

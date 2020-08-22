@@ -41,7 +41,7 @@
       let trainUpdate = currentTrips[i];
       try {
         
-        let trainObject = trainUpdate.createTrainFrom(trainsArray);
+        let trainObject = trainUpdate.createTrainOrFindTrainIn(trainsArray);
 
         // 🚸 What are the cases that cause this?
         if (!trainObject) {

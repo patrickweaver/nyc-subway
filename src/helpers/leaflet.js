@@ -69,25 +69,28 @@ function drawTrain(train) {
 }
 
 function moveTrain(train) {
-  console.log("🛎 Moving train:", train.id, "to", train.latitude, ",", train.longitude, "going", train.direction)
+  
+  console.log("🛎 Moving train:", train.id, "going", train.direction)
   const totalDuration = UPDATE_FREQUENCY_IN_SECONDS * 1000;
-  const numberOfDestinations = 1 + train.intermediateDestinations.length;
-  const durationEach = totalDuration / numberOfDestinations;
   const destinations = train.intermediateDestinations;
   train.intermediateDestinations = [];
   destinations.push({latitude: train.latitude, longitude: train.longitude})
+  const numberOfDestinations = destinations.length;
+  const durationEach = totalDuration / numberOfDestinations;
 
   let durationElapsed = 0;
+  
   destinations.forEach(loc => {
+    const timer = durationElapsed;
     setTimeout(() => {
+      console.log("⏱ moving ", train.id, "to:", loc.latitude, ",", loc.longitude, "for", durationEach / 1000, "in", (timer / 1000), "seconds.");
       train.marker.slideTo([loc.latitude, loc.longitude], {
         duration: durationEach,
         keepAtCenter: false
       });
-    }, durationElapsed);
+    }, timer);
     durationElapsed += durationEach;
   });
-  
 }
 
 
