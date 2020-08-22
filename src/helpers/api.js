@@ -1,5 +1,7 @@
 // Gets feed from backend
 
+import LocalTime from "../classes/LocalTime.js";
+
 async function getFeed(line=false) {
   try {
     if (!line) {
@@ -17,9 +19,9 @@ async function getFeed(line=false) {
 function parseFeed(apiResponse) {
   const timestamp = parseInt(apiResponse.header.timestamp);
 
-  const syncDate = new Date();
-  const timestampDate = new Date(timestamp);
-  console.log(`Syncing! at ${syncDate.getHours()}:${syncDate.getMinutes()}:${syncDate.getSeconds()} and API thinks it's ${timestampDate.getHours()}:${timestampDate.getMinutes()}:${timestampDate.getSeconds()}`)
+  const syncDate = LocalTime.fromCurrentTime();
+  const timestampDate = LocalTime.fromTimestamp(timestamp);
+  console.log(`Syncing! at ${syncDate.printTime()} and API thinks it's ${timestampDate.printTime()}`)
 
   const tripEntities = apiResponse.entity.map(i => {
     i.timestamp = timestamp;
@@ -35,6 +37,6 @@ async function getMtaFeed() {
   return parseFeed(apiResponse);
 }
 
-module.exports = {
+export default {
   getMtaFeed: getMtaFeed
 }

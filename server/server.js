@@ -3,6 +3,14 @@ const express = require('express');
 const app = express();
 app.use(express.static('server/public'));
 
+// Check that .env variables are set:
+if (false) {
+  process.exit();
+}
+
+
+
+
 // 🚸 Not implemented currently, but will allow collecting data
 // to determine how long to expect a train to spend between
 // each stop.

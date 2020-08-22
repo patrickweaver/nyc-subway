@@ -24,7 +24,7 @@
   async function drawLoop() {
     // Get data from API
     tripEntities = await api.getMtaFeed()
-    console.log(JSON.stringify(tripEntities));
+    //console.log(JSON.stringify(tripEntities));
     // Validate data and create TripEntity objects
     const tripEntityObjects = tripEntities.map((i, index) => new TripEntity(i, index));
     // 🚸 Only use "Current" type trips for map
