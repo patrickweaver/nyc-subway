@@ -22,9 +22,11 @@ export default class Train {
     this.scheduledAt = null;
   }
 
-  static newScheduledTrain(scheduledAt) {
-    return new Train(null, null, null, null, scheduledAt);
+  /*
+  static newScheduledTrain() {
+    return new Train(null, null);
   }
+  */
 
   locate() {
 

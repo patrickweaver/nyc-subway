@@ -55,7 +55,7 @@ function drawLine(station1, station2) {
 }
 
 function drawTrain(train) {
-  console.log("🚇 New Train:", train.id, "at", train.latitude, ",", train.longitude, "going", train.direction)
+  console.log("🚇 New Train: (index:", train.mostRecentTripEntity.index, "), id:", train.id, "at", train.latitude, ",", train.longitude, "going", train.direction, "type:", train.mostRecentTripEntity.type, ", startimeTimestamp:", train.mostRecentTripEntity.trip.startTimestamp)
 
   let bounds = L.latLng(train.latitude, train.longitude).toBounds(250);
   

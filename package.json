@@ -5,7 +5,7 @@
   "main": "server/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && node -r dotenv/config server/server.js && node server/server.js",
+    "start": "npm run build && node -r dotenv/config server/server.js",
     "dev": "node -r dotenv/config server/server.js && node server/server.js",
     "build": "echo '**building**' && rollup -c",
     "watch": "rollup -c -w"

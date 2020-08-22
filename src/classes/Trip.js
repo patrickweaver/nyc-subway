@@ -19,6 +19,8 @@ export default class Trip {
       second: startTime.substring(6, 8),
       zone: timezone
     })
+    const stts = (new Date(startTimestampDT.toISO())).getTime() / 1000;
+    console.log(timezone, startDate, startTime, "⌛️ 1.", stts, "2.", startTimestampDT, "3.", startTimestampDT.toISO(), "4.", new Date(startTimestampDT.ts), "5.", (new Date(startTimestampDT.ts)).getTime())
     this.startTimestamp = (new Date(startTimestampDT.toISO())).getTime() / 1000;
   }
 }

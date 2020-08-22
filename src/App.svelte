@@ -24,6 +24,7 @@
   async function drawLoop() {
     // Get data from API
     tripEntities = await api.getMtaFeed()
+    console.log(JSON.stringify(tripEntities));
     // Validate data and create TripEntity objects
     const tripEntityObjects = tripEntities.map((i, index) => new TripEntity(i, index));
     // 🚸 Only use "Current" type trips for map
@@ -34,7 +35,7 @@
 
   // Draw each train on map
   function drawEachTrain(currentTrips) {
-    console.log('🧮 Received data for', currentTrips.length, 'trains')
+    console.log('🧮 Received data for', currentTrips.length, 'trains', "(", currentTrips.map(i => i.index), ")")
     
     for (var i in currentTrips) {
       let trainUpdate = currentTrips[i];
