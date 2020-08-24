@@ -55,12 +55,10 @@ export default class TripEntity {
 
       } else {
         console.log("OTHER NO STU OR CSS at index:", index);
-
       }
 
     } else {
-      console.log("OTHER NO TRIP at index:", index)
-      // Not on a current trip or scheduled.
+      console.log("OTHER NO TRIP at index:", index);
     }
 
     this.index = index;
