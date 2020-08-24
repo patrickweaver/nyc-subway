@@ -69,4 +69,4 @@ typings/
 
 /scraper/data
 
-.data/logs/*
+.data/*
