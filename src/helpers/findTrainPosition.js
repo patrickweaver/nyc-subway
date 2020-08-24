@@ -2,31 +2,66 @@ import lines from "../data/lines.js";
 import stations from "./stations.js";
 import stationWaitTimes from "../data/stationWaitTimes.js";
 
-export default function findTrainPosition(nextStopId, routeId, direction, waitTimeEstimate) {
+export default function findTrainPosition(lastNextStationId, nextStopId, routeId, direction, waitTimeEstimate) {
 
   try {
-    // Find next station stationId in list of stations
-    // for the route. Then use index of next station to
-    // find the previous station on the route.
+    
+    // Confirm route is valid:
     if (!lines[routeId]) {
       throw "Invalid routeId: " + routeId;
     }
 
-    let nextStation = stations.findByGTFS(nextStopId);
-
-    let nextStationIndex = lines[routeId].indexOf(nextStation["GTFS Stop ID"]);
+    // lastNextStation will help us find intermediate stations to animate
+    // train through.
+    let lastNextStation;
+    let lastNextStationIndex;
+    if (lastNextStationId && lastNextStationId !== nextStopId) {
+      // If this is not a new train to us, look up previous value for
+      // next station index:
+      lastNextStationIndex = lines[routeId].indexOf(lastNextStationId);
+      lastNextStation = stations.findByGTFS(lastNextStationId);
+    }
     
+    // nextStation and prevStation will help us calculate the current lat/long
+    // of the train.
+    let nextStation = stations.findByGTFS(nextStopId);
+    let nextStationIndex = lines[routeId].indexOf(nextStation["GTFS Stop ID"]);
     let prevStation;
+    let prevStationIndex;
+
     // Previous Station index will be different relative to next
     // Station depending on direction of train.
-    let prevStationOffset = 1; // N default
-    if (direction === "S") {
-      prevStationOffset = -1;
+    // 🚸Next station could be index 0?
+    let directionOffset = direction === "N" ? -1 : 1; // "S" if not "N"
+    prevStationIndex = nextStationIndex - directionOffset;
+    
+
+    const intermediateDestinations = [];
+    if (lastNextStationIndex && lastNextStationIndex !== nextStationIndex) {
+      // Add in between stations to .intermediateDestinations. Most
+      // of the time this won't add anything. 
+      for (
+        let i = lastNextStationIndex;
+        i !== nextStationIndex;
+        i += directionOffset
+      ) {
+        const stationId = lines[routeId][i];
+        const station = stations.findByGTFS(stationId);
+        const latitude = station["GTFS Latitude"];
+        const longitude = station["GTFS Longitude"];
+        intermediateDestinations.push({
+          latitude: latitude,
+          longitude: longitude,
+          index: i
+        });
+      }
     }
-    let prevStationIndex = nextStationIndex + prevStationOffset;
 
-
-    if (prevStationIndex >= 0 && prevStationIndex < lines[routeId].length) {
+    if (
+      !prevStation
+      && prevStationIndex >= 0
+      && prevStationIndex < lines[routeId].length
+    ) {
       prevStation = stations.findByGTFS(lines[routeId][prevStationIndex])
     } else {
       // 🚧 Trains waiting to begin journey have next stop as first or last
@@ -59,7 +94,11 @@ export default function findTrainPosition(nextStopId, routeId, direction, waitTi
     let trainLat = prevLat + dLat;
     let trainLong = prevLong + dLong;
 
-    return { latitude: trainLat, longitude: trainLong }
+    return {
+      latitude: trainLat,
+      longitude: trainLong,
+      intermediateDestinations: intermediateDestinations
+    }
 
   } catch (error) {
     console.log("Error finding train location:\n", error)

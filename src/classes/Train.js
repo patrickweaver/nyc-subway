@@ -1,5 +1,3 @@
-//import { te } from "date-fns/locale";
-
 import findTrainPosition from "../helpers/findTrainPosition.js";
 
 export default class Train {
@@ -12,6 +10,7 @@ export default class Train {
 
     this.direction = null;
     this.intermediateDestinations = [];
+    this.nextStationId = null;
     this.latitude = null;
     this.longitude = null;
     this.marker = null;
@@ -70,7 +69,10 @@ export default class Train {
         throw 'Invalid train direction: ' + this.direction;
       }
   
-      const trainPos = findTrainPosition(nextStopId, this.routeId, this.direction, waitTimeEstimate);
+      const trainPos = findTrainPosition(this.nextStationId, nextStopId, this.routeId, this.direction, waitTimeEstimate);
+
+      // Update .nextStationId for next update to read.
+      this.nextStationId = nextStopId;
 
       if (!trainPos.latitude || !trainPos.longitude) {
         throw "Error finding lat/long."
@@ -82,6 +84,7 @@ export default class Train {
 
       this.latitude = trainPos.latitude;
       this.longitude = trainPos.longitude;
+      this.intermediateDestinations = trainPos.intermediateDestinations
 
     } catch (error) {
       console.log("Error locating train:", error);

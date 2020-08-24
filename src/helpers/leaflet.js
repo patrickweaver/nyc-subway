@@ -71,7 +71,7 @@ function drawTrain(train) {
 function moveTrain(train) {
   
   console.log("🛎 Moving train:", train.id, "going", train.direction)
-  const totalDuration = UPDATE_FREQUENCY_IN_SECONDS * 1000;
+  const totalDuration = 10000;//UPDATE_FREQUENCY_IN_SECONDS * 1000;
   const destinations = train.intermediateDestinations;
   train.intermediateDestinations = [];
   destinations.push({latitude: train.latitude, longitude: train.longitude})
@@ -83,7 +83,7 @@ function moveTrain(train) {
   destinations.forEach(loc => {
     const timer = durationElapsed;
     setTimeout(() => {
-      console.log("⏱ moving ", train.id, "to:", loc.latitude, ",", loc.longitude, "for", durationEach / 1000, "in", (timer / 1000), "seconds.");
+      console.log("⏱ moving ", train.id, "to:", loc.latitude, ",", loc.longitude, "via", destinations.length, "destinations, for", durationEach / 1000, "in", (timer / 1000), "seconds.");
       train.marker.slideTo([loc.latitude, loc.longitude], {
         duration: durationEach,
         keepAtCenter: false
@@ -92,7 +92,6 @@ function moveTrain(train) {
     durationElapsed += durationEach;
   });
 }
-
 
 function drawMap() {
   map = L.map("map")
@@ -104,8 +103,6 @@ function drawMap() {
   }).addTo(map);
   return map
 }
-
-
 
 export default {
   markers: markers,
