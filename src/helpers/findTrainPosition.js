@@ -13,13 +13,11 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
 
     // lastNextStation will help us find intermediate stations to animate
     // train through.
-    let lastNextStation;
     let lastNextStationIndex;
     if (lastNextStationId && lastNextStationId !== nextStopId) {
       // If this is not a new train to us, look up previous value for
       // next station index:
       lastNextStationIndex = lines[routeId].indexOf(lastNextStationId);
-      lastNextStation = stations.findByGTFS(lastNextStationId);
     }
     
     // nextStation and prevStation will help us calculate the current lat/long
