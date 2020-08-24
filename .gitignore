@@ -70,3 +70,5 @@ typings/
 /scraper/data
 
 .data/*
+!.data/note.txt
+!.data/logs/note.txt
