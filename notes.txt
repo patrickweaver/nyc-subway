@@ -1,7 +1,6 @@
 - G Daytime Route missing from Church Ave F/G
 - feedEntity.id is not consistently the same train between responses
-- Sorting G by latitude "Hoyt - Schermerhorn Sts" is mis-sorted
-- Trip start/stop times are in HH:MM:SS, but arrival and departure times are in Unix Time
+- Trip start/stop times are in HH:MM:SS, but arrival and departure times are in Unix Time (second precision)
 - Station arrival and departure times are always the same (G line at least)
 - The first trip update is the station the train just left, but the the arrival/departure time at that station can change retroactively.
 - The list of data for each train has pairs of corresponding data, instead of combining all of the data for one train. The first group of data has the timing for upcoming stops, the second group of data has the status at the current stop.
@@ -14,3 +13,4 @@
 New To Dos August 2020:
 - Figure out frontend error: Error: index 7 train has no "tripUpdate" property.
 - Trains sometimes go negative on the line toward the next station
+- Compare Lat/Lng plots calculated vs actual stoptime update data (check negatives)
