@@ -4,8 +4,9 @@
   import TripEntity from "./classes/TripEntity.js";
 
   // Import helpers
-  import api from './helpers/api.js';
-  import stations from './helpers/stations.js';
+  import api from "./helpers/api.js";
+  import mergeTripUpdateAndVehicleEntities from "./helpers/mergeTripUpdateAndVehicleEntities.js";
+  import stations from "./helpers/stations.js";
   import leaflet from "./helpers/leaflet.js";
 
   // Initialize variables
@@ -18,15 +19,20 @@
   // Station data is hard coded
   // See ./data/stationData.js, which is generated form tools/stationData.csv
   // 🚸 Currently limiting scope to the G line.
-  let gStops = stations.getLineStops('G');
+  let gStops = stations.getLineStops("G");
 
   // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds
   async function drawLoop() {
     // Get data from API
     tripEntities = await api.getMtaFeed()
-    //console.log(JSON.stringify(tripEntities));
+
+    console.log(JSON.stringify(tripEntities));
+
+    // Combine TripUpdate and Vehicle data:
+    const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);
+
     // Validate data and create TripEntity objects
-    const tripEntityObjects = tripEntities.map((i, index) => new TripEntity(i, index));
+    const tripEntityObjects = combinedTripEntities.map((i, index) => new TripEntity(i, index));
     // 🚸 Only use "Current" type trips for map
     const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
     //Draw each train at its updated position on the map
@@ -35,7 +41,7 @@
 
   // Draw each train on map
   function drawEachTrain(currentTrips) {
-    console.log('🧮 Received data for', currentTrips.length, 'trains', "(", currentTrips.map(i => i.index), ")")
+    console.log("🧮 Received data for", currentTrips.length, "trains", "(", currentTrips.map(i => i.index), ")")
     
     for (var i in currentTrips) {
       let trainUpdate = currentTrips[i];

@@ -1,6 +1,7 @@
 import StopTimeUpdate from "./StopTimeUpdate.js";
 import Train from "./Train.js";
 import Trip from "./Trip.js";
+import lines from "../data/lines.js";
 
 export default class TripEntity {
   constructor(tripEntity, index) {
@@ -15,31 +16,50 @@ export default class TripEntity {
       && te.tripUpdate.trip.startTime
       && te.tripUpdate.trip.startDate
       && te.tripUpdate.trip.routeId
-      && te.tripUpdate.stopTimeUpdate
-      && te.tripUpdate.stopTimeUpdate[0]
-      && te.tripUpdate.stopTimeUpdate[0].arrival
-      && te.tripUpdate.stopTimeUpdate[0].arrival.time
-      && te.tripUpdate.stopTimeUpdate[0].departure
-      && te.tripUpdate.stopTimeUpdate[0].departure.time
-      && te.tripUpdate.stopTimeUpdate[0].stopId
     ) {
-      type = "Current" // May change to future
-      tripObject = te.tripUpdate.trip;
-    } else if (
-      te.vehicle
-      && te.vehicle.trip
-      && te.vehicle.trip.tripId
-      && te.vehicle.trip.startTime
-      && te.vehicle.trip.startDate
-      && te.vehicle.trip.routeId
-      && te.vehicle.currentStopSequence
-      //&& te.vehicle.timestamp // This is missing on some
-      && te.vehicle.stopId
-    ) {
-      type = "Scheduled";
-      tripObject = te.vehicle.trip;
+
+      if (
+        te.tripUpdate.stopTimeUpdate
+        && te.tripUpdate.stopTimeUpdate[0]
+        && te.tripUpdate.stopTimeUpdate[0].arrival
+        && te.tripUpdate.stopTimeUpdate[0].arrival.time
+        && te.tripUpdate.stopTimeUpdate[0].departure
+        && te.tripUpdate.stopTimeUpdate[0].departure.time
+        && te.tripUpdate.stopTimeUpdate[0].stopId 
+      ) {
+
+        if (
+          te.vehicle.currentStopSequence
+          //&& te.vehicle.timestamp // This is missing on some
+          && te.vehicle.stopId
+        ) {
+          type = "Current"
+          tripObject = te.tripUpdate.trip;
+        } else {
+          type = "Scheduled";
+          tripObject = te.vehicle.trip;
+        }
+
+      } else if (te.vehicle.currentStopSequence) {
+
+        const line = lines[te.tripUpdate.trip.routeId];
+        if (!line) throw "Invalid line: " + te.tripUpdate.trip.routeId;
+        const currentStop = te.vehicle.currentStopSequence;
+        const firstStop = line[0];
+        const lastStop = line[line.length - 1];
+
+        if (currentStop === firstStop || currentStop === lastStop) {
+          type = "Arrived";
+          tripObject = te.vehicle.trip;
+        }
+
+      } else {
+        console.log("OTHER NO STU OR CSS at index:", index);
+
+      }
+
     } else {
-      console.log("OTHER at index:", index)
+      console.log("OTHER NO TRIP at index:", index)
       // Not on a current trip or scheduled.
     }
 
