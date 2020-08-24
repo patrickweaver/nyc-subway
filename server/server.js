@@ -3,13 +3,18 @@ const express = require('express');
 const app = express();
 app.use(express.static('server/public'));
 
+const mostRecentData = {};
+const updateEvery = (parseInt(process.env.UPDATE_FREQUENCY_IN_SECONDS) * 1000) + 200;
+
 // Check that .env variables are set:
-if (false) {
+if (
+  !process.env.MTA_API_KEY
+  || !process.env.TIMEZONE
+  || !process.env.UPDATE_FREQUENCY_IN_SECONDS
+) {
+  console.log("Fatal Error: Missing ENV variable.")
   process.exit();
 }
-
-
-
 
 // 🚸 Not implemented currently, but will allow collecting data
 // to determine how long to expect a train to spend between
@@ -35,14 +40,43 @@ app.get('/api/all', async function(req, res) {
 
 // API endpoint to view individual line data
 app.get('/api/:line', async function(req, res) {
-  const feedResponse = await getFeed((req.params.line).toLowerCase());
+  try {
+    let now = (new Date()).getTime();
+    if (!req.params.line) throw "Invalid line."
+    const line = (req.params.line).toLowerCase();
 
-  // Run logging module if set via ENV
-  if (LOG_LOCATIONS) {
-    logLocations(feedResponse);
+    let shouldUpdate = true;
+    if (mostRecentData.line) {
+      if (mostRecentData.line.timestamp && mostRecentData.line.data) {
+        if (now - updateEvery < mostRecentData.line.timestamp)  {
+          shouldUpdate = false;
+        }
+      }
+    } else {
+      mostRecentData.line = {};
+    }
+
+    let feedResponse;
+    if (shouldUpdate) {
+      feedResponse = await getFeed(line);
+      mostRecentData.line.timestamp = now;
+      mostRecentData.line.data = feedResponse;
+    } else {
+      feedResponse = mostRecentData.line.data;
+    }
+
+    // Run logging module if set via ENV
+    if (LOG_LOCATIONS) {
+      logLocations(feedResponse);
+    }
+
+    console.log(`📲Sending ${shouldUpdate ? "💡 new" : "💾 cached"} response for line ${line} to client.`)
+
+    res.json(feedResponse);
+  } catch (error) {
+    console.log("Error:", error);
+    res.json({error: error});
   }
-
-  res.json(feedResponse);
 });
 
 var listener = app.listen(process.env.PORT, function () {

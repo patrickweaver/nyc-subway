@@ -14,7 +14,7 @@
   let trainsArray = []; // Array of Train objects
 
   // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
-  const updateFreqency = UPDATE_FREQUENCY_IN_SECONDS * 1000;
+  const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
 
   // Station data is hard coded
   // See ./data/stationData.js, which is generated form tools/stationData.csv
@@ -26,7 +26,7 @@
     // Get data from API
     tripEntities = await api.getMtaFeed()
 
-    console.log(JSON.stringify(tripEntities));
+    //console.log(JSON.stringify(tripEntities));
 
     // Combine TripUpdate and Vehicle data:
     const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);

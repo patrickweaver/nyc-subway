@@ -15,3 +15,4 @@ New To Dos August 2020:
 - Trains sometimes go negative on the line toward the next station
 - Compare Lat/Lng plots calculated vs actual stoptime update data (check negatives)
 - Make a dashboard in Svelte to watch real time data as data
+- Figure out why trains log as moving on second identical data update

@@ -23,7 +23,7 @@ module.exports = async function(feedId=null) {
       encoding: null,
       headers: {
         'User-Agent': 'Request-Promise',
-        'x-api-key': process.env.NEW_MTA_API_KEY
+        'x-api-key': process.env.MTA_API_KEY
       }
     };
 

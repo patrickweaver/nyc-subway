@@ -71,7 +71,7 @@ function drawTrain(train) {
 function moveTrain(train) {
   
   console.log("🛎 Moving train:", train.id, "going", train.direction)
-  const totalDuration = 10000;//UPDATE_FREQUENCY_IN_SECONDS * 1000;
+  const totalDuration = UPDATE_FREQUENCY_IN_SECONDS * 1000;
   const destinations = train.intermediateDestinations;
   train.intermediateDestinations = [];
   destinations.push({latitude: train.latitude, longitude: train.longitude})
