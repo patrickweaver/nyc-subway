@@ -6,4 +6,6 @@ module.exports = {
   TILE_LAYER: "https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png",
   TIMEZONE: process.env.TIMEZONE,
   UPDATE_FREQUENCY_IN_SECONDS: process.env.UPDATE_FREQUENCY_IN_SECONDS,
+  METER_LAT_OFFSET: process.env.METER_LAT_OFFSET,
+  METER_LNG_OFFSET: process.env.METER_LNG_OFFSET,
 }

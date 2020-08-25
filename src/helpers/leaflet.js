@@ -26,6 +26,14 @@ const markers = {
     radius: 80,
   },
 
+  // Train Circle:
+  trainCircle: {
+    color: '#00FF00',
+    fillColor: '#44EE44',
+    fillOpacity: 1,
+    radius: 40,
+  }
+
 }
 
 // Draw stations on map (happens on first load)
@@ -46,12 +54,32 @@ function drawStation(station, recenter=false) {
 }
 
 // Draw connecting line between stations
-function drawLine(station1, station2) {
+function drawLine(station1, station2) { 
   var latlongs = [
     [station1.latitude, station1.longitude],
     [station2.latitude, station2.longitude]
   ];
   L.polyline(latlongs, {color: 'green'}).addTo(map);
+}
+
+function drawTracks(station1, station2) {
+  const dLat = (station1.latitude - station2.latitude) / METER_LAT_OFFSET;
+  const dLng = (station1.longitude - station2.longitude) / METER_LAT_OFFSET;
+  const angle = Math.PI - Math.atan(dLat / dLng);
+  const oLat = (Math.sin(angle) * 30) * METER_LAT_OFFSET;
+  const oLng = (Math.sin(angle) * 30) * METER_LAT_OFFSET;
+
+  var latlongs1 = [
+    [station1.latitude, station1.longitude],
+    [station2.latitude, station2.longitude]
+  ];
+  var latlongs2 = [
+    [station1.latitude - oLat, station1.longitude + oLng],
+    [station2.latitude - oLat, station2.longitude + oLng]
+  ];
+
+  L.polyline(latlongs1, {color: 'green'}).addTo(map);
+  L.polyline(latlongs2, {color: 'red'}).addTo(map);
 }
 
 function drawTrain(train) {
@@ -64,7 +92,10 @@ function drawTrain(train) {
     trainIcon = markers.ngIcon;
   }
   
-  var trainMarker = L.marker([train.latitude, train.longitude], {icon: trainIcon}).addTo(map);
+  const trainPosition = [train.latitude, train.longitude];
+  //var trainMarker = L.marker(trainPosition, {icon: trainIcon}).addTo(map);
+  const trainMarker = L.circle(trainPosition, markers.trainCircle)
+    .addTo(map)
   return(trainMarker)
 }
 
@@ -108,6 +139,7 @@ export default {
   markers: markers,
   drawStation: drawStation,
   drawLine: drawLine,
+  drawTracks: drawTracks,
   drawTrain: drawTrain,
   moveTrain: moveTrain,
   drawMap: drawMap,

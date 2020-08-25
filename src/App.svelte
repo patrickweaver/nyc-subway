@@ -92,7 +92,8 @@
 
       // Connect new station to previous station:
       if (prevStation) {
-        leaflet.drawLine(prevStation, station);
+        //leaflet.drawLine(prevStation, station);
+        leaflet.drawTracks(prevStation, station);
       }
       prevStation = station;
     }

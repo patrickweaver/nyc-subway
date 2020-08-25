@@ -4,7 +4,7 @@ const app = express();
 app.use(express.static('server/public'));
 
 const mostRecentData = {};
-const updateEvery = (parseInt(process.env.UPDATE_FREQUENCY_IN_SECONDS) * 1000) + 200;
+const updateEvery = (parseInt(process.env.UPDATE_FREQUENCY_IN_SECONDS) * 1000) - 200;
 
 // Check that .env variables are set:
 if (
