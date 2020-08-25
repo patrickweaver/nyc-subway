@@ -81,19 +81,23 @@
 
     // Draw all the stations
     let prevStation = null;
+    let nextStation = null;
     for (let i = 0; i < gStops.length; i++) {
 
       // Create station object
       const s = gStops[i];
+      if (gStops[i + 1]) {
+        const ns = gStops[i + 1];
+        nextStation = new Station(ns["GTFS Stop ID"], ns["GTFS Latitude"], ns["GTFS Longitude"]);
+      }
       const station = new Station(s["GTFS Stop ID"], s["GTFS Latitude"], s["GTFS Longitude"]);
-
       // Draw station on map
       leaflet.drawStation(station);
 
       // Connect new station to previous station:
       if (prevStation) {
         //leaflet.drawLine(prevStation, station);
-        leaflet.drawTracks(prevStation, station);
+        leaflet.drawTracks(prevStation, station, nextStation);
       }
       prevStation = station;
     }
