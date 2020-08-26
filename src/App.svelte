@@ -88,9 +88,9 @@
       const s = gStops[i];
       if (gStops[i + 1]) {
         const ns = gStops[i + 1];
-        nextStation = new Station(ns["GTFS Stop ID"], ns["GTFS Latitude"], ns["GTFS Longitude"]);
+        nextStation = new Station(ns["GTFS Stop ID"], ns["GTFS Latitude"], ns["GTFS Longitude"], ns["Stop Name"]);
       }
-      const station = new Station(s["GTFS Stop ID"], s["GTFS Latitude"], s["GTFS Longitude"]);
+      const station = new Station(s["GTFS Stop ID"], s["GTFS Latitude"], s["GTFS Longitude"], s["Stop Name"]);
       // Draw station on map
       leaflet.drawStation(station);
 
