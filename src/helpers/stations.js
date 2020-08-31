@@ -145,7 +145,7 @@ function offsetFromPoint(pointLat, pointLng, normalizedOffsetMetersX, normalized
 
 function findOffsetPoints(stationA, stationB, stationC) {
   // Length of offset line
-  const offsetLength = 50;
+  const offsetLength = 20;
 
   const pos = {};
   pos.a = stationA ? [stationA.latitude, stationA.longitude] : null;
@@ -191,7 +191,13 @@ function findOffsetPoints(stationA, stationB, stationC) {
   const oPos = offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, offsetLength);
   const oPosNeg = offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, -offsetLength);
 
-  return [oPos, oPosNeg];
+  const crossProduct = abVector.cross(cbVector);
+
+  if (crossProduct < 0) {
+    return [oPosNeg, oPos];
+  } else {
+    return [oPos, oPosNeg];
+  }
   
 }
 
