@@ -1,6 +1,10 @@
 import L from "leaflet";
 import * as leafletMarkerSlideTo from "leaflet.marker.slideto";
 
+import Victor from 'victor';
+
+const RAD_TO_DEG = 57.2958;
+
 let map; // Map var for leaflet
 
 const markers = {
@@ -63,109 +67,20 @@ function drawLine(station1, station2) {
   L.polyline(latlongs, { color: "green" }).addTo(map);
 }
 
-function drawTracks(station1, station2, station3) {
-  // 🚸 Will have to have a different calculation for the end of the line.
-  if (!station3) {
-    return;
-  }
+function drawTracks(stationA, stationB) {
 
-  console.log("🚉", station2.name);
+  console.log("🚉", stationB.name);
 
-  const aPos = [station1.latitude, station1.longitude];
-  const bPos = [station2.latitude, station2.longitude];
-  const cPos = [station3.latitude, station3.longitude];
+  // Draw offset line for station B
+  L.polyline(stationB.offsets, { color: "#00fff2" }).addTo(map); // Aqua
 
-  L.polyline([aPos, bPos], { color: "purple" }).addTo(map);
-
-  const dLatLng = (s1, s2) => [s1.latitude - s2.latitude, s1.longitude - s2.longitude];
-
-  let dLatAB, dLngAB, dLatBC, dLngBC;
-  [dLatAB, dLngAB] = dLatLng(station2, station1);
-  [dLatBC, dLngBC] = dLatLng(station2, station3);
-
-  console.log("AB:", dLatAB, dLngAB, dLatAB / METER_LAT_OFFSET, dLngAB / METER_LNG_OFFSET)
-  console.log("BC:", dLatBC, dLngBC, dLatBC / METER_LAT_OFFSET, dLngBC / METER_LNG_OFFSET)
-
-  const bc = Math.abs(Math.atan(dLngBC / dLatBC));
-  const ab = Math.abs(Math.atan(dLngAB / dLatAB));
-
-  console.log("bc:", bc * 57.2958, "ab:", ab * 57.2958);
-
-  console.log("Full angle:", ((1.5 * Math.PI) - ab - bc) * 57.2958);
-  console.log("Half Angle:", (((1.5 * Math.PI) - ab - bc) / 2)  * 57.2958);
-
-  const offsetAngle = (bc - 3 * ab) / 2;
-  const offsetAngle3 = Math.PI * 1.5;
-  const offsetAngle2 = Math.PI;
-  const offsetAngle1 = Math.PI / 2;
-  console.log("Offset Angle:", offsetAngle * 57.2958);
-
-  const dLatOB = Math.sin(offsetAngle) * (50 * METER_LAT_OFFSET);
-  const dLngOB = Math.cos(offsetAngle) * (50 * METER_LNG_OFFSET);
-  const dLatOB1 = Math.sin(offsetAngle1) * (50 * METER_LAT_OFFSET);
-  const dLngOB1 = Math.cos(offsetAngle1) * (50 * METER_LNG_OFFSET);
-  const dLatOB2 = Math.sin(offsetAngle2) * (50 * METER_LAT_OFFSET);
-  const dLngOB2 = Math.cos(offsetAngle2) * (50 * METER_LNG_OFFSET);
-  const dLatOB3 = Math.sin(offsetAngle3) * (50 * METER_LAT_OFFSET);
-  const dLngOB3 = Math.cos(offsetAngle3) * (50 * METER_LNG_OFFSET);
-  const dLatOB4 = Math.sin(0) * (50 * METER_LAT_OFFSET);
-  const dLngOB4 = Math.cos(0) * (50 * METER_LNG_OFFSET);
-  console.log("dLatOB:", dLatOB / METER_LAT_OFFSET, "dLngOB:", dLngOB / METER_LNG_OFFSET)
-
-
-  const oPos = [
-    station2.latitude - dLngOB,
-    station2.longitude - dLatOB
-  ]
-
-  const oPos1 = [
-    station2.latitude + dLatOB1,
-    station2.longitude - dLngOB1
-  ]
-
-  const oPos2 = [
-    station2.latitude + dLatOB2,
-    station2.longitude - dLngOB2
-  ]
-
-  const oPos3 = [
-    station2.latitude + dLatOB3,
-    station2.longitude - dLngOB3
-  ]
-  const oPos4 = [
-    station2.latitude + dLatOB4,
-    station2.longitude - dLngOB4
-  ]
-
-  const trainMarker = L.circle(bPos, {
-    color: "#000000",
-    fillColor: "#DFDFDF",
-    fillOpacity: 0.8,
-    radius: 50,
-  }).addTo(map);
-  L.polyline([oPos1, bPos], { color: "red" }).addTo(map);
-  L.polyline([oPos2, bPos], { color: "orange" }).addTo(map);
-  L.polyline([oPos3, bPos], { color: "yellow" }).addTo(map);
-  L.polyline([oPos4, bPos], { color: "green" }).addTo(map);
-  L.polyline([oPos, bPos], { color: "white" }).addTo(map);
-
-
-  /*
-  const dLat = (station1.latitude - station2.latitude) / METER_LAT_OFFSET;
-  const dLng = (station1.longitude - station2.longitude) / METER_LAT_OFFSET;
-  const angle = Math.PI - Math.atan(dLat / dLng);
-  const oLat = Math.sin(angle) * 30 * METER_LAT_OFFSET;
-  const oLng = Math.sin(angle) * 30 * METER_LAT_OFFSET;
-
+  // Draw N and S offest positions:
+  L.circle(stationB.offsets[0], {radius: 20, color: "orange"}).addTo(map);
+  L.circle(stationB.offsets[1], {radius: 20, color: "yellow"}).addTo(map);
   
-  var latlongs2 = [
-    [station1.latitude - oLat, station1.longitude + oLng],
-    [station2.latitude - oLat, station2.longitude + oLng],
-  ];
-
-  L.polyline(latlongs1, { color: "green" }).addTo(map);
-  L.polyline(latlongs2, { color: "red" }).addTo(map);
-  */
+  //Draw lines between offsets:
+  L.polyline([stationA.offsets[0], stationB.offsets[0]], { color: "orange" }).addTo(map);
+  L.polyline([stationA.offsets[1], stationB.offsets[1]], { color: "yellow" }).addTo(map);
 }
 
 function drawTrain(train) {
