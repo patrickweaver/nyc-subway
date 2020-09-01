@@ -1,5 +1,5 @@
 import lines from "../data/lines.js";
-import stations from "./stations.js";
+import stationHelpers from "./stationHelpers.js";
 import stationWaitTimes from "../data/stationWaitTimes.js";
 
 export default function findTrainPosition(lastNextStationId, nextStopId, routeId, direction, waitTimeEstimate) {
@@ -22,7 +22,7 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
     
     // nextStation and prevStation will help us calculate the current lat/long
     // of the train.
-    let nextStation = stations.findByGTFS(nextStopId);
+    let nextStation = stationHelpers.findByGTFS(nextStopId);
     let nextStationIndex = lines[routeId].indexOf(nextStation["GTFS Stop ID"]);
     let prevStation;
     let prevStationIndex;
@@ -44,7 +44,7 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
         i += directionOffset
       ) {
         const stationId = lines[routeId][i];
-        const station = stations.findByGTFS(stationId);
+        const station = stationHelpers.findByGTFS(stationId);
         const latitude = station["GTFS Latitude"];
         const longitude = station["GTFS Longitude"];
         intermediateDestinations.push({
@@ -60,7 +60,7 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
       && prevStationIndex >= 0
       && prevStationIndex < lines[routeId].length
     ) {
-      prevStation = stations.findByGTFS(lines[routeId][prevStationIndex])
+      prevStation = stationHelpers.findByGTFS(lines[routeId][prevStationIndex])
     } else {
       // 🚧 Trains waiting to begin journey have next stop as first or last
       // but will not have a previous station index.

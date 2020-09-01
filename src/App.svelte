@@ -6,7 +6,7 @@
   // Import helpers
   import api from "./helpers/api.js";
   import mergeTripUpdateAndVehicleEntities from "./helpers/mergeTripUpdateAndVehicleEntities.js";
-  import stations from "./helpers/stations.js";
+  import stationHelpers from "./helpers/stations.js";
   import leaflet from "./helpers/leaflet.js";
 
   // Initialize variables
@@ -19,7 +19,7 @@
   // Station data is hard coded
   // See ./data/stationData.js, which is generated form tools/stationData.csv
   // 🚸 Currently limiting scope to the G line.
-  let gStops = stations.getLineStops("G");
+  let gStops = stationHelpers.getLineStops("G");
 
   // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds
   async function drawLoop() {

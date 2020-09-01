@@ -20,13 +20,9 @@ export default class Train {
     this.routeId = null;
     this.scheduledAt = null;
   }
-
-  /*
-  static newScheduledTrain() {
-    return new Train(null, null);
-  }
-  */
-
+  
+  // Update a train's lat/long based on it's most recent
+  // next stationand expected arrival time.
   locate() {
 
     try {

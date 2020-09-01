@@ -30,20 +30,6 @@ function findByGTFS(gtfsId, containsDirection=false) {
   return station;
 }
 
-// 🚸 Not currently used (was an early hack for order)
-// Compare two stations by latitude
-function compareByLatitude(a, b) {
-  let aLong = a['GTFS Latitude'];
-  let bLong = b['GTFS Latitude'];
-  if (aLong > bLong) {
-    return -1;
-  }
-  if (bLong > aLong) {
-    return 1;
-  }
-  return 0;
-}
-
 // Compare two stations by where they are in the train's route
 function compareByLineOrder(lineOrder, a, b) {
   try {
