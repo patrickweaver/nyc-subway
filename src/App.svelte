@@ -6,7 +6,7 @@
   // Import helpers
   import api from "./helpers/api.js";
   import mergeTripUpdateAndVehicleEntities from "./helpers/mergeTripUpdateAndVehicleEntities.js";
-  import stationHelpers from "./helpers/stations.js";
+  import stationHelpers from "./helpers/stationHelpers.js";
   import leaflet from "./helpers/leaflet.js";
 
   // Initialize variables
@@ -17,7 +17,7 @@
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
 
   // Station data is hard coded
-  // See ./data/stationData.js, which is generated form tools/stationData.csv
+  // See ./data/stationData.js, which is generated from tools/stationData.csv
   // 🚸 Currently limiting scope to the G line.
   let gStops = stationHelpers.getLineStops("G");
 
@@ -75,11 +75,7 @@
     }
   }
 
-  (async function main() {
-    // Draw the map
-    leaflet.drawMap();
-
-    // Draw all the stations
+  function drawStations() {
     let prevStation = null;
     for (let i = 0; i < gStops.length; i++) {
 
@@ -96,6 +92,14 @@
 
       prevStation = station;
     }
+  }
+
+  (async function main() {
+    // Draw the map
+    leaflet.drawMap();
+
+    // Draw all the stations
+    drawStations();
 
     drawLoop();
     setInterval(drawLoop, updateFreqency);
