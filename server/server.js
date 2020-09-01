@@ -29,7 +29,6 @@ const logLocations = require('./helpers/logLocations.js');
 
 // API endpoint to view all train data
 app.get('/api/all', async function(req, res) {
-  
   // 🚸 Not implemented yet, will return error.
   // Probably best to implement this as a loop through all of
   // the individual endpoints since there isn't an endpoint for all

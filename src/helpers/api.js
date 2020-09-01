@@ -32,8 +32,8 @@ function parseFeed(apiResponse) {
 }
 
 // 🚸 Can deal with more lines here later.
-async function getMtaFeed() {
-  const apiResponse = await getFeed("g");
+async function getMtaFeed(feedId) {
+  const apiResponse = await getFeed(feedId);
   return parseFeed(apiResponse);
 }
 

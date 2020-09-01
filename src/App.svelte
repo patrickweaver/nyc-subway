@@ -10,31 +10,54 @@
   import leaflet from "./helpers/leaflet.js";
 
   // Initialize variables
-  let tripEntities = []; // Most recent API response
-  let trainsArray = []; // Array of Train objects
+  const tripEntities = []; // Most recent API response
+  const trainsArray = []; // Array of Train objects
+  let routes = [];
 
   // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
 
+  const routeIds = ["l", "g", "a"];
+
   // Station data is hard coded
   // See ./data/stationData.js, which is generated from tools/stationData.csv
   // 🚸 Currently limiting scope to the G line.
-  let gStops = stationHelpers.getLineStops("G");
+  routes = routeIds.map(i => stationHelpers.getLineStops(i));
+
+  (async function main() {
+    // Draw the map
+    leaflet.drawMap();
+
+    // Parse station data:
+    parseStations();
+
+    // Draw all the stations
+    routes.forEach(i => drawStations(i));
+
+    drawLoop();
+    setInterval(drawLoop, updateFreqency);
+
+  })();
+
+
 
   // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds
   async function drawLoop() {
     // Get data from API
-    tripEntities = await api.getMtaFeed()
+    tripEntities = await api.getMtaFeed(route)
 
     //console.log(JSON.stringify(tripEntities));
 
     // Combine TripUpdate and Vehicle data:
     const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);
-
+    
     // Validate data and create TripEntity objects
     const tripEntityObjects = combinedTripEntities.map((i, index) => new TripEntity(i, index));
+    console.log(`Found ${tripEntityObjects.length} trip entity objects.`)
+
     // 🚸 Only use "Current" type trips for map
     const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
+    console.log(`of those ${currentTrips.length} are current`);
     //Draw each train at its updated position on the map
     drawEachTrain(currentTrips);
   }
@@ -75,12 +98,16 @@
     }
   }
 
-  function drawStations() {
+  function parseStations() {
+
+  }
+
+  function drawStations(routeStops) {
     let prevStation = null;
-    for (let i = 0; i < gStops.length; i++) {
+    for (let i = 0; i < routeStops.length; i++) {
 
       // Create station object
-      const station = gStops[i];
+      const station = routeStops[i];
 
       // Draw station on map
       leaflet.drawStation(station);
@@ -94,17 +121,6 @@
     }
   }
 
-  (async function main() {
-    // Draw the map
-    leaflet.drawMap();
-
-    // Draw all the stations
-    drawStations();
-
-    drawLoop();
-    setInterval(drawLoop, updateFreqency);
-
-  })();
 </script>
 
 <style>

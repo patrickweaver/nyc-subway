@@ -24,4 +24,5 @@ export default {
     'F26',
     'F27'
   ],
+  L: []
 }
