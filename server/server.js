@@ -1,7 +1,7 @@
 // Set up express server
-const express = require('express');
+const express = require("express");
 const app = express();
-app.use(express.static('server/public'));
+app.use(express.static("server/public"));
 
 const mostRecentData = {};
 const updateEvery = (parseInt(process.env.UPDATE_FREQUENCY_IN_SECONDS) * 1000) - 200;
@@ -20,15 +20,17 @@ if (
 // to determine how long to expect a train to spend between
 // each stop.
 const LOG_LOCATIONS = process.env.LOG_LOCATIONS === "true";
+const LOG_RESPONSE = process.env.LOG_RESPONSE === "true";
 
 // Get the current feed from the MTA API
-const getFeed = require('./helpers/getFeed.js');
+const getFeed = require("./helpers/getFeed.js");
 
 // 🚸 Currently this does nothing
-const logLocations = require('./helpers/logLocations.js');
+const logLocations = require("./helpers/logLocations.js");
+const logResponse = require("./helpers/logResponse.js");
 
 // API endpoint to view all train data
-app.get('/api/all', async function(req, res) {
+app.get("/api/all", async function(req, res) {
   // 🚸 Not implemented yet, will return error.
   // Probably best to implement this as a loop through all of
   // the individual endpoints since there isn't an endpoint for all
@@ -38,7 +40,7 @@ app.get('/api/all', async function(req, res) {
 });
 
 // API endpoint to view individual line data
-app.get('/api/:line', async function(req, res) {
+app.get("/api/:line", async function(req, res) {
   try {
     let now = (new Date()).getTime();
     if (!req.params.line) throw "Invalid line."
@@ -65,8 +67,11 @@ app.get('/api/:line', async function(req, res) {
     }
 
     // Run logging module if set via ENV
-    if (LOG_LOCATIONS) {
+    if (shouldUpdate && LOG_LOCATIONS) {
       logLocations(feedResponse);
+    }
+    if (shouldUpdate && LOG_RESPONSE) {
+      logResponse(feedResponse, line);
     }
 
     console.log(`📲Sending ${shouldUpdate ? "💡 new" : "💾 cached"} response for line ${line} to client.`)
@@ -79,5 +84,5 @@ app.get('/api/:line', async function(req, res) {
 });
 
 var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+  console.log("Your app is listening on port " + listener.address().port);
 });

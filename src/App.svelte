@@ -34,15 +34,15 @@
     // Draw all the stations
     routes.forEach(i => drawStations(i));
 
-    drawLoop();
-    setInterval(drawLoop, updateFreqency);
+    drawLoop("a");
+    setInterval(drawLoop.bind(this, "a"), updateFreqency);
 
   })();
 
 
 
   // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds
-  async function drawLoop() {
+  async function drawLoop(route) {
     // Get data from API
     tripEntities = await api.getMtaFeed(route)
 
