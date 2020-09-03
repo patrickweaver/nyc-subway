@@ -54,6 +54,7 @@ const lineGroups = [
 ]
 
 main();
+setInterval(main, 1000 * 60 * 5);
 
 async function main() {
 
@@ -66,7 +67,7 @@ async function main() {
 
     module.exports = `
 
-    const filename = `./tools/lines_${(new Date()).getTime()}.js`;
+    const filename = "./tools/lines.js";
     fs.writeFile(filename, linesCopy + JSON.stringify(lines), function (err) {
       if (err) return console.log("Error:\n", err);
       console.log(`stop ID line data written to ${filename}`);
@@ -77,11 +78,11 @@ async function main() {
 }
 
 async function getLineGroup(lineGroup) {
-  console.log("👅 getting:", lineGroup.lines.join(""), lineGroup.apiSuffix);
+  //console.log("👅 getting:", lineGroup.lines.join(""), lineGroup.apiSuffix);
   try {
-    const apiResponse = JSON.parse(JSON.stringify(await getFeed(lineGroup.apiSuffix)));
+    const apiResponse = await getFeed(lineGroup.apiSuffix);
 
-    console.log("🗣 ENTITIES COUNT", apiResponse.entity.length);
+    //console.log("🗣 ENTITIES COUNT", apiResponse.entity.length);
 
     const tripUpdateEntities = apiResponse.entity.filter(i => {
       if (i.tripUpdate) {
@@ -138,11 +139,11 @@ async function getLineGroup(lineGroup) {
       })
 
 
-      if (!lines[line] || lines[line].length < longestLength) {
-        console.log("🐙 Found more for", line, ":", longestLength);
+      if (longestLength > 0 && (!lines[line] || lines[line].length < longestLength)) {
+        console.log("🐙 Found more for", line, ":", longestLength, "(used to be", lines[line] ? lines[line].length : "empty", ") at", (new Date()).getHours(), ":", (new Date()).getMinutes());
         lines[line] = lineStopIdsUpdates[longestIndex];
       } else {
-        console.log("🌫 ", line, "still at:", lines[line].length);
+        //console.log("🌫 ", line, "still at:", lines[line] ? lines[line].length : longestLength);
       }
     });
 

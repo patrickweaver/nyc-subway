@@ -8,6 +8,7 @@
   - Items with a stopTimeUpdate property show where the train will be at each stop down the line.
   - Items with a vehicle property show where the train is currently, and additional information on some feeds.
 - %2F confusion on new api url
+- 96th St is Q06 (Jamaica is G__)
 
 
 Done August 2020:
@@ -24,3 +25,5 @@ New To Dos August 2020:
 New To Dos September 2020:
 - Generate list of stations in order for each line
 - Convert to use ES6 modules for code sharing?
+- Deal with 2 versions of the A train (currently only looking at Far Rockaway bound A)
+* Rewrite station order function in stationHelpers (currently only works for G line).

@@ -8,6 +8,7 @@
   import mergeTripUpdateAndVehicleEntities from "./helpers/mergeTripUpdateAndVehicleEntities.js";
   import stationHelpers from "./helpers/stationHelpers.js";
   import leaflet from "./helpers/leaflet.js";
+  import lineGroups from "./helpers/lineGroups.js";
 
   // Initialize variables
   const tripEntities = []; // Most recent API response
@@ -17,12 +18,26 @@
   // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
 
-  const routeIds = ["l", "g", "a"];
+  const routeIds = lineGroups.flatMap(i => {
+    return i.lines.map(j => {
+      return {
+        line: j,
+        color: i.color,
+      }
+    });
+  });
+
+  console.log(routeIds);
 
   // Station data is hard coded
   // See ./data/stationData.js, which is generated from tools/stationData.csv
   // 🚸 Currently limiting scope to the G line.
-  routes = routeIds.map(i => stationHelpers.getLineStops(i));
+  routes = routeIds.map(i => {
+    return {
+      stops: stationHelpers.getLineStops(i.line),
+      color: i.color,
+    }
+  });
 
   (async function main() {
     // Draw the map
@@ -30,23 +45,23 @@
 
     // Parse station data:
     parseStations();
-
     // Draw all the stations
-    routes.forEach(i => drawStations(i));
+    routes.forEach(i => drawStations(i.stops, i.color));
 
-    drawLoop("a");
-    setInterval(drawLoop.bind(this, "a"), updateFreqency);
+    drawLoop();
+    setInterval(drawLoop, updateFreqency);
 
   })();
 
 
 
   // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds
-  async function drawLoop(route) {
-    // Get data from API
-    tripEntities = await api.getMtaFeed(route)
+  async function drawLoop() {
 
-    //console.log(JSON.stringify(tripEntities));
+    const lineGroup = lineGroups[0];
+
+    // Get data from API
+    tripEntities = await api.getMtaFeed(lineGroup.apiSuffix);
 
     // Combine TripUpdate and Vehicle data:
     const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);
@@ -102,19 +117,21 @@
 
   }
 
-  function drawStations(routeStops) {
+  function drawStations(routeStops, color) {
     let prevStation = null;
     for (let i = 0; i < routeStops.length; i++) {
 
       // Create station object
       const station = routeStops[i];
 
+      console.log("🧛🏻‍♀️", station);
+
       // Draw station on map
       leaflet.drawStation(station);
 
       // Connect new station to previous station:
       if (prevStation) {
-        leaflet.drawTracks(prevStation, station);
+        leaflet.drawTracks(prevStation, station, color);
       }
 
       prevStation = station;

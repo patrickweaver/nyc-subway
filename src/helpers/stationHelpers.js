@@ -67,11 +67,11 @@ function compareByLineOrder(lineOrder, a, b) {
 
 // Get the stations where the train currently stops
 // 🚸 Implementation has 'Daytime Routes' hard coded.
-function getLineStops(line) {
+function getLineStops(lineId) {
   // Filter out all stations where train doesn't stop:
   let lineStations = stationData.filter(station => {
     const linesArray = String(station['Daytime Routes']).split(' ');
-    if (linesArray.indexOf(line.toUpperCase()) > -1) {
+    if (linesArray.indexOf(lineId.toUpperCase()) > -1) {
       return true
     }
   });

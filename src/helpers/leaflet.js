@@ -67,7 +67,7 @@ function drawLine(station1, station2) {
   L.polyline(latlongs, { color: "green" }).addTo(map);
 }
 
-function drawTracks(stationA, stationB) {
+function drawTracks(stationA, stationB, color) {
 
   console.log("🚉", stationB.name);
 
@@ -79,8 +79,8 @@ function drawTracks(stationA, stationB) {
   L.circle(stationB.offsets[1], {radius: 20, color: "yellow"}).addTo(map);
   
   //Draw lines between offsets:
-  L.polyline([stationA.offsets[0], stationB.offsets[0]], { color: "orange" }).addTo(map);
-  L.polyline([stationA.offsets[1], stationB.offsets[1]], { color: "yellow" }).addTo(map);
+  L.polyline([stationA.offsets[0], stationB.offsets[0]], { color: color }).addTo(map);
+  L.polyline([stationA.offsets[1], stationB.offsets[1]], { color: color }).addTo(map);
 }
 
 function drawTrain(train) {
