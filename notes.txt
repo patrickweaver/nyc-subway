@@ -22,4 +22,5 @@ New To Dos August 2020:
 - Figure out why trains log as moving on second identical data update
 
 New To Dos September 2020:
-- 
+- Generate list of stations in order for each line
+- Convert to use ES6 modules for code sharing?

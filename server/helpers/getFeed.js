@@ -12,11 +12,6 @@ module.exports = async function(feedId=null) {
     if (feedId && feeds[feedId] === undefined) {
       throw "Invalid feedId"
     }
-  
-    // 🚸 TODO: Build feed for all lines
-    if (!feedId) {
-      throw "Not implemented yet."
-    }
 
     var options = {
       uri: baseUri + feeds[feedId],
@@ -26,14 +21,13 @@ module.exports = async function(feedId=null) {
         'x-api-key': process.env.MTA_API_KEY
       }
     };
-
   
     const feedResponse = await rp(options);
     // The response is a GTFS object, which needs to be decoded:
     const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(feedResponse);
     return feed;
   } catch (error) {
-    console.log("Error: " + error.substr(0, 50));
+    console.log("Error: " + error);
     //console.log(error);
     return {error: error}
   }
