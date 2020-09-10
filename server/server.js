@@ -74,7 +74,7 @@ app.get("/api/:line", async function(req, res) {
       logResponse(feedResponse, line);
     }
 
-    console.log(`📲Sending ${shouldUpdate ? "💡 new" : "💾 cached"} response for line ${line} to client.`)
+    console.log(`📲Sending ${shouldUpdate ? "💡 new" : "💾 cached"} response for line ${line} to client with ${feedResponse.entity.length} items.`)
 
     res.json(feedResponse);
   } catch (error) {

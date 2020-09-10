@@ -11,28 +11,26 @@
   import lineGroups from "./helpers/lineGroups.js";
 
   // Initialize variables
-  const tripEntities = []; // Most recent API response
+  var tripEntities = []; // Most recent API response
   const trainsArray = []; // Array of Train objects
   let routes = [];
 
   // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
 
-  const routeIds = lineGroups.flatMap(i => {
-    return i.lines.map(j => {
+  const routeData = lineGroups.flatMap(lineGroup => {
+    return lineGroup.lines.map(line => {
       return {
-        line: j,
-        color: i.color,
+        line: line,
+        color: lineGroup.color,
       }
     });
   });
 
-  console.log(routeIds);
-
   // Station data is hard coded
   // See ./data/stationData.js, which is generated from tools/stationData.csv
   // 🚸 Currently limiting scope to the G line.
-  routes = routeIds.map(i => {
+  routes = routeData.map(i => {
     return {
       stops: stationHelpers.getLineStops(i.line),
       color: i.color,
@@ -44,8 +42,8 @@
     leaflet.drawMap();
 
     // Parse station data:
-    parseStations();
-    // Draw all the stations
+    parseStations(); // 🚸 Empty right now
+    // Draw all the stations for each route
     routes.forEach(i => drawStations(i.stops, i.color));
 
     drawLoop();
@@ -62,9 +60,12 @@
 
     // Get data from API
     tripEntities = await api.getMtaFeed(lineGroup.apiSuffix);
+    //console.log(JSON.stringify(tripEntities))
 
     // Combine TripUpdate and Vehicle data:
     const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);
+
+    console.log(`${tripEntities.length} entities becomes data for ${combinedTripEntities.length} trains`)
     
     // Validate data and create TripEntity objects
     const tripEntityObjects = combinedTripEntities.map((i, index) => new TripEntity(i, index));
@@ -114,7 +115,7 @@
   }
 
   function parseStations() {
-
+    //🚸 Empty right now
   }
 
   function drawStations(routeStops, color) {
@@ -123,8 +124,6 @@
 
       // Create station object
       const station = routeStops[i];
-
-      console.log("🧛🏻‍♀️", station);
 
       // Draw station on map
       leaflet.drawStation(station);

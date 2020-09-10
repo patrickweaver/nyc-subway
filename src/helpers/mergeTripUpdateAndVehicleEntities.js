@@ -11,7 +11,10 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
       }
     });
 
+    console.log("🧤", tripUpdates.length, vehicles.length, unknown.length)
+
     const tripUpdateIds = tripUpdates.map(i => {
+      // 🚸 Interal try here?
       if (!i.tripUpdate.trip) throw "No trip data.";
       if (!i.tripUpdate.trip.tripId) throw "No trip id.";
       return i.tripUpdate.trip.tripId;
@@ -31,7 +34,9 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
       const vehicleIndex = vehicleIds.indexOf(id);
       let vehicleEntity;
       if (vehicleIndex === -1) {
-        throw "Vehicle for tripUpdate not found."
+        console.log("🎒 Vehicle not found for id:", tripUpdateEntity.tripUpdate.trip.tripId)
+        return
+        //throw "Vehicle for tripUpdate not found."
       } else {
         vehicleEntity = vehicles[vehicleIndex];
       }
@@ -47,7 +52,7 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
     return tripUpdates;
 
   } catch (error) {
-    console.log("Error:", error);
+    console.log("⛔️ Error:", error);
     return [];
   }
 }

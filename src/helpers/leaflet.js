@@ -69,8 +69,6 @@ function drawLine(station1, station2) {
 
 function drawTracks(stationA, stationB, color) {
 
-  console.log("🚉", stationB.name);
-
   // Draw offset line for station B
   L.polyline(stationB.offsets, { color: "#00fff2" }).addTo(map); // Aqua
 

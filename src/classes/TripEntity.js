@@ -13,13 +13,14 @@ export default class TripEntity {
       te.tripUpdate
       && te.tripUpdate.trip
       && te.tripUpdate.trip.tripId
-      && te.tripUpdate.trip.startTime
+      //&& te.tripUpdate.trip.startTime // Not always present
       && te.tripUpdate.trip.startDate
       && te.tripUpdate.trip.routeId
     ) {
 
       if (
-        te.tripUpdate.stopTimeUpdate
+        te.vehicle
+        && te.tripUpdate.stopTimeUpdate
         && te.tripUpdate.stopTimeUpdate[0]
         && te.tripUpdate.stopTimeUpdate[0].arrival
         && te.tripUpdate.stopTimeUpdate[0].arrival.time
@@ -40,7 +41,7 @@ export default class TripEntity {
           tripObject = te.vehicle.trip;
         }
 
-      } else if (te.vehicle.currentStopSequence) {
+      } else if (te.vehicle && te.vehicle.currentStopSequence) {
 
         const line = lines[te.tripUpdate.trip.routeId];
         if (!line) throw "Invalid line: " + te.tripUpdate.trip.routeId;
@@ -59,6 +60,12 @@ export default class TripEntity {
 
     } else {
       console.log("OTHER NO TRIP at index:", index);
+      console.log("\nte.tripUpdate", te.tripUpdate
+        ,"\n.trip", te.tripUpdate.trip
+        ,"\n.trip.tripId", te.tripUpdate.trip.tripId
+        //,"\n.trip.startTime", te.tripUpdate.trip.startTime
+        ,"\n.trip.startDate", te.tripUpdate.trip.startDate
+        ,"\n.trip.routeId", te.tripUpdate.trip.routeId)
     }
 
     this.index = index;
@@ -66,14 +73,17 @@ export default class TripEntity {
     
     let trip = null
     if (type === "Current" || type === "Scheduled") {
-      trip = new Trip(tripObject.tripId, tripObject.startTime, tripObject.startDate, tripObject.routeId);
+      const startTime = tripObject.startTime || null;
+      trip = new Trip(tripObject.tripId, startTime, tripObject.startDate, tripObject.routeId);
     }
 
     this.trip = trip;
     
     if (type === "Current") {
-      if (trip.startTimestamp > te.timestamp) {
-        type = "Future"
+      if (!trip.startTimestamp) {
+        type = "No startTime";
+      } else if (trip.startTimestamp > te.timestamp) {
+        type = "Future";
       }
 
       this.stopTimeUpdates = te.tripUpdate.stopTimeUpdate.map((i, index) => new StopTimeUpdate(index, i))

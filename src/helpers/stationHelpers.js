@@ -34,8 +34,8 @@ function findByGTFS(gtfsId, containsDirection=false) {
 function compareByLineOrder(lineOrder, a, b) {
   try {
     // Isolate GTFS Stop Id
-    let aId = a['GTFS Stop ID'];
-    let bId = b['GTFS Stop ID'];
+    let aId = a['GTFS Stop ID'].toString();
+    let bId = b['GTFS Stop ID'].toString();
 
     // Find index of GTFS Stop Id in line order
     let aIndex = lineOrder.indexOf(aId);
@@ -59,7 +59,7 @@ function compareByLineOrder(lineOrder, a, b) {
     return 0;
 
   } catch (error) {
-    console.log("ERROR:", error)
+    console.log("⛔️ Error:", error)
     return error;
   }
 }
@@ -68,18 +68,21 @@ function compareByLineOrder(lineOrder, a, b) {
 // Get the stations where the train currently stops
 // 🚸 Implementation has 'Daytime Routes' hard coded.
 function getLineStops(lineId) {
+  lineId = lineId.toUpperCase();
   // Filter out all stations where train doesn't stop:
-  let lineStations = stationData.filter(station => {
-    const linesArray = String(station['Daytime Routes']).split(' ');
-    if (linesArray.indexOf(lineId.toUpperCase()) > -1) {
-      return true
+  function lineStopsAtStation(stationDataItem) {
+    const linesArray = String(stationDataItem['Daytime Routes']).split(' ');
+    if (linesArray.indexOf(lineId) > -1) {
+      return true;
     }
-  });
+    return false;
+  }
+  let lineStations = stationData.filter(lineStopsAtStation);
 
   // 🚸 Will want to want to do this programmatically when showing
   // more than one line.
-  let compareByGOrder = compareByLineOrder.bind(this, lines['G']);
-  lineStations.sort(compareByGOrder);
+  let compare = compareByLineOrder.bind(this, lines[lineId]);
+  lineStations.sort(compare);
   
   // Split Daytime Routes into array
   const formattedLineStations = lineStations.map(

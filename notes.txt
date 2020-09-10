@@ -16,7 +16,6 @@ Done August 2020:
 
 
 New To Dos August 2020:
-- Figure out frontend error: Error: index 7 train has no "tripUpdate" property.
 - Trains sometimes go negative on the line toward the next station
 - Compare Lat/Lng plots calculated vs actual stoptime update data (check negatives)
 - Make a dashboard in Svelte to watch real time data as data
@@ -27,3 +26,16 @@ New To Dos September 2020:
 - Convert to use ES6 modules for code sharing?
 - Deal with 2 versions of the A train (currently only looking at Far Rockaway bound A)
 * Rewrite station order function in stationHelpers (currently only works for G line).
+- Pro-rate each sub-duration for distance between that station and next.
+
+
+Questions:
+
+- How often is the MTA Real time API actually updated?
+- Better way to calculate GPS position than from average time between stations?
+- Better way to think about lines than LineGroup -> Line? (Division?)
+- API endpoint for all data?
+- Why do they split it into stopTimeUpdate and Vehicle
+
+
+- Look at schedule data between stops but be careful with exaggerated with last stop.

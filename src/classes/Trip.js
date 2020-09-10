@@ -10,8 +10,9 @@ export default class Trip {
     this.direction = this.tripId.split("..")[1] ? this.tripId.split("..")[1] : null;
 
     // Second precision Unix timestamp
-    this.startTimestamp = LocalTime
+    this.startTimestamp = this.startTime ? LocalTime
       .fromYYMMDD_HHMMSS(startDate, startTime)
-      .secondPrecisionTS();
+      .secondPrecisionTS()
+      : null;
   }
 }
