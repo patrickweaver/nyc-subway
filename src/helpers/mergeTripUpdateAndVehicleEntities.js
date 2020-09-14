@@ -1,11 +1,14 @@
 export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
+  //console.log(JSON.stringify(tripEntities));
   try {
-    const tripUpdates = [], vehicles = [], unknown = [];
+    const tripUpdates = [], vehicles = [], alerts = [], unknown = [];
     tripEntities.forEach(i => {
       if (i.tripUpdate) {
         tripUpdates.push(i);
       } else if (i.vehicle) {
         vehicles.push(i);
+      } else if (i.alert) {
+        alerts.push(i)
       } else {
         unknown.push(i);
       }
@@ -13,36 +16,68 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
 
     console.log("🧤", tripUpdates.length, vehicles.length, unknown.length)
 
-    const tripUpdateIds = tripUpdates.map(i => {
-      // 🚸 Interal try here?
-      if (!i.tripUpdate.trip) throw "No trip data.";
-      if (!i.tripUpdate.trip.tripId) throw "No trip id.";
-      return i.tripUpdate.trip.tripId;
-    });
+    if (unknown.length > 0) {
+      console.log("🚨 🚨 🚨 🚨 🚨 🚨\n Unknown Entity:");
+      console.log(JSON.stringify(unknown));
+      console.log(" - - - - - - - - - - - -");
+      console.log(JSON.stringify(tripEntities));
+      throw "Unknown Entity";
+    }
 
-    const vehicleIds = vehicles.map(i => {
-      if (!i.vehicle.trip) throw "No trip data.";
-      if (!i.vehicle.trip.tripId) throw "No trip id.";
-      return i.vehicle.trip.tripId;
-    });
+    function extractTripIds(type, i) {
+      let item = i;
+      if (type) {
+        item = i[type];
+      }
+      if (!item.trip) throw "No trip data.";
+      if (!item.trip.tripId) throw "No trip id.";
+      return item.trip.tripId;
+    }
+
+    const tripUpdateIds = tripUpdates.map(extractTripIds.bind(this, "tripUpdate"));
+    const vehicleIds = vehicles.map(extractTripIds.bind(this, "vehicle"));
+
+    const tripAlerts = alerts.flatMap(i => {
+      if (!i.alert.informedEntity) {
+        console.log("No informedEntity");
+        return
+        //throw "No informedEntity";
+      }
+      let alerts = i.alert.informedEntity;
+      if (
+        i.alert.headerText
+        && i.alert.headerText.translation
+        && i.alert.headerText.translation[0]
+      ) {
+        console.log("adding text", i.alert.headerText.translation)
+        alerts = alerts.map(j => {
+          j.texts = i.alert.headerText.translation;
+          return j;
+        });
+      }
+      return alerts;
+    })
+
+    const alertIds = tripAlerts.map(extractTripIds.bind(this, null));
     
-    // It seems likely that the indexes for the matching
-    // tripUpdate and vehicle will be the same, but this
-    // will double check.
+    // Match entities for the same trip:
     tripUpdateIds.forEach((id, index) => {
       const tripUpdateEntity = tripUpdates[index];
       const vehicleIndex = vehicleIds.indexOf(id);
-      let vehicleEntity;
-      if (vehicleIndex === -1) {
-        console.log("🎒 Vehicle not found for id:", tripUpdateEntity.tripUpdate.trip.tripId)
-        return
-        //throw "Vehicle for tripUpdate not found."
-      } else {
-        vehicleEntity = vehicles[vehicleIndex];
+      if (vehicleIndex != -1) {
+        let vehicleEntity = vehicles[vehicleIndex];
+        tripUpdateEntity.vehicle = vehicleEntity.vehicle;
+        vehicleIds.splice(vehicleIndex, 1);
+        vehicles.splice(vehicleIndex, 1);
       }
-      tripUpdateEntity.vehicle = vehicleEntity.vehicle;
-      vehicleIds.splice(vehicleIndex, 1);
-      vehicles.splice(vehicleIndex, 1);
+
+      const alertIndex = alertIds.indexOf(id);
+      if (alertIndex != -1) {
+        let alertEntity = tripAlerts[alertIndex];
+        tripUpdateEntity.alert = alertEntity;
+        alertIds.splice(alertIndex, 1);
+        tripAlerts.splice(alertIndex, 1);
+      }
     });
 
     if (vehicles.length > 0) {

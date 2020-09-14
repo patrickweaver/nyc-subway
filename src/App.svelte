@@ -55,27 +55,39 @@
 
   // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds
   async function drawLoop() {
+    try {
+      const lineGroup = lineGroups[0];
 
-    const lineGroup = lineGroups[0];
+      // Get data from API
+      tripEntities = await api.getMtaFeed(lineGroup.apiSuffix);
+      //console.log(JSON.stringify(tripEntities))
+      
+      // Combine TripUpdate and Vehicle data:
+      const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);
 
-    // Get data from API
-    tripEntities = await api.getMtaFeed(lineGroup.apiSuffix);
-    //console.log(JSON.stringify(tripEntities))
+      console.log(`${tripEntities.length} entities becomes data for ${combinedTripEntities.length} trains`)
+      
+      // Validate data and create TripEntity objects
+      const tripEntityObjects = combinedTripEntities.map((i, index) => new TripEntity(i, index));
+      console.log(`Found ${tripEntityObjects.length} trip entity objects.`)
 
-    // Combine TripUpdate and Vehicle data:
-    const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);
-
-    console.log(`${tripEntities.length} entities becomes data for ${combinedTripEntities.length} trains`)
-    
-    // Validate data and create TripEntity objects
-    const tripEntityObjects = combinedTripEntities.map((i, index) => new TripEntity(i, index));
-    console.log(`Found ${tripEntityObjects.length} trip entity objects.`)
-
-    // 🚸 Only use "Current" type trips for map
-    const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
-    console.log(`of those ${currentTrips.length} are current`);
-    //Draw each train at its updated position on the map
-    drawEachTrain(currentTrips);
+      // 🚸 Only use "Current" type trips for map
+      const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
+      const types = {}
+      tripEntityObjects.forEach(i => {
+        if (types[i.type]) {
+          types[i.type] += 1
+        } else {
+          types[i.type] = 1
+        }
+      });
+      console.log("📊 Types\n:", types)
+      console.log(`of those ${currentTrips.length} are current`);
+      //Draw each train at its updated position on the map
+      drawEachTrain(currentTrips);
+    } catch (error) {
+      console.log("🖋Error:", error);
+    }
   }
 
   // Draw each train on map

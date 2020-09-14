@@ -1,3 +1,4 @@
+
 export default [
   {
     lines: ["2"],
@@ -5,6 +6,7 @@ export default [
     color: "Red",
   },
 ]
+
 
 
 const lineGroups = [
@@ -54,3 +56,5 @@ const lineGroups = [
     color: "SteelBlue",
   }
 ]
+
+//export default lineGroups
