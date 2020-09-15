@@ -5,53 +5,7 @@ const mergeTripUpdateAndVehicleEntities = require("./mergeTripUpdateAndVehicleEn
 
 var lines = require("./lines.js");
 
-const lineGroups = [
-  {
-    lines: ["A", "C", "E"],
-    apiSuffix: "ace",
-    color: "Blue",
-  },
-  {
-    lines: ["B", "D", "F", "M"],
-    apiSuffix: "bdfm",
-    color: "Orange",
-  },
-  {
-    lines: ["G"],
-    apiSuffix: "g",
-    color: "LightGreen",
-  },
-  {
-    lines: ["J", "Z"],
-    apiSuffix: "jz",
-    color: "Brown",
-  },
-  {
-    lines: ["N", "Q", "R", "W"],
-    apiSuffix: "nqrw",
-    color: "Yellow",
-  },
-  {
-    lines: ["L"],
-    apiSuffix: "l",
-    color: "DarkGrey",
-  },
-  {
-    lines: ["1", "2", "3", "4", "5", "6", "GS"],
-    apiSuffix: "123456", // Not actually the suffix
-    color: "Red",
-  },
-  {
-    lines: ["7"],
-    apiSuffix: "7",
-    color: "Purple",
-  },
-  {
-    lines: ["SIR"],
-    apiSuffix: "si",
-    color: "SteelBlue",
-  }
-]
+const lineGroups = require("./lineGroups.js");
 
 main();
 setInterval(main, 1000 * 60 * 5);
@@ -78,20 +32,13 @@ async function main() {
 }
 
 async function getLineGroup(lineGroup) {
-  //console.log("👅 getting:", lineGroup.lines.join(""), lineGroup.apiSuffix);
   try {
+    // Request line group data from API:
     const apiResponse = await getFeed(lineGroup.apiSuffix);
+    // Filter to only entities with a tripUpdate property
+    const tripUpdateEntities = apiResponse.entity.filter(i => i.tripUpdate ? true : false)
 
-    //console.log("🗣 ENTITIES COUNT", apiResponse.entity.length);
-
-    const tripUpdateEntities = apiResponse.entity.filter(i => {
-      if (i.tripUpdate) {
-        return true;
-      }
-
-      return false;
-    });
-
+    // Filter to only valid South bound trips for each line.
     const tripUpdatesByLine = [];
     lineGroup.lines.forEach(line => {
       lineTripEntities = tripUpdateEntities.filter(i => {
@@ -99,34 +46,35 @@ async function getLineGroup(lineGroup) {
         if (!i.tripUpdate.trip) return false;
         if (!i.tripUpdate.trip.routeId) return false;
         if (!i.tripUpdate.trip.tripId) return false;
-
+        const tripId = i.tripUpdate.trip.tripId
         if (lineGroup.apiSuffix === "123456") {
-          if (i.tripUpdate.trip.tripId[10] != "S") return false;
+          if (tripId[10] != "S") return false;
         } else {
-          if (i.tripUpdate.trip.tripId.substring(i.tripUpdate.trip.tripId.length - 1) != "S") return false;
+          if (tripId.substring(tripId.length - 1) != "S") return false;
         }
-
         if (i.tripUpdate.trip.routeId.toLowerCase() === line.toLowerCase()) {
           return true;
         }
-        
         return false;
       });
 
       tripUpdatesByLine.push(lineTripEntities);
     });
 
+    // Extract stopIds from tripUpdatesByLine with direction removed
     const updateStopIds = tripUpdatesByLine.map(lineUpdates => {
       return lineUpdates.map(update => {
         if (!update.tripUpdate) return null;
         if (!update.tripUpdate.stopTimeUpdate) return null;
         if (!update.tripUpdate.stopTimeUpdate[0]) return null;
-
+        // remove direction from stopId string
         return update.tripUpdate.stopTimeUpdate.map(stationUpdate => stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1));
       });
     });
 
+    // For each line in the group (color on map)
     lineGroup.lines.forEach((line, index) => {
+      // Find entity with longest list of stopTimeUpdates
       const lineStopIdsUpdates = updateStopIds[index];
       let longestIndex = 0;
       let longestLength = 0;
@@ -138,12 +86,11 @@ async function getLineGroup(lineGroup) {
         }
       })
 
-
+      // If list of updates is longer (includes more stops) than what we had previously
+      // then replace it.
       if (longestLength > 0 && (!lines[line] || lines[line].length < longestLength)) {
         console.log("🐙 Found more for", line, ":", longestLength, "(used to be", lines[line] ? lines[line].length : "empty", ") at", (new Date()).getHours(), ":", (new Date()).getMinutes());
         lines[line] = lineStopIdsUpdates[longestIndex];
-      } else {
-        //console.log("🌫 ", line, "still at:", lines[line] ? lines[line].length : longestLength);
       }
     });
 

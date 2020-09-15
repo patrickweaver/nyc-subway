@@ -42,12 +42,12 @@
     leaflet.drawMap();
 
     // Parse station data:
-    parseStations(); // 🚸 Empty right now
+    const stationsAndTracks = parseRoutes(routes); // 🚸 Empty right now
     // Draw all the stations for each route
     routes.forEach(i => drawStations(i.stops, i.color));
 
-    drawLoop();
-    setInterval(drawLoop, updateFreqency);
+    //drawLoop();
+    //setInterval(drawLoop, updateFreqency);
 
   })();
 
@@ -126,8 +126,25 @@
     }
   }
 
-  function parseStations() {
-    //🚸 Empty right now
+  function parseRoutes(routes) {
+    const combinedRoutes = routes.flatMap(i => {
+      return i.stops.map(j => {
+        j.colors = [i.color];
+        return j;
+      })
+    })
+
+    const uniqueStations = {};
+    combinedRoutes.forEach(i => {
+      const latlng = `${i.latitude}_${i.longitude}`;
+      console.log(i)
+      if (!uniqueStations[latlng]) {
+        uniqueStations[latlng] = i;
+      } else {
+        uniqueStations[latlng]
+      }
+    })
+
   }
 
   function drawStations(routeStops, color) {

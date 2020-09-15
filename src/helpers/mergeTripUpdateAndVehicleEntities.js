@@ -27,7 +27,9 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
     function extractTripIds(type, i) {
       let item = i;
       if (type) {
+        if (!i[type]) throw `No type value for ${type} in ${JSON.stringify(i)}`;
         item = i[type];
+        
       }
       if (!item.trip) throw "No trip data.";
       if (!item.trip.tripId) throw "No trip id.";
@@ -38,12 +40,14 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
     const vehicleIds = vehicles.map(extractTripIds.bind(this, "vehicle"));
 
     const tripAlerts = alerts.flatMap(i => {
+      let alerts = [];
       if (!i.alert.informedEntity) {
         console.log("No informedEntity");
-        return
+        console.log(i.alert)
+        return alerts;
         //throw "No informedEntity";
       }
-      let alerts = i.alert.informedEntity;
+      alerts = i.alert.informedEntity;
       if (
         i.alert.headerText
         && i.alert.headerText.translation
