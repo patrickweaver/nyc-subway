@@ -5,6 +5,11 @@ export default [
     apiSuffix: "123456", // Not actually the suffix
     color: "Red",
   },
+  {
+    lines: ["A", "C", "E"],
+    apiSuffix: "ace",
+    color: "Blue",
+  },
 ]
 
 
