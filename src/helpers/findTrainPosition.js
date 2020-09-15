@@ -82,7 +82,7 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
     if (stationWaitTimes[routeId] && stationWaitTimes[routeId][nextStopId] && stationWaitTImes[routeId][nextStopId][direction]) {
       waitTimes = stationWaitTimes[routeId][nextStopId][direction];
     } else {
-      waitTimes = 120;
+      waitTimes = {avg: 120, max: 120};
     }
     let progress = waitTimeEstimate / waitTimes.avg;
     if (progress > 1) {
@@ -100,7 +100,6 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
     const dLong = progress * (nextLong - prevLong);
     let trainLat = prevLat + dLat;
     let trainLong = prevLong + dLong;
-
     return {
       latitude: trainLat,
       longitude: trainLong,
