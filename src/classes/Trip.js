@@ -7,7 +7,13 @@ export default class Trip {
     this.startDate = startDate;
     this.routeId = routeId;
 
-    this.direction = this.tripId.split("..")[1] ? this.tripId.split("..")[1] : null;
+    this.direction = (() => {
+      const idSplit = this.tripId.split("..");
+      if (idSplit[1] && idSplit[1][0]) {
+        return idSplit[1][0];
+      }
+      return null;
+    })();
 
     // Second precision Unix timestamp
     this.startTimestamp = this.startTime ? LocalTime

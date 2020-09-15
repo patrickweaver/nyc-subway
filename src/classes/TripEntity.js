@@ -8,7 +8,6 @@ export default class TripEntity {
     const te = tripEntity;
     let type = "Invalid"; // Default
     let tripObject = null;
-    
     if (
       te.tripUpdate
       && te.tripUpdate.trip
@@ -76,7 +75,6 @@ export default class TripEntity {
     if (type === "Current" || type === "Scheduled") {
       const startTime = tripObject.startTime || null;
       trip = new Trip(tripObject.tripId, startTime, tripObject.startDate, tripObject.routeId);
-      console.log(trip)
     }
 
     this.trip = trip;
@@ -85,21 +83,9 @@ export default class TripEntity {
       const CURRENT_TRIPS_START_AT_MOST_IN_FUTURE = 30;
       if (
         !trip.startTimestamp
-        && (
-          !trip.tripUpdate
-          || !trip.tripUpdate.stopTimeUpdate
-          || !trip.tripUpdate.stopTimeUpdate[0]
-          || !trip.tripUpdate.stopTimeUpdate[0].arrival
-          || !trip.tripUpdate.stopTimeUpdate[0].arrival.time
-          || parseInt(trip.tripUpdate.stopTimeUpdate[0].arrival.time) - CURRENT_TRIPS_START_AT_MOST_IN_FUTURE > parseInt(te.timestamp)
-        )
+        && false // 🚸 Check if first stopTimeUpdate is first stop for direction and too far in future.
       ) {
-        if (trip.tripUpdate
-          && trip.tripUpdate.stopTimeUpdate) {
-        console.log("⏱", parseInt(trip.tripUpdate.stopTimeUpdate[0].arrival.time) - CURRENT_TRIPS_START_AT_MOST_IN_FUTURE > parseInt(te.timestamp), parseInt(trip.tripUpdate.stopTimeUpdate[0].arrival.time) - CURRENT_TRIPS_START_AT_MOST_IN_FUTURE, parseInt(te.timestamp))
-          } else { console.log("⏱", "something missing")
-        console.log(trip.tripUpdate)}
-        type = "noStartTime";
+        type = "noStartTime"; // Probably "Future" also
       } else if (trip.startTimestamp > te.timestamp) {
         type = "Future";
       }

@@ -14,7 +14,7 @@ function findByGTFS(gtfsId, containsDirection=false) {
     const direction = gtfsId.substring(gtfsId.length - 1, gtfsId.length);
   }
   // Create array of just GTFS Ids and find index of station
-  const gtfsArray = stationData.map(i => i['GTFS Stop ID'])
+  const gtfsArray = stationData.map(i => String(i['GTFS Stop ID']));
   const index = gtfsArray.indexOf(stationGtfsId);
   if (index === -1) {
     console.log('🦞 Station not found: ', stationGtfsId);

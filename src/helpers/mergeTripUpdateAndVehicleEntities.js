@@ -49,7 +49,6 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
         && i.alert.headerText.translation
         && i.alert.headerText.translation[0]
       ) {
-        console.log("adding text", i.alert.headerText.translation)
         alerts = alerts.map(j => {
           j.texts = i.alert.headerText.translation;
           return j;

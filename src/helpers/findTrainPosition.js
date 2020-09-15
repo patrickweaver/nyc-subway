@@ -23,7 +23,10 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
     // nextStation and prevStation will help us calculate the current lat/long
     // of the train.
     let nextStation = stationHelpers.findByGTFS(nextStopId);
-    let nextStationIndex = lines[routeId].indexOf(nextStation["GTFS Stop ID"]);
+    let nextStationIndex = lines[routeId].indexOf(String(nextStation["GTFS Stop ID"]));
+    if (nextStationIndex == -1) {
+      throw `Can't find next station in line. (${nextStation["GTFS Stop ID"]}, ${routeId})`
+    }
     let prevStation;
     let prevStationIndex;
 
@@ -62,6 +65,7 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
     ) {
       prevStation = stationHelpers.findByGTFS(lines[routeId][prevStationIndex])
     } else {
+      debugger;
       // 🚧 Trains waiting to begin journey have next stop as first or last
       // but will not have a previous station index.
       console.log("⏱ Next Stop:", nextStopId, "Route Id:", routeId, "Direction:", direction);
@@ -74,7 +78,12 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
 
     //🚧 Calculate lat/long mid-way between the next statio and the previous
     // station.
-    const waitTimes = stationWaitTimes[routeId][nextStopId][direction];
+    let waitTimes = null;
+    if (stationWaitTimes[routeId] && stationWaitTimes[routeId][nextStopId] && stationWaitTImes[routeId][nextStopId][direction]) {
+      waitTimes = stationWaitTimes[routeId][nextStopId][direction];
+    } else {
+      waitTimes = 120;
+    }
     let progress = waitTimeEstimate / waitTimes.avg;
     if (progress > 1) {
       progress = waitTimeEstimate / waitTimes.max;
