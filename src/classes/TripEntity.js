@@ -55,7 +55,8 @@ export default class TripEntity {
         }
 
       } else {
-        console.log("OTHER NO STU OR CSS at index:", index);
+        // 🚸 These seem to be future trips?
+        //console.log("OTHER NO STU OR CSS at index:", index);
       }
 
     } else {
@@ -75,13 +76,30 @@ export default class TripEntity {
     if (type === "Current" || type === "Scheduled") {
       const startTime = tripObject.startTime || null;
       trip = new Trip(tripObject.tripId, startTime, tripObject.startDate, tripObject.routeId);
+      console.log(trip)
     }
 
     this.trip = trip;
     
     if (type === "Current") {
-      if (!trip.startTimestamp) {
-        type = "No startTime";
+      const CURRENT_TRIPS_START_AT_MOST_IN_FUTURE = 30;
+      if (
+        !trip.startTimestamp
+        && (
+          !trip.tripUpdate
+          || !trip.tripUpdate.stopTimeUpdate
+          || !trip.tripUpdate.stopTimeUpdate[0]
+          || !trip.tripUpdate.stopTimeUpdate[0].arrival
+          || !trip.tripUpdate.stopTimeUpdate[0].arrival.time
+          || parseInt(trip.tripUpdate.stopTimeUpdate[0].arrival.time) - CURRENT_TRIPS_START_AT_MOST_IN_FUTURE > parseInt(te.timestamp)
+        )
+      ) {
+        if (trip.tripUpdate
+          && trip.tripUpdate.stopTimeUpdate) {
+        console.log("⏱", parseInt(trip.tripUpdate.stopTimeUpdate[0].arrival.time) - CURRENT_TRIPS_START_AT_MOST_IN_FUTURE > parseInt(te.timestamp), parseInt(trip.tripUpdate.stopTimeUpdate[0].arrival.time) - CURRENT_TRIPS_START_AT_MOST_IN_FUTURE, parseInt(te.timestamp))
+          } else { console.log("⏱", "something missing")
+        console.log(trip.tripUpdate)}
+        type = "noStartTime";
       } else if (trip.startTimestamp > te.timestamp) {
         type = "Future";
       }
