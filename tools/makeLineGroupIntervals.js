@@ -3,7 +3,7 @@ const fs = require("fs");
 const getFeed = require("../server/helpers/getFeed.js");
 const mergeTripUpdateAndVehicleEntities = require("./mergeTripUpdateAndVehicleEntities.js");
 
-var lineGroupInervals = require("./lineGroupIntervals.js");
+var lineGroupIntervals = require("./lineGroupIntervals.js");
 
 const lineGroups = require("./lineGroups.js");
 
@@ -22,7 +22,7 @@ async function main() {
     module.exports = `
 
     const filename = "./tools/lineGroupIntervals.js";
-    fs.writeFile(filename, linesCopy + JSON.stringify(lines), function (err) {
+    fs.writeFile(filename, lineGroupIntervalsCopy + JSON.stringify(lineGroupIntervals), function (err) {
       if (err) return console.log("Error:\n", err);
       console.log(`stop ID line data written to ${filename}`);
     });
@@ -33,46 +33,74 @@ async function main() {
 
 async function getLineGroup(lineGroup) {
   try {
+    // Populate empty array on first run
+    if (!lineGroupIntervals[lineGroup.color]) {
+      lineGroupIntervals[lineGroup.color] = [];
+    }
+
     // Request line group data from API:
     const apiResponse = await getFeed(lineGroup.apiSuffix);
     // Filter to only entities with a tripUpdate property
     const tripUpdateEntities = apiResponse.entity.filter(i => i.tripUpdate ? true : false)
 
     // Filter to only valid South bound trips
-    const tripUpdates = [];
     lineGroupTripEntities = tripUpdateEntities.filter(i => {
       if (!i.tripUpdate) return false;
       if (!i.tripUpdate.trip) return false;
       if (!i.tripUpdate.trip.routeId) return false;
       if (!i.tripUpdate.trip.tripId) return false;
-      const tripId = i.tripUpdate.trip.tripId
-      if (lineGroup.apiSuffix === "123456") {
-        if (tripId[10] != "S") return false;
+      const tripId = i.tripUpdate.trip.tripId;
+      let direction;
+      if (!tripId.split("..")[1]) { // Sometimes there is one dot??
+        direction = tripId.split(".")[1][0];
       } else {
-        if (tripId.substring(tripId.length - 1) != "S") return false;
+        direction = tripId.split("..")[1][0];
+      }
+      if (direction != "S") return false;
+      return true;
+    });
+
+    // Extract stopIds from tripUpdates with direction removed
+    const updateStopIds = lineGroupTripEntities.map(entity => {
+      if (!entity.tripUpdate) return null;
+      if (!entity.tripUpdate.stopTimeUpdate) return null;
+      if (!entity.tripUpdate.stopTimeUpdate[0]) return null;
+      // remove direction from stopId string
+      return entity.tripUpdate.stopTimeUpdate.map(stationUpdate => stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1));
+    }).filter(i => i); // Filter out nulls
+
+    // Loop through in pairs, see if interval already is present
+    console.log("\n",lineGroup.color);
+    const updatedIntervals = updateStopIds.flatMap(tripStopIds => {
+      return tripStopIds.map((stopId, index) => {
+        if (index === tripStopIds.length - 1) {
+          return []; // Skip last one
+        }
+        const nextStopId = tripStopIds[index + 1];
+        const interval = [stopId, nextStopId];
+        return interval;
+      });
+    }).filter(i => i && i.length == 2); // Filter out empties;
+
+    const currentIntervalStrings = lineGroupIntervals[lineGroup.color].map(i => JSON.stringify(i));
+    const updatedIntervalsStrings = updatedIntervals.map(i => JSON.stringify(i));
+
+    const newIntervals = updatedIntervals.filter((i, index) => {
+      const stringVer = updatedIntervalsStrings[index];
+      if (currentIntervalStrings.indexOf(stringVer) === -1) {
+        return true
       }
       return false;
     });
 
-    tripUpdates.push(lineGroupTripEntities);
+    console.log(`Adding ${newIntervals.length} new intervals.`)
 
-    // Extract stopIds from tripUpdates with direction removed
-    const updateStopIds = tripUpdates.map(updates => {
-      return updates.map(update => {
-        if (!update.tripUpdate) return null;
-        if (!update.tripUpdate.stopTimeUpdate) return null;
-        if (!update.tripUpdate.stopTimeUpdate[0]) return null;
-        // remove direction from stopId string
-        return update.tripUpdate.stopTimeUpdate.map(stationUpdate => stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1));
-      });
-    });
-
-    // Loop through in pairs, see if interval already is present
-
-    // If not add it
 
     // Current color:
-    // lineGroups[lineGroup]
+    lineGroupIntervals[lineGroup.color] = Array.from(new Set(
+      lineGroupIntervals[lineGroup.color].concat(newIntervals).map(i => JSON.stringify(i))
+    )).map(i => JSON.parse(i));
+
 
   } catch (error) {
     console.log("👺 makeLineList Error for line", lineGroup.lines.join(""), ":");

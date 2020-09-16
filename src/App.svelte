@@ -8,7 +8,8 @@
   import mergeTripUpdateAndVehicleEntities from "./helpers/mergeTripUpdateAndVehicleEntities.js";
   import stationHelpers from "./helpers/stationHelpers.js";
   import leaflet from "./helpers/leaflet.js";
-  import lineGroups from "./helpers/lineGroups.js";
+  import lineGroups from "./data/lineGroups.js";
+  import lineGroupIntervals from "./data/lineGroupIntervals.js";
 
   // Initialize variables
   var tripEntities = []; // Most recent API response
@@ -41,10 +42,19 @@
     // Draw the map
     leaflet.drawMap();
 
-    // Parse station data:
-    const stationsAndTracks = parseRoutes(routes); // 🚸 Empty right now
-    // Draw all the stations for each route
-    routes.forEach(i => drawStations(i.stops, i.color));
+    for (let color in lineGroupIntervals) {
+      const intervals = lineGroupIntervals[color];
+      intervals.forEach(interval => {
+        const station1 = stationHelpers.findByGTFS(interval[0]);
+        const station2 = stationHelpers.findByGTFS(interval[1]);
+        leaflet.drawInterval(color, station1, station2);
+      });
+    }
+
+    // // Parse station data:
+    // const stationsAndTracks = parseRoutes(routes); // 🚸 Empty right now
+    // // Draw all the stations for each route
+    // routes.forEach(i => drawStations(i.stops, i.color));
 
     //drawLoop();
     //setInterval(drawLoop, updateFreqency);

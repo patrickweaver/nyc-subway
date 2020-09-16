@@ -47,11 +47,13 @@ async function getLineGroup(lineGroup) {
         if (!i.tripUpdate.trip.routeId) return false;
         if (!i.tripUpdate.trip.tripId) return false;
         const tripId = i.tripUpdate.trip.tripId
-        if (lineGroup.apiSuffix === "123456") {
-          if (tripId[10] != "S") return false;
+        let direction;
+        if (!tripId.split("..")[1]) { // Sometimes there is one dot??
+          direction = tripId.split(".")[1][0];
         } else {
-          if (tripId.substring(tripId.length - 1) != "S") return false;
+          direction = tripId.split("..")[1][0];
         }
+        if (direction != "S") return false;
         if (i.tripUpdate.trip.routeId.toLowerCase() === line.toLowerCase()) {
           return true;
         }

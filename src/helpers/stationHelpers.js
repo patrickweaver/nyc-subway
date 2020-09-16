@@ -27,6 +27,7 @@ function findByGTFS(gtfsId, containsDirection=false) {
     station.direction = direction;
   }
   station.daytimeRoutesArray = String(station['Daytime Routes']).split(' ');
+  
   return station;
 }
 
