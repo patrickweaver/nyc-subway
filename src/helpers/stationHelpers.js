@@ -93,7 +93,7 @@ function getLineStops(lineId) {
     }
   );
 
-  const stationObjects = formattedLineStations.map(s => new Station(s["GTFS Stop ID"], s["GTFS Latitude"], s["GTFS Longitude"], s["Stop Name"]));
+  const stationObjects = formattedLineStations.map(s => new Station(s));
 
   const stationsWithOffsets = stationObjects.map(
     (stationB, index, stations) => {

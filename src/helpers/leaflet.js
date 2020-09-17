@@ -60,8 +60,8 @@ function drawStation(station, recenter = false) {
 
 function drawInterval(color, station1, station2) {
   if (!station1 || !station2) return;
-  const s1Pos = [station1["GTFS Latitude"], station1["GTFS Longitude"]];
-  const s2Pos = [station2["GTFS Latitude"], station2["GTFS Longitude"]];
+  const s1Pos = [station1.latitude, station1.longitude];
+  const s2Pos = [station2.latitude, station2.longitude];
   L.polyline([s1Pos, s2Pos], {color: color}).addTo(map);
 
 }

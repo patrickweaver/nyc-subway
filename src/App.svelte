@@ -3,13 +3,16 @@
   import Station from "./classes/Station.js";
   import TripEntity from "./classes/TripEntity.js";
 
+  // Import hard coded data
+  import stationData from "./data/stationData.js";
+  import lineGroups from "./data/lineGroups.js";
+  import lineGroupIntervals from "./data/lineGroupIntervals.js";
+
   // Import helpers
   import api from "./helpers/api.js";
   import mergeTripUpdateAndVehicleEntities from "./helpers/mergeTripUpdateAndVehicleEntities.js";
   import stationHelpers from "./helpers/stationHelpers.js";
   import leaflet from "./helpers/leaflet.js";
-  import lineGroups from "./data/lineGroups.js";
-  import lineGroupIntervals from "./data/lineGroupIntervals.js";
 
   // Initialize variables
   var tripEntities = []; // Most recent API response
@@ -19,24 +22,29 @@
   // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
 
-  const routeData = lineGroups.flatMap(lineGroup => {
-    return lineGroup.lines.map(line => {
-      return {
-        line: line,
-        color: lineGroup.color,
-      }
-    });
+  const stations = {};
+  stationData.forEach(i => {
+    const station = new Station(i)
+    stations[station.stopId] = station;  
   });
 
-  // Station data is hard coded
-  // See ./data/stationData.js, which is generated from tools/stationData.csv
-  // 🚸 Currently limiting scope to the G line.
-  routes = routeData.map(i => {
-    return {
-      stops: stationHelpers.getLineStops(i.line),
-      color: i.color,
-    }
-  });
+  // const routeData = lineGroups.flatMap(lineGroup => {
+  //   return lineGroup.lines.map(line => {
+  //     return {
+  //       line: line,
+  //       color: lineGroup.color,
+  //     }
+  //   });
+  // });
+
+  // // Station data is hard coded
+  // // See ./data/stationData.js, which is generated from tools/stationData.csv
+  // routes = routeData.map(i => {
+  //   return {
+  //     stops: stationHelpers.getLineStops(i.line),
+  //     color: i.color,
+  //   }
+  // });
 
   (async function main() {
     // Draw the map
@@ -45,8 +53,8 @@
     for (let color in lineGroupIntervals) {
       const intervals = lineGroupIntervals[color];
       intervals.forEach(interval => {
-        const station1 = stationHelpers.findByGTFS(interval[0]);
-        const station2 = stationHelpers.findByGTFS(interval[1]);
+        const station1 = stations[interval[0]];
+        const station2 = stations[interval[1]];
         leaflet.drawInterval(color, station1, station2);
       });
     }
