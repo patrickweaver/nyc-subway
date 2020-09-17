@@ -25,10 +25,10 @@ const markers = {
 
   // Station
   stationCircle: {
-    color: "#9cb48b",
-    fillColor: "#73CCA3",
-    fillOpacity: 0.5,
-    radius: 80,
+    color: "#3F3F3F",
+    fillColor: "#000000",
+    fillOpacity: 1.0,
+    radius: 50,
   },
 
   // Train Circle:
@@ -42,10 +42,7 @@ const markers = {
 
 // Draw stations on map (happens on first load)
 function drawStation(station, recenter = false) {
-  if (!station.latitude || !station.longitude) {
-    return;
-  }
-
+  if (!station.latitude || !station.longitude) return;
   L.circle([station.latitude, station.longitude], markers.stationCircle).addTo(
     map
   );

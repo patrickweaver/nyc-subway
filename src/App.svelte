@@ -50,13 +50,16 @@
     // Draw the map
     leaflet.drawMap();
 
+    
     for (let color in lineGroupIntervals) {
       const intervals = lineGroupIntervals[color];
-      intervals.forEach(interval => {
-        const station1 = stations[interval[0]];
-        const station2 = stations[interval[1]];
-        leaflet.drawInterval(color, station1, station2);
+      intervals.forEach(i => {
+        leaflet.drawInterval(color, stations[i[0]], stations[i[1]]);
       });
+    }
+
+    for (let i in stations) {
+      leaflet.drawStation(stations[i]);
     }
 
     // // Parse station data:
@@ -64,8 +67,8 @@
     // // Draw all the stations for each route
     // routes.forEach(i => drawStations(i.stops, i.color));
 
-    //drawLoop();
-    //setInterval(drawLoop, updateFreqency);
+    // drawLoop();
+    // setInterval(drawLoop, updateFreqency);
 
   })();
 

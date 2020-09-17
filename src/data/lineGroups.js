@@ -1,10 +1,15 @@
 
 export default [
-  {
-    lines: ["2"],
-    apiSuffix: "123456", // Not actually the suffix
-    color: "Red",
-  },
+  // {
+  //     lines: ["G"],
+  //     apiSuffix: "G", // Not actually the suffix
+  //     color: "Green",
+  //   },
+  // {
+  //   lines: ["2"],
+  //   apiSuffix: "123456", // Not actually the suffix
+  //   color: "Red",
+  // },
   {
     lines: ["A", "C", "E"],
     apiSuffix: "ace",
