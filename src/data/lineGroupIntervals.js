@@ -82,8 +82,8 @@ export default {
     ["D14", "A25", "7 Av (B D E)", "50 St (C E)"],
     ["G21", "F09", "Queens Plaza (E M R)", "Court Sq (E M)"],
     ["F09", "F11", "Court Sq (E M)", "Lexington Av/53 St (E M)"],
-    ["G14","G21","Jackson Hts - Roosevelt Av (E F M R)","Queens Plaza (E M R)"],  // 🚸 EXPRESS??
-    ["G08","G14","Forest Hills - 71 Av (E F M R)","Jackson Hts - Roosevelt Av (E F M R)"],  // 🚸 EXPRESS??
+    //["G14","G21","Jackson Hts - Roosevelt Av (E F M R)","Queens Plaza (E M R)"],  // 🚸 EXPRESS??
+    //["G08","G14","Forest Hills - 71 Av (E F M R)","Jackson Hts - Roosevelt Av (E F M R)"],  // 🚸 EXPRESS??
     //["F06","G08","Kew Gardens - Union Tpke (E F)","Forest Hills - 71 Av (E F M R)",], // EXPRESS??
     ["G06","G07","Sutphin Blvd - Archer Av - JFK Airport (E J Z)","Jamaica - Van Wyck (E)"],
     //["G07", "F06", "Jamaica - Van Wyck (E)", "Kew Gardens - Union Tpke (E F)"], // EXPRESS??
@@ -91,9 +91,6 @@ export default {
     //["F03", "F06", "Parsons Blvd (F)", "Kew Gardens - Union Tpke (E F)"], // ALTERNATE
     ["G05","G06","Jamaica Center - Parsons/Archer (E J Z)","Sutphin Blvd - Archer Av - JFK Airport (E J Z)"],
     //["H19", "H04", "Unknown station Blue", "Broad Channel (A S)"], // UNKNOWN STATION
-    ["S01", "S03", "Franklin Av (S)", "Park Pl (S)"],
-    ["S03", "S04", "Park Pl (S)", "Botanic Garden (S)"],
-    ["S04", "D26", "Botanic Garden (S)", "Prospect Park (B Q)"],
     //["A61", "A62", "Rockaway Blvd (A)", "Unknown station Blue"], //UNKNOWN STATION
     //["A62", "A63", "Unknown station Blue", "104 St (A)"], // UNKNOWN STATION
     ["G07", "F05", "Jamaica - Van Wyck (E)", "Briarwood - Van Wyck Blvd (E F)"],
@@ -129,12 +126,12 @@ export default {
     //["D20", "D21", "W 4 St (B D F M)", "Broadway-Lafayette St (B D F M)"],
   ],
   Orange: [
-    ["D35", "D39", "Kings Hwy (B Q)", "Sheepshead Bay (B Q)"],
+    // ["D35", "D39", "Kings Hwy (B Q)", "Sheepshead Bay (B Q)"], // EXPRESS
     ["D39", "D40", "Sheepshead Bay (B Q)", "Brighton Beach (B Q)"],
     ["D25", "D26", "7 Av (B Q)", "Prospect Park (B Q)"],
-    ["D26", "D28", "Prospect Park (B Q)", "Church Av (B Q)"],
-    ["D28", "D31", "Church Av (B Q)", "Newkirk Plaza (B Q)"],
-    ["D31", "D35", "Newkirk Plaza (B Q)", "Kings Hwy (B Q)"],
+    //["D26", "D28", "Prospect Park (B Q)", "Church Av (B Q)"], // EXPRESS
+    //["D28", "D31", "Church Av (B Q)", "Newkirk Plaza (B Q)"], // EXPRESS
+    //["D31", "D35", "Newkirk Plaza (B Q)", "Kings Hwy (B Q)"], // EXPRESS
     ["R30", "D24", "DeKalb Av (B Q R)", "Atlantic Av - Barclays Ctr (B Q)"],
     ["D24", "D25", "Atlantic Av - Barclays Ctr (B Q)", "7 Av (B Q)"],
     ["D16","D17","42 St - Bryant Pk (B D F M)","34 St - Herald Sq (B D F M)"],
@@ -178,10 +175,10 @@ export default {
     ["B15", "B16", "55 St (D)", "62 St (D)"],
     ["B16", "B17", "62 St (D)", "71 St (D)"],
     ["R36", "B12", "36 St (D N R)", "9 Av (D)"],
-    ["D22", "R31", "Grand St (B D)", "Atlantic Av - Barclays Ctr (D N R)"],
-    ["R31", "R36", "Atlantic Av - Barclays Ctr (D N R)", "36 St (D N R)"],
-    ["D13", "A15", "145 St (B D)", "125 St (A B C D)"],
-    ["A15", "A24", "125 St (A B C D)", "59 St - Columbus Circle (A B C D)"],
+    //["D22", "R31", "Grand St (B D)", "Atlantic Av - Barclays Ctr (D N R)"], // EXPRESS
+    //["R31", "R36", "Atlantic Av - Barclays Ctr (D N R)", "36 St (D N R)"], // EXPRESS
+    //["D13", "A15", "145 St (B D)", "125 St (A B C D)"], // EXPRESS
+    //["A15", "A24", "125 St (A B C D)", "59 St - Columbus Circle (A B C D)"], // EXPRESS
     ["D01", "D03", "Norwood - 205 St (D)", "Bedford Park Blvd (B D)"],
     ["D42","D43","W 8 St - NY Aquarium (F Q)","Coney Island - Stillwell Av (D F N Q)"],
     ["F32", "F33", "Bay Pkwy (F)", "Avenue N (F)"],
@@ -215,8 +212,9 @@ export default {
     ["B04", "B06", "21 St - Queensbridge (F)", "Roosevelt Island (F)"],
     ["B06", "B08", "Roosevelt Island (F)", "Lexington Av/63 St (F Q)"],
     ["B08", "B10", "Lexington Av/63 St (F Q)", "57 St (F)"],
-    ["G08","G14","Forest Hills - 71 Av (E F M R)","Jackson Hts - Roosevelt Av (E F M R)"],
-    ["G14","B04","Jackson Hts - Roosevelt Av (E F M R)","21 St - Queensbridge (F)"],
+    //["G08","G14","Forest Hills - 71 Av (E F M R)","Jackson Hts - Roosevelt Av (E F M R)"], // EXPRESS
+    //["G14","B04","Jackson Hts - Roosevelt Av (E F M R)","21 St - Queensbridge (F)"], // EXPRESS
+    ["G20","B04","36 St (M R)","21 St - Queensbridge (F)"], // Not a real interval, but where the tracks are
     ["F01", "F02", "Jamaica - 179 St (F)", "169 St (F)"],
     ["F02", "F03", "169 St (F)", "Parsons Blvd (F)"],
     ["F03", "F04", "Parsons Blvd (F)", "Sutphin Blvd (F)"],
@@ -253,38 +251,15 @@ export default {
     ["G09", "G10", "67 Av (M R)", "63 Dr - Rego Park (M R)"],
     ["G10", "G11", "63 Dr - Rego Park (M R)", "Woodhaven Blvd (M R)"],
     ["G11", "G12", "Woodhaven Blvd (M R)", "Grand Av - Newtown (M R)"],
-    ["B23", "B24", "Bay 50 St (D)", "Unknown station Orange"],
-    ["B24","D43","Unknown station Orange","Coney Island - Stillwell Av (D F N Q)"],
-    ["A16", "A19", "116 St (B C)", "96 St (B C)"],
-    ["A20", "A22", "86 St (B C)", "72 St (B C)"],
-    ["A20", "A24", "86 St (B C)", "59 St - Columbus Circle (A B C D)"],
-    ["A16", "A18", "116 St (B C)", "103 St (B C)"],
-    ["F39", "D43", "Neptune Av (F)", "Coney Island - Stillwell Av (D F N Q)"],
-    ["A41", "F21", "Jay St - MetroTech (A C F)", "Carroll St (F G)"],
-    ["A20", "D14", "86 St (B C)", "7 Av (B D E)"],
-    ["A16", "A21", "116 St (B C)", "81 St - Museum of Natural History (B C)"],
-    ["A41", "F23", "Jay St - MetroTech (A C F)", "4 Av (F G)"],
-    ["F03", "F06", "Parsons Blvd (F)", "Kew Gardens - Union Tpke (E F)"],
+    //["B23", "B24", "Bay 50 St (D)", "Unknown station Orange"], // UNKNOWN STATION
+    //["B24","D43","Unknown station Orange","Coney Island - Stillwell Av (D F N Q)"], // UNKNOWN STATION
     ["R30", "R31", "DeKalb Av (B Q R)", "Atlantic Av - Barclays Ctr (D N R)"],
     ["R31", "R32", "Atlantic Av - Barclays Ctr (D N R)", "Union St (R)"],
     ["R32", "R33", "Union St (R)", "9 St (R)"],
     ["R33", "R34", "9 St (R)", "Prospect Av (R)"],
     ["R34", "R35", "Prospect Av (R)", "25 St (R)"],
     ["R35", "R36", "25 St (R)", "36 St (D N R)"],
-    ["G14","G21","Jackson Hts - Roosevelt Av (E F M R)","Queens Plaza (E M R)"],
-    ["F12", "D14", "5 Av/53 St (E M)", "7 Av (B D E)"],
-    ["D14", "A25", "7 Av (B D E)", "50 St (C E)"],
-    ["A25","A27","50 St (C E)","42 St - Port Authority Bus Terminal (A C E)"],
-    ["A27","A28","42 St - Port Authority Bus Terminal (A C E)","34 St - Penn Station (A C E)"],
-    ["A28", "A30", "34 St - Penn Station (A C E)", "23 St (C E)"],
-    ["A30", "A31", "23 St (C E)", "14 St (A C E)"],
-    ["A31", "A32", "14 St (A C E)", "W 4 St (A C E)"],
-    ["A32", "A33", "W 4 St (A C E)", "Spring St (C E)"],
-    ["A33", "A34", "Spring St (C E)", "Canal St (A C E)"],
-    ["A34", "A36", "Canal St (A C E)", "Chambers St (A C)"],
-    ["A36", "A38", "Chambers St (A C)", "Fulton St (A C)"],
-    ["A38", "A40", "Fulton St (A C)", "High St (A C)"],
-    ["A40", "A41", "High St (A C)", "Jay St - MetroTech (A C F)"],
+    //["G14","G21","Jackson Hts - Roosevelt Av (E F M R)","Queens Plaza (E M R)"], // EXPRESS
   ],
   LightGreen: [
     ["F24", "F25", "7 Av (F G)", "15 St - Prospect Park (F G)"],
@@ -338,8 +313,6 @@ export default {
     ["J14", "J15", "104 St (J Z)", "Woodhaven Blvd (J Z)"],
     ["G05","G06","Jamaica Center - Parsons/Archer (E J Z)","Sutphin Blvd - Archer Av - JFK Airport (E J Z)"],
     ["G06","J12","Sutphin Blvd - Archer Av - JFK Airport (E J Z)","121 St (J Z)"],
-    ["J24", "J28", "Alabama Av (J)", "Chauncey St (J Z)"],
-    ["J24", "J30", "Alabama Av (J)", "Gates Av (J Z)"],
   ],
   Yellow: [
     ["N10", "D43", "86 St (N)", "Coney Island - Stillwell Av (D F N Q)"],
@@ -351,19 +324,19 @@ export default {
     ["N07", "N08", "Bay Pkwy (N)", "Kings Hwy (N)"],
     ["N08", "N09", "Kings Hwy (N)", "Avenue U (N)"],
     ["N09", "N10", "Avenue U (N)", "86 St (N)"],
-    ["R36", "R41", "36 St (D N R)", "59 St (N R)"],
+    //["R36", "R41", "36 St (D N R)", "59 St (N R)"], // EXPRESS
     ["R41", "N02", "59 St (N R)", "8 Av (N)"],
     ["R26", "R27", "Rector St (R W)", "Whitehall St (R W)"],
-    ["Q01", "R31", "Canal St (N Q)", "Atlantic Av - Barclays Ctr (D N R)"],
-    ["R31", "R36", "Atlantic Av - Barclays Ctr (D N R)", "36 St (D N R)"],
+    //["Q01", "R31", "Canal St (N Q)", "Atlantic Av - Barclays Ctr (D N R)"], // EXPRESS
+    //["R31", "R36", "Atlantic Av - Barclays Ctr (D N R)", "36 St (D N R)"], // EXPRESS
     ["R21", "R22", "8 St - NYU (R W)", "Prince St (R W)"],
     ["R22", "R23", "Prince St (R W)", "Canal St (R W)"],
     ["R23", "R24", "Canal St (R W)", "City Hall (R W)"],
     ["R24", "R25", "City Hall (R W)", "Cortlandt St (R W)"],
     ["R25", "R26", "Cortlandt St (R W)", "Rector St (R W)"],
     ["R16", "R17", "Times Sq - 42 St (N Q R W)", "34 St - Herald Sq (N Q R W)"],
-    ["R17", "R20", "34 St - Herald Sq (N Q R W)", "14 St - Union Sq (N Q R W)"],
-    ["R20", "Q01", "14 St - Union Sq (N Q R W)", "Canal St (N Q)"],
+    //["R17", "R20", "34 St - Herald Sq (N Q R W)", "14 St - Union Sq (N Q R W)"], // EXPRESS
+    //["R20", "Q01", "14 St - Union Sq (N Q R W)", "Canal St (N Q)"], // EXPRESS
     ["R13", "R14", "5 Av/59 St (N W R)", "57 St - 7 Av (N Q R W)"],
     ["R14", "R15", "57 St - 7 Av (N Q R W)", "49 St (N R W)"],
     ["R15", "R16", "49 St (N R W)", "Times Sq - 42 St (N Q R W)"],
@@ -373,8 +346,9 @@ export default {
     ["R20", "R21", "14 St - Union Sq (N Q R W)", "8 St - NYU (R W)"],
     ["R11", "R13", "Lexington Av/59 St (N W R)", "5 Av/59 St (N W R)"],
     ["R08", "R09", "39 Av (N W)", "Queensboro Plaza (N W)"],
-    ["R09", "R60", "Queensboro Plaza (N W)", "Unknown station Yellow"],
-    ["R60", "R11", "Unknown station Yellow", "Lexington Av/59 St (N W R)"],
+    //["R09", "R60", "Queensboro Plaza (N W)", "Unknown station Yellow"], // UNKNOWN STATION
+    // ["R60", "R11", "Unknown station Yellow", "Lexington Av/59 St (N W R)"], // UNKNOWN STATION
+    ["R09", "R11", "Queensboro Plaza (N W)", "Lexington Av/59 St (N W R)"], // COMBINED FROM ABOVE
     ["R01", "R03", "Astoria - Ditmars Blvd (N W)", "Astoria Blvd (N W)"],
     ["R03", "R04", "Astoria Blvd (N W)", "30 Av (N W)"],
     ["R04", "R05", "30 Av (N W)", "Broadway (N W)"],
@@ -384,12 +358,11 @@ export default {
     ["Q04", "Q03", "86 St (Q)", "72 St (Q)"],
     ["Q03", "B08", "72 St (Q)", "Lexington Av/63 St (F Q)"],
     ["B08", "R14", "Lexington Av/63 St (F Q)", "57 St - 7 Av (N Q R W)"],
-    ["R14", "R16", "57 St - 7 Av (N Q R W)", "Times Sq - 42 St (N Q R W)"],
+    //["R14", "R16", "57 St - 7 Av (N Q R W)", "Times Sq - 42 St (N Q R W)"], // EXPRESS
     ["D42","D43","W 8 St - NY Aquarium (F Q)","Coney Island - Stillwell Av (D F N Q)"],
     ["D40", "D41", "Brighton Beach (B Q)", "Ocean Pkwy (Q)"],
     ["D41", "D42", "Ocean Pkwy (Q)", "W 8 St - NY Aquarium (F Q)"],
     ["D31", "D32", "Newkirk Plaza (B Q)", "Avenue H (B Q)"],
-    ["D32", "D34", "Avenue H (B Q)", "Avenue M (B Q)"],
     ["D34", "D35", "Avenue M (B Q)", "Kings Hwy (B Q)"],
     ["D35", "D37", "Kings Hwy (B Q)", "Avenue U (B Q)"],
     ["D37", "D38", "Avenue U (B Q)", "Neck Rd (B Q)"],
@@ -414,16 +387,18 @@ export default {
     ["R36", "R39", "36 St (D N R)", "45 St (R)"],
     ["R39", "R40", "45 St (R)", "53 St (R)"],
     ["R40", "R41", "53 St (R)", "59 St (N R)"],
-    ["R41", "R42", "59 St (N R)", "Bay Ridge Av (R)"],
+    //["R41", "R42", "59 St (N R)", "Bay Ridge Av (R)"], // EXPRESS
     ["R31", "R32", "Atlantic Av - Barclays Ctr (D N R)", "Union St (R)"],
     ["R32", "R33", "Union St (R)", "9 St (R)"],
     ["R33", "R34", "9 St (R)", "Prospect Av (R)"],
-    ["R27", "R65", "Whitehall St (R W)", "Unknown station Yellow"],
-    ["R65", "R28", "Unknown station Yellow", "Court St (R)"],
+    //["R27", "R65", "Whitehall St (R W)", "Unknown station Yellow"], // UNKNOWN STATION
+    //["R65", "R28", "Unknown station Yellow", "Court St (R)"], // UNKNOWN STATION
+    ["R27", "R28", "Whitehall St (R W)", "Court St (R)"], // COMBINED FROM ABOVE
     ["R28", "R29", "Court St (R)", "Jay St - MetroTech (R)"],
     ["R29", "R30", "Jay St - MetroTech (R)", "DeKalb Av (B Q R)"],
     ["R30", "R31", "DeKalb Av (B Q R)", "Atlantic Av - Barclays Ctr (D N R)"],
-    ["G21", "R60", "Queens Plaza (E M R)", "Unknown station Yellow"],
+    //["G21", "R60", "Queens Plaza (E M R)", "Unknown station Yellow"], // UNKNOWN STATION
+    ["G21", "R11", "Queens Plaza (E M R)", "Lexington Av/59 St (N W R)"], // MISSING
     ["G16", "G18", "Northern Blvd (M R)", "46 St (M R)"],
     ["G18", "G19", "46 St (M R)", "Steinway St (M R)"],
     ["G19", "G20", "Steinway St (M R)", "36 St (M R)"],
@@ -436,23 +411,9 @@ export default {
     ["G10", "G11", "63 Dr - Rego Park (M R)", "Woodhaven Blvd (M R)"],
     ["G11", "G12", "Woodhaven Blvd (M R)", "Grand Av - Newtown (M R)"],
     ["G12", "G13", "Grand Av - Newtown (M R)", "Elmhurst Av (M R)"],
-    ["R25", "R27", "Cortlandt St (R W)", "Whitehall St (R W)"],
-    ["R16", "R20", "Times Sq - 42 St (N Q R W)", "14 St - Union Sq (N Q R W)"],
-    ["R33", "R35", "9 St (R)", "25 St (R)"],
-    ["R03", "R09", "Astoria Blvd (N W)", "Queensboro Plaza (N W)"],
-    ["R24", "R26", "City Hall (R W)", "Rector St (R W)"],
-    ["R06", "R09", "36 Av (N W)", "Queensboro Plaza (N W)"],
-    ["G09", "G11", "67 Av (M R)", "Woodhaven Blvd (M R)"],
-    ["R01", "N05", "Astoria - Ditmars Blvd (N W)", "18 Av (N)"],
-    ["R01", "N09", "Astoria - Ditmars Blvd (N W)", "Avenue U (N)"],
-    ["D40", "D42", "Brighton Beach (B Q)", "W 8 St - NY Aquarium (F Q)"],
-    ["D30", "D34", "Cortelyou Rd (B Q)", "Avenue M (B Q)"],
-    ["B08", "R16", "Lexington Av/63 St (F Q)", "Times Sq - 42 St (N Q R W)"],
-    ["B08", "R20", "Lexington Av/63 St (F Q)", "14 St - Union Sq (N Q R W)"],
-    ["R34", "R36", "Prospect Av (R)", "36 St (D N R)"],
     ["R22", "Q01", "Prince St (R W)", "Canal St (N Q)"],
   ],
-  DarkGrey: [
+  LightGrey: [
     ["L26", "L27", "Livonia Av (L)", "New Lots Av (L)"],
     ["L27", "L28", "New Lots Av (L)", "E 105 St (L)"],
     ["L28", "L29", "E 105 St (L)", "Canarsie - Rockaway Pkwy (L)"],
@@ -526,66 +487,100 @@ export default {
     ["243", "244", "Winthrop St (2 5)", "Church Av (2 5)"],
     ["244", "245", "Church Av (2 5)", "Beverly Rd (2 5)"],
     ["245", "246", "Beverly Rd (2 5)", "Newkirk Av (2 5)"],
-    ["231", "232", "Clark St (2 3)", "Borough Hall (2 3)"],
-    ["232", "233", "Borough Hall (2 3)", "Hoyt St (2 3)"],
-    ["233", "234", "Hoyt St (2 3)", "Nevins St (2 3 4 5)"],
+    ["231", "232", "Clark St (2 3)", "Borough Hall (2 3)"], // NO GREEN
+    ["232", "233", "Borough Hall (2 3)", "Hoyt St (2 3)"], // NO GREEN
+    ["233", "234", "Hoyt St (2 3)", "Nevins St (2 3 4 5)"], // NO GREEN
     ["234", "235", "Nevins St (2 3 4 5)", "Atlantic Av - Barclays Ctr (2 3)"],
-    ["137", "228", "Chambers St (1 2 3)", "Park Pl (2 3)"],
-    ["228", "229", "Park Pl (2 3)", "Fulton St (2 3)"],
-    ["229", "230", "Fulton St (2 3)", "Wall St (2 3)"],
-    ["230", "231", "Wall St (2 3)", "Clark St (2 3)"],
-    ["120", "123", "96 St (1 2 3)", "72 St (1 2 3)"],
-    ["123", "127", "72 St (1 2 3)", "Times Sq - 42 St (1 2 3)"],
-    ["128", "132", "34 St - Penn Station (1 2 3)", "14 St (1 2 3)"],
-    ["132", "137", "14 St (1 2 3)", "Chambers St (1 2 3)"],
-    ["226", "227", "116 St (2 3)", "Central Park North (110 St) (2 3)"],
-    ["227", "120", "Central Park North (110 St) (2 3)", "96 St (1 2 3)"],
-    ["224", "225", "135 St (2 3)", "125 St (2 3)"],
-    ["225", "226", "125 St (2 3)", "116 St (2 3)"],
+    ["137", "228", "Chambers St (1 2 3)", "Park Pl (2 3)"], // NO GREEN
+    ["228", "229", "Park Pl (2 3)", "Fulton St (2 3)"], // NO GREEN
+    ["229", "230", "Fulton St (2 3)", "Wall St (2 3)"], // NO GREEN
+    ["230", "231", "Wall St (2 3)", "Clark St (2 3)"], // NO GREEN
+    // ["120", "123", "96 St (1 2 3)", "72 St (1 2 3)"], // EXPRESS
+    // ["128", "132", "34 St - Penn Station (1 2 3)", "14 St (1 2 3)"], // EXPRESS
+    // ["132", "137", "14 St (1 2 3)", "Chambers St (1 2 3)"], // EXPRESS
+    ["226", "227", "116 St (2 3)", "Central Park North (110 St) (2 3)"], // NO GREEN
+    ["227", "120", "Central Park North (110 St) (2 3)", "96 St (1 2 3)"], // NO GREEN
+    ["224", "225", "135 St (2 3)", "125 St (2 3)"], // NO GREEN
+    ["225", "226", "125 St (2 3)", "116 St (2 3)"], // NO GREEN
     ["217", "218", "Simpson St (2 5)", "Intervale Av (2 5)"],
     ["218", "219", "Intervale Av (2 5)", "Prospect Av (2 5)"],
     ["219", "220", "Prospect Av (2 5)", "Jackson Av (2 5)"],
     ["220", "221", "Jackson Av (2 5)", "3 Av - 149 St (2 5)"],
     ["221", "222", "3 Av - 149 St (2 5)", "149 St - Grand Concourse (2 5)"],
-    ["222", "224", "149 St - Grand Concourse (2 5)", "135 St (2 3)"],
+    ["222", "224", "149 St - Grand Concourse (2 5)", "135 St (2 3)"], // NO GREEN
     ["215", "216", "174 St (2 5)", "Freeman St (2 5)"],
     ["216", "217", "Freeman St (2 5)", "Simpson St (2 5)"],
-    ["212", "213", "Bronx Park East (2 5)", "E 180 St (2 5)"],
+    ["212", "213", "Bronx Park East (2 5)", "E 180 St (2 5)"], // GREEN DASHED
     ["213", "214", "E 180 St (2 5)", "West Farms Sq - E Tremont Av (2 5)"],
     ["214", "215", "West Farms Sq - E Tremont Av (2 5)", "174 St (2 5)"],
-    ["207", "208", "219 St (2 5)", "Gun Hill Rd (2 5)"],
-    ["208", "209", "Gun Hill Rd (2 5)", "Burke Av (2 5)"],
-    ["209", "210", "Burke Av (2 5)", "Allerton Av (2 5)"],
-    ["210", "211", "Allerton Av (2 5)", "Pelham Pkwy (2 5)"],
-    ["211", "212", "Pelham Pkwy (2 5)", "Bronx Park East (2 5)"],
-    ["201", "204", "Wakefield - 241 St (2)", "Nereid Av (2 5)"],
-    ["204", "205", "Nereid Av (2 5)", "233 St (2 5)"],
-    ["205", "206", "233 St (2 5)", "225 St (2 5)"],
-    ["206", "207", "225 St (2 5)", "219 St (2 5)"],
-    ["254", "255", "Junius St (3)", "Pennsylvania Av (3)"],
-    ["255", "256", "Pennsylvania Av (3)", "Van Siclen Av (3)"],
-    ["256", "257", "Van Siclen Av (3)", "New Lots Av (3)"],
-    ["253", "254", "Rockaway Av (3)", "Junius St (3)"],
+    ["207", "208", "219 St (2 5)", "Gun Hill Rd (2 5)"], // GREEN DASHED
+    ["208", "209", "Gun Hill Rd (2 5)", "Burke Av (2 5)"], // GREEN DASHED
+    ["209", "210", "Burke Av (2 5)", "Allerton Av (2 5)"], // GREEN DASHED
+    ["210", "211", "Allerton Av (2 5)", "Pelham Pkwy (2 5)"], // GREEN DASHED
+    ["211", "212", "Pelham Pkwy (2 5)", "Bronx Park East (2 5)"], // GREEN DASHED
+    ["201", "204", "Wakefield - 241 St (2)", "Nereid Av (2 5)"], // NO GREEN
+    ["204", "205", "Nereid Av (2 5)", "233 St (2 5)"], // GREEN DASHED
+    ["205", "206", "233 St (2 5)", "225 St (2 5)"], // GREEN DASHED
+    ["206", "207", "225 St (2 5)", "219 St (2 5)"], // GREEN DASHED
+    ["254", "255", "Junius St (3)", "Pennsylvania Av (3)"], // NO GREEN
+    ["255", "256", "Pennsylvania Av (3)", "Van Siclen Av (3)"], // NO GREEN
+    ["256", "257", "Van Siclen Av (3)", "New Lots Av (3)"], // NO GREEN
+    ["253", "254", "Rockaway Av (3)", "Junius St (3)"], // NO GREEN
     ["239", "248", "Franklin Av (2 3 4 5)", "Nostrand Av (3)"],
     ["248", "249", "Nostrand Av (3)", "Kingston Av (3)"],
     ["249", "250", "Kingston Av (3)", "Crown Hts - Utica Av (3 4)"],
-    ["250", "251", "Crown Hts - Utica Av (3 4)", "Sutter Av - Rutland Rd (3)"],
-    ["251", "252", "Sutter Av - Rutland Rd (3)", "Saratoga Av (3)"],
-    ["252", "253", "Saratoga Av (3)", "Rockaway Av (3)"],
-    ["301", "302", "Harlem - 148 St (3)", "145 St (3)"],
-    ["302", "224", "145 St (3)", "135 St (2 3)"],
+    ["250", "251", "Crown Hts - Utica Av (3 4)", "Sutter Av - Rutland Rd (3)"], // NO GREEN
+    ["251", "252", "Sutter Av - Rutland Rd (3)", "Saratoga Av (3)"], // NO GREEN
+    ["252", "253", "Saratoga Av (3)", "Rockaway Av (3)"], // NO GREEN
+    ["301", "302", "Harlem - 148 St (3)", "145 St (3)"], // NO GREEN
+    ["302", "224", "145 St (3)", "135 St (2 3)"], // NO GREEN
     ["423", "234", "Borough Hall (4 5)", "Nevins St (2 3 4 5)"],
-    ["235", "239", "Atlantic Av - Barclays Ctr (2 3)", "Franklin Av (2 3 4 5)"],
-    ["239", "250", "Franklin Av (2 3 4 5)", "Crown Hts - Utica Av (3 4)"],
+    // ["235", "239", "Atlantic Av - Barclays Ctr (2 3)", "Franklin Av (2 3 4 5)"], // EXPRESS
+    // ["239", "250", "Franklin Av (2 3 4 5)", "Crown Hts - Utica Av (3 4)"], // EXPRESS
+  ],
+  Green: [
+    ["246", "247", "Newkirk Av (2 5)", "Flatbush Av - Brooklyn College (2 5)"],
+    ["235", "236", "Atlantic Av - Barclays Ctr (2 3)", "Bergen St (2 3)"],
+    ["236", "237", "Bergen St (2 3)", "Grand Army Plaza (2 3)"],
+    ["237","238","Grand Army Plaza (2 3)","Eastern Pkwy - Brooklyn Museum (2 3)"],
+    ["238","239","Eastern Pkwy - Brooklyn Museum (2 3)","Franklin Av (2 3 4 5)"],
+    ["239", "241", "Franklin Av (2 3 4 5)", "President St (2 5)"],
+    ["241", "242", "President St (2 5)", "Sterling St (2 5)"],
+    ["242", "243", "Sterling St (2 5)", "Winthrop St (2 5)"],
+    ["243", "244", "Winthrop St (2 5)", "Church Av (2 5)"],
+    ["244", "245", "Church Av (2 5)", "Beverly Rd (2 5)"],
+    ["245", "246", "Beverly Rd (2 5)", "Newkirk Av (2 5)"],
+    ["234", "235", "Nevins St (2 3 4 5)", "Atlantic Av - Barclays Ctr (2 3)"],
+    ["217", "218", "Simpson St (2 5)", "Intervale Av (2 5)"],
+    ["218", "219", "Intervale Av (2 5)", "Prospect Av (2 5)"],
+    ["219", "220", "Prospect Av (2 5)", "Jackson Av (2 5)"],
+    ["220", "221", "Jackson Av (2 5)", "3 Av - 149 St (2 5)"],
+    ["221", "222", "3 Av - 149 St (2 5)", "149 St - Grand Concourse (2 5)"],
+    ["215", "216", "174 St (2 5)", "Freeman St (2 5)"],
+    ["216", "217", "Freeman St (2 5)", "Simpson St (2 5)"],
+    ["213", "214", "E 180 St (2 5)", "West Farms Sq - E Tremont Av (2 5)"],
+    ["214", "215", "West Farms Sq - E Tremont Av (2 5)", "174 St (2 5)"],
+    // ["207", "208", "219 St (2 5)", "Gun Hill Rd (2 5)"], // GREEN DASHED
+    // ["208", "209", "Gun Hill Rd (2 5)", "Burke Av (2 5)"], // GREEN DASHED
+    // ["209", "210", "Burke Av (2 5)", "Allerton Av (2 5)"], // GREEN DASHED
+    // ["210", "211", "Allerton Av (2 5)", "Pelham Pkwy (2 5)"], // GREEN DASHED
+    // ["211", "212", "Pelham Pkwy (2 5)", "Bronx Park East (2 5)"], // GREEN DASHED
+    // ["204", "205", "Nereid Av (2 5)", "233 St (2 5)"], // GREEN DASHED
+    // ["205", "206", "233 St (2 5)", "225 St (2 5)"], // GREEN DASHED
+    // ["206", "207", "225 St (2 5)", "219 St (2 5)"], // GREEN DASHED
+    ["239", "248", "Franklin Av (2 3 4 5)", "Nostrand Av (3)"],
+    ["248", "249", "Nostrand Av (3)", "Kingston Av (3)"],
+    ["249", "250", "Kingston Av (3)", "Crown Hts - Utica Av (3 4)"],
+    ["423", "234", "Borough Hall (4 5)", "Nevins St (2 3 4 5)"],
     ["420", "423", "Bowling Green (4 5)", "Borough Hall (4 5)"],
     ["640", "418", "Brooklyn Bridge - City Hall (4 5 6)", "Fulton St (4 5)"],
     ["418", "419", "Fulton St (4 5)", "Wall St (4 5)"],
     ["419", "420", "Wall St (4 5)", "Bowling Green (4 5)"],
-    ["629", "631", "59 St (4 5 6)", "Grand Central - 42 St (4 5 6)"],
-    ["631", "635", "Grand Central - 42 St (4 5 6)", "14 St - Union Sq (4 5 6)"],
-    ["635","640","14 St - Union Sq (4 5 6)","Brooklyn Bridge - City Hall (4 5 6)"],
-    ["621", "626", "125 St (4 5 6)", "86 St (4 5 6)"],
-    ["626", "629", "86 St (4 5 6)", "59 St (4 5 6)"],
+    // ["629", "631", "59 St (4 5 6)", "Grand Central - 42 St (4 5 6)"], // EXPRESS
+    // ["631", "635", "Grand Central - 42 St (4 5 6)", "14 St - Union Sq (4 5 6)"], // EXPRESS
+    // ["635","640","14 St - Union Sq (4 5 6)","Brooklyn Bridge - City Hall (4 5 6)"], // EXPRESS
+    // ["621", "626", "125 St (4 5 6)", "86 St (4 5 6)"], // EXPRESS
+    // ["626", "629", "86 St (4 5 6)", "59 St (4 5 6)"], // EXPRESS
     ["415","416","149 St - Grand Concourse (4)","138 St - Grand Concourse (4 5)"],
     ["416", "621", "138 St - Grand Concourse (4 5)", "125 St (4 5 6)"],
     ["412", "413", "170 St (4)", "167 St (4)"],
@@ -643,10 +638,17 @@ export default {
     ["604", "606", "Westchester Sq - E Tremont Av (6)", "Zerega Av (6)"],
     ["606", "607", "Zerega Av (6)", "Castle Hill Av (6)"],
     ["601", "602", "Pelham Bay Park (6)", "Buhre Av (6)"],
+    // ["613", "619", "Hunts Point Av (6)", "3 Av - 138 St (6)"], // EXPRESS
+  ],
+  DarkGrey: [
     ["902", "901", "Times Sq - 42 St (S)", "Grand Central - 42 St (S)"],
-    ["613", "619", "Hunts Point Av (6)", "3 Av - 138 St (6)"],
-    ["635", "637", "14 St - Union Sq (4 5 6)", "Bleecker St (6)"],
-    ["637", "640", "Bleecker St (6)", "Brooklyn Bridge - City Hall (4 5 6)"],
+    ["S01", "S03", "Franklin Av (S)", "Park Pl (S)"],
+    ["S03", "S04", "Park Pl (S)", "Botanic Garden (S)"],
+    ["S04", "D26", "Botanic Garden (S)", "Prospect Park (B Q)"],
+    ["H04", "H12", "Broad Channel (A S)", "Beach 90 St (A S)"],
+    ["H12", "H13", "Beach 90 St (A S)", "Beach 98 St (A S)"],
+    ["H13", "H14", "Beach 98 St (A S)", "Beach 105 St (A S)"],
+    ["H14", "H15", "Beach 105 St (A S)", "Rockaway Park - Beach 116 St (A S)"],
   ],
   Purple: [
     ["723", "724", "Grand Central - 42 St (7)", "5 Av (7)"],
@@ -659,7 +661,6 @@ export default {
     ["716", "718", "33 St (7)", "Queensboro Plaza (7)"],
     ["714", "715", "46 St (7)", "40 St (7)"],
     ["715", "716", "40 St (7)", "33 St (7)"],
-    ["706", "710", "103 St - Corona Plaza (7)", "74 St - Broadway (7)"],
     ["710", "711", "74 St - Broadway (7)", "69 St (7)"],
     ["711", "712", "69 St (7)", "Woodside - 61 St (7)"],
     ["712", "713", "Woodside - 61 St (7)", "52 St (7)"],
@@ -671,11 +672,6 @@ export default {
     ["701", "702", "Flushing - Main St (7)", "Mets - Willets Point (7)"],
     ["702", "705", "Mets - Willets Point (7)", "111 St (7)"],
     ["705", "706", "111 St (7)", "103 St - Corona Plaza (7)"],
-    ["706", "708", "103 St - Corona Plaza (7)", "90 St - Elmhurst Av (7)"],
-    ["706", "712", "103 St - Corona Plaza (7)", "Woodside - 61 St (7)"],
-    ["706", "711", "103 St - Corona Plaza (7)", "69 St (7)"],
-    ["706", "709", "103 St - Corona Plaza (7)", "82 St - Jackson Hts (7)"],
-    ["706", "713", "103 St - Corona Plaza (7)", "52 St (7)"],
   ],
   SteelBlue: [
     ["S16", "S15", "Huguenot (SIR)", "Prince's Bay (SIR)"],
@@ -693,13 +689,10 @@ export default {
     ["S19", "S18", "Great Kills (SIR)", "Eltingville (SIR)"],
     ["S18", "S17", "Eltingville (SIR)", "Annadale (SIR)"],
     ["S17", "S16", "Annadale (SIR)", "Huguenot (SIR)"],
-    ["S31", "S19", "St George (SIR)", "Great Kills (SIR)"],
     ["S31", "S30", "St George (SIR)", "Tompkinsville (SIR)"],
     ["S30", "S29", "Tompkinsville (SIR)", "Stapleton (SIR)"],
     ["S29", "S28", "Stapleton (SIR)", "Clifton (SIR)"],
     ["S28", "S27", "Clifton (SIR)", "Grasmere (SIR)"],
     ["S27", "S26", "Grasmere (SIR)", "Old Town (SIR)"],
-    ["S30", "S28", "Tompkinsville (SIR)", "Clifton (SIR)"],
-    ["S31", "S29", "St George (SIR)", "Stapleton (SIR)"],
   ],
 };
