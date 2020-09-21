@@ -2,6 +2,7 @@
   // Import classes
   import Station from "./classes/Station.js";
   import TripEntity from "./classes/TripEntity.js";
+  import Interval from "./classes/Interval.js";
 
   // Import hard coded data
   import stationData from "./data/stationData.js";
@@ -18,15 +19,12 @@
   var tripEntities = []; // Most recent API response
   const trainsArray = []; // Array of Train objects
   let routes = [];
+  const stations = {};
 
   // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
 
-  const stations = {};
-  stationData.forEach(i => {
-    const station = new Station(i)
-    stations[station.stopId] = station;  
-  });
+  
 
   // const routeData = lineGroups.flatMap(lineGroup => {
   //   return lineGroup.lines.map(line => {
@@ -47,10 +45,17 @@
   // });
 
   (async function main() {
-    // Draw the map
+    // Draw the map tiles
     leaflet.drawMap();
 
-    
+    stationData.forEach(i => {
+      const station = new Station(i)
+      stations[station.stopId] = station;  
+    });
+
+    const mergedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
+
+    // Draw tracks by drawing each interval lines between stations
     for (let color in lineGroupIntervals) {
       const intervals = lineGroupIntervals[color];
       intervals.forEach(i => {
@@ -58,6 +63,7 @@
       });
     }
 
+    // Draw dots for each station
     for (let i in stations) {
       leaflet.drawStation(stations[i]);
     }

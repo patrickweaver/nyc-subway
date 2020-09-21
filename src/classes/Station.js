@@ -16,6 +16,16 @@ export default class Station {
       n: s["North Direction Label"],
       s: s["South Direction Label"]
     }
+    this.intervals = [];
   }
 
 }
+
+/* Ideas:
+
+- 
+
+
+
+
+*/
