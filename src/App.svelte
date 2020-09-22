@@ -20,6 +20,7 @@
   const trainsArray = []; // Array of Train objects
   let routes = [];
   const stations = {};
+  const stationStopIds = [];
 
   // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
@@ -48,20 +49,23 @@
     // Draw the map tiles
     leaflet.drawMap();
 
+    // Create a Station object from hard coded station data
     stationData.forEach(i => {
       const station = new Station(i)
-      stations[station.stopId] = station;  
+      stations[station.stopId] = station;
+      stationStopIds.push(station.stopId);
     });
 
-    const mergedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
+    // Add Interval objects to Station objects from hard coded interval data
+    Interval.combineIntervals(lineGroupIntervals, stations);
 
     // Draw tracks by drawing each interval lines between stations
-    for (let color in lineGroupIntervals) {
-      const intervals = lineGroupIntervals[color];
+    stationStopIds.forEach(s => {
+      const intervals = stations[s].intervals;
       intervals.forEach(i => {
-        leaflet.drawInterval(color, stations[i[0]], stations[i[1]]);
-      });
-    }
+        leaflet.drawInterval(i.colors[0], i.nStation, i.sStation);
+      })
+    })
 
     // Draw dots for each station
     for (let i in stations) {
