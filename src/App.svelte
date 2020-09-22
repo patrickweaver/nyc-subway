@@ -63,7 +63,7 @@
     stationStopIds.forEach(s => {
       const intervals = stations[s].intervals;
       intervals.forEach(i => {
-        leaflet.drawInterval(i.colors[0], i.nStation, i.sStation);
+        leaflet.drawInterval(i.colors, i.nStation, i.sStation);
       })
     })
 
