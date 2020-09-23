@@ -1,24 +1,3 @@
-
-export default [
-  // {
-  //     lines: ["G"],
-  //     apiSuffix: "G", // Not actually the suffix
-  //     color: "Green",
-  //   },
-  // {
-  //   lines: ["2"],
-  //   apiSuffix: "123456", // Not actually the suffix
-  //   color: "Red",
-  // },
-  {
-    lines: ["A", "C", "E"],
-    apiSuffix: "ace",
-    color: "Blue",
-  },
-]
-
-
-
 const lineGroups = [
   {
     lines: ["A", "C", "E"],
@@ -67,4 +46,4 @@ const lineGroups = [
   }
 ]
 
-//export default lineGroups
+export default lineGroups
