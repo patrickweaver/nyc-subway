@@ -1,9 +1,10 @@
 export default class Interval {
-  constructor(nStation, sStation, colors, followingStations={}) {
+  constructor(nStation, sStation, colors, shape, followingStations={}) {
     this.nStation = nStation;
     this.sStation = sStation;
     this.followingStations = followingStations;
     this.colors = colors;
+    this.shape = shape;
     this.offsets = {};
   }
 
@@ -15,6 +16,7 @@ export default class Interval {
       colorIntervals.forEach(i => {
         const nStation = stations[i[0]];
         const sStation = stations[i[1]];
+        const shape = i[4];
         const sStopIds = nStation.intervals.map(j => j.sStation.stopId);
         
         // Find stations after interval by
@@ -33,7 +35,7 @@ export default class Interval {
         } else {
           const followingStationsWithColor = {[color]: followingStations};
           // Otherwise make a new interval (this happens if there are currently 0)
-          nStation.intervals.push(new Interval(nStation, sStation, [color], followingStationsWithColor));
+          nStation.intervals.push(new Interval(nStation, sStation, [color], shape, followingStationsWithColor));
         }
       })
     }

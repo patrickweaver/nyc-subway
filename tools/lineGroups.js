@@ -32,7 +32,7 @@ module.exports = [
   {
     lines: ["1", "2", "3", "4", "5", "6", "GS"],
     apiSuffix: "123456", // Not actually the suffix
-    color: "Red",
+    color: "Red", // Not all actually red
   },
   {
     lines: ["7"],

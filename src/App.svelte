@@ -7,7 +7,7 @@
   // Import hard coded data
   import stationData from "./data/stationData.js";
   import lineGroups from "./data/lineGroups.js";
-  import lineGroupIntervals from "./data/lineGroupIntervals.js";
+  import lineGroupIntervals from "./data/lineGroupIntervalsWithShapes.js";
   import shapes from "./data/shapes.js";
 
   // Import helpers
@@ -63,36 +63,36 @@
       stationStopIds.push(station.stopId);
     });
 
-    // // Add Interval objects to Station objects from hard coded interval data
-    // Interval.combineIntervals(lineGroupIntervals, stations);
+    // Add Interval objects to Station objects from hard coded interval data
+    Interval.combineIntervals(lineGroupIntervals, stations);
 
-    // // Draw tracks by drawing each interval lines between stations
-    // stationStopIds.forEach(s => {
-    //   const intervals = stations[s].intervals;
-    //   intervals.forEach(i => {
-    //     leaflet.drawInterval(i.colors, i.nStation, i.sStation);
-    //   })
-    // })
-
-    const drawLine = "A";
-
-    for (let s in shapes[drawLine]) {
-      const shape = shapes[drawLine][s];
-      shape.forEach((s1, index) => {
-        const color = lineColors[drawLine];
-        if (!shape[index + 1]) return ;
-        const s2 = shape[index + 1];
-        const pos1 = {
-          latitude: s1[0],
-          longitude: s1[1]
-        }
-        const pos2 = {
-          latitude: s2[0],
-          longitude: s2[1]
-        }
-        leaflet.drawInterval([color], pos1, pos2);
+    // Draw tracks by drawing each interval lines between stations
+    stationStopIds.forEach(s => {
+      const intervals = stations[s].intervals;
+      intervals.forEach(interval => {
+        leaflet.drawInterval(interval);
       })
-    }
+    })
+
+    // const drawLine = "A";
+
+    // for (let s in shapes[drawLine]) {
+    //   const shape = shapes[drawLine][s];
+    //   shape.forEach((s1, index) => {
+    //     const color = lineColors[drawLine];
+    //     if (!shape[index + 1]) return ;
+    //     const s2 = shape[index + 1];
+    //     const pos1 = {
+    //       latitude: s1[0],
+    //       longitude: s1[1]
+    //     }
+    //     const pos2 = {
+    //       latitude: s2[0],
+    //       longitude: s2[1]
+    //     }
+    //     leaflet.drawInterval([color], pos1, pos2);
+    //   })
+    // }
 
     // Draw dots for each station
     for (let i in stations) {

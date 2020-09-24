@@ -55,13 +55,22 @@ function drawStation(station, recenter = false) {
   */
 }
 
-function drawInterval(colors, station1, station2) {
-  if (!station1 || !station2) return;
-  if (colors.length === 0) return;
-  const s1Pos = [station1.latitude, station1.longitude];
-  const s2Pos = [station2.latitude, station2.longitude];
-  L.polyline([s1Pos, s2Pos], {color: colors[0]}).addTo(map);
-
+function drawInterval(interval) {
+  if (!interval.nStation || !interval.sStation) return;
+  if (interval.colors.length === 0) return;
+  if (interval.shape.length > 0) {
+    interval.shape.forEach((i, index) => {
+      if (index < interval.shape.length - 1) {
+        const pos1 = [interval.shape[index][0], interval.shape[index][1]];
+        const pos2 = [interval.shape[index + 1][0], interval.shape[index + 1][1]];
+        L.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
+      }
+    });
+  } else {
+    const s1Pos = [interval.nStation.latitude, interval.nStation.longitude];
+    const s2Pos = [interval.sStation.latitude, interval.sStation.longitude];
+    L.polyline([s1Pos, s2Pos], {color: interval.colors[0]}).addTo(map);
+  }
 }
 
 // Draw connecting line between stations
