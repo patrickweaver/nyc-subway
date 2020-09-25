@@ -1,8 +1,6 @@
 import L from "leaflet";
 import * as leafletMarkerSlideTo from "leaflet.marker.slideto";
 
-import Victor from 'victor';
-
 const RAD_TO_DEG = 57.2958;
 
 let map; // Map var for leaflet
@@ -56,6 +54,7 @@ function drawStation(station, recenter = false) {
 }
 
 function drawInterval(interval) {
+  console.log(interval);
   if (!interval.nStation || !interval.sStation) return;
   if (interval.colors.length === 0) return;
   if (interval.shape.length > 0) {
@@ -64,10 +63,10 @@ function drawInterval(interval) {
         const pos1 = [interval.shape[index][0], interval.shape[index][1]];
         const pos2 = [interval.shape[index + 1][0], interval.shape[index + 1][1]];
         // L.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
-        const offsets1 = [interval.offsets[index][0], interval.offsets[index][1]];
-        const offsets2 = [interval.offsets[index + 1][0], interval.offsets[index + 1][1]];
-        drawTracks(offsets1, offsets2, interval.colors[0])
-        //L.polyline([pos1, pos2], {color: "black"}).addTo(map);
+        const color0 = interval.colors[0];
+        const offsets1 = [interval.offsets[color0][index][0], interval.offsets[color0][index][1]];
+        const offsets2 = [interval.offsets[color0][index + 1][0], interval.offsets[color0][index + 1][1]];
+        drawTracks(offsets1, offsets2, color0)
       }
     });
   } else {

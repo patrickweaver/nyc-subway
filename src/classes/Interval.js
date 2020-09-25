@@ -14,7 +14,7 @@ export default class Interval {
     this.followingStations = followingStations;
     this.colors = colors;
     this.shape = shape;
-    this.offsets = Interval.mapPointsToOffsets(shape, trackDistance);
+    this.offsets = Interval.mapPointsToOffsets(shape, trackDistance, colors);
   }
 
   static combineIntervals(lineGroupIntervals, stations) {
@@ -51,18 +51,27 @@ export default class Interval {
     }
   }
 
-  static mapPointsToOffsets(shape, distance) {
-    return shape.map((pointB, index) => {
-      let pointA = null;
-      let pointC = null;
-      if (index > 0) {
-        pointA = shape[index - 1];
-      }
-      if (index < shape.length - 1) {
-        pointC = shape[index + 1];
-      }
-      return Interval.findOffsetPoints(pointA, pointB, pointC, distance);
-    });
+  static mapPointsToOffsets(shape, distance, colors) {
+    // For each color return an array of pairs (each side
+    // of the shape line) of offset points (which are
+    // pairs of coordinates) that map to each pair of
+    // coordinates from the shape.
+    const colorOffsetPoints = {};
+    colors.forEach((color, index) => {
+      const colorDistance = distance * (index + 1);
+      colorOffsetPoints[color] = shape.map((pointB, index) => {
+        let pointA = null;
+        let pointC = null;
+        if (index > 0) {
+          pointA = shape[index - 1];
+        }
+        if (index < shape.length - 1) {
+          pointC = shape[index + 1];
+        }
+        return Interval.findOffsetPoints(pointA, pointB, pointC, distance);
+      });
+    })
+    return colorOffsetPoints;
   }
 
   static findOffsetPoints(pointA, pointB, pointC, offsetLengthMeters) {
