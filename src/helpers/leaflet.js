@@ -89,7 +89,7 @@ function drawLine(station1, station2) {
 function drawTracks(offsetsA, offsetsB, color) {
   try {
     // Draw offset line for station B
-    //L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
+    L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
     // Draw N and S offest positions:
     L.circle(offsetsB[0], {radius: 5, color: "grey"}).addTo(map);

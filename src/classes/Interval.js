@@ -13,7 +13,7 @@ export default class Interval {
     this.followingStations = followingStations;
     this.colors = colors;
     this.shape = shape;
-    this.offsets = Interval.mapPointsToOffsets(shape);
+    this.offsets = Interval.mapPointsToOffsets(shape, 80);
   }
 
   static combineIntervals(lineGroupIntervals, stations) {
@@ -50,7 +50,7 @@ export default class Interval {
     }
   }
 
-  static mapPointsToOffsets(shape) {
+  static mapPointsToOffsets(shape, distance) {
     return shape.map((pointB, index) => {
       let pointA = null;
       let pointC = null;
@@ -60,7 +60,7 @@ export default class Interval {
       if (index < shape.length - 1) {
         pointC = shape[index + 1];
       }
-      return Interval.findOffsetPoints(pointA, pointB, pointC, 20);
+      return Interval.findOffsetPoints(pointA, pointB, pointC, distance);
     });
   }
 
@@ -74,7 +74,7 @@ export default class Interval {
     let dLatAB, dLngAB, dLatCB, dLngCB;
     [dLatAB, dLngAB] = Interval.dLatLng(pointB, pointA);
     [dLatCB, dLngCB] = Interval.dLatLng(pointB, pointC);
-  
+    debugger;
     // Turn distances into vectors using Victor: http://victorjs.org/
     const abVector = new Victor(dLatAB, dLngAB);
     const cbVector = new Victor(dLatCB, dLngCB);
@@ -89,7 +89,7 @@ export default class Interval {
       // Point B is first in interval shape:
     } else if (!pointA) {
       const offsetCVector = cbVector.clone().normalize().rotate(Math.PI / 2);
-      
+
       // Swap N and S for first point:
       pointB.sOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthMeters);
       pointB.nOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, -offsetLengthMeters);
@@ -129,8 +129,8 @@ export default class Interval {
       return [0, 0];
     }
     return [
-      (s1.latitude - s0.latitude) / METER_LAT_OFFSET, 
-      (s1.longitude - s0.longitude) / METER_LNG_OFFSET
+      (s1[0] - s0[0]) / METER_LAT_OFFSET, 
+      (s1[1] - [1]) / METER_LNG_OFFSET
     ];
   }
 }
