@@ -1,4 +1,5 @@
 import Victor from 'victor';
+const trackDistance = 20; // Meters
 
 export default class Interval {
   constructor(
@@ -13,7 +14,7 @@ export default class Interval {
     this.followingStations = followingStations;
     this.colors = colors;
     this.shape = shape;
-    this.offsets = Interval.mapPointsToOffsets(shape, 80);
+    this.offsets = Interval.mapPointsToOffsets(shape, trackDistance);
   }
 
   static combineIntervals(lineGroupIntervals, stations) {
@@ -74,7 +75,6 @@ export default class Interval {
     let dLatAB, dLngAB, dLatCB, dLngCB;
     [dLatAB, dLngAB] = Interval.dLatLng(pointB, pointA);
     [dLatCB, dLngCB] = Interval.dLatLng(pointB, pointC);
-    debugger;
     // Turn distances into vectors using Victor: http://victorjs.org/
     const abVector = new Victor(dLatAB, dLngAB);
     const cbVector = new Victor(dLatCB, dLngCB);
@@ -130,7 +130,7 @@ export default class Interval {
     }
     return [
       (s1[0] - s0[0]) / METER_LAT_OFFSET, 
-      (s1[1] - [1]) / METER_LNG_OFFSET
+      (s1[1] - s0[1]) / METER_LNG_OFFSET
     ];
   }
 }

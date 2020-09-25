@@ -67,7 +67,7 @@ function drawInterval(interval) {
         const offsets1 = [interval.offsets[index][0], interval.offsets[index][1]];
         const offsets2 = [interval.offsets[index + 1][0], interval.offsets[index + 1][1]];
         drawTracks(offsets1, offsets2, interval.colors[0])
-        L.polyline([pos1, pos2], {color: "black"}).addTo(map);
+        //L.polyline([pos1, pos2], {color: "black"}).addTo(map);
       }
     });
   } else {
@@ -89,11 +89,11 @@ function drawLine(station1, station2) {
 function drawTracks(offsetsA, offsetsB, color) {
   try {
     // Draw offset line for station B
-    L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
+    //L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
     // Draw N and S offest positions:
-    L.circle(offsetsB[0], {radius: 5, color: "grey"}).addTo(map);
-    L.circle(offsetsB[1], {radius: 5, color: "grey"}).addTo(map);
+    //L.circle(offsetsB[0], {radius: 5, color: "grey"}).addTo(map);
+    //L.circle(offsetsB[1], {radius: 5, color: "grey"}).addTo(map);
     
     //Draw lines between offsets:
     L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
