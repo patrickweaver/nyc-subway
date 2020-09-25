@@ -63,7 +63,11 @@ function drawInterval(interval) {
       if (index < interval.shape.length - 1) {
         const pos1 = [interval.shape[index][0], interval.shape[index][1]];
         const pos2 = [interval.shape[index + 1][0], interval.shape[index + 1][1]];
-        L.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
+        // L.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
+        const offsets1 = [interval.offsets[index][0], interval.offsets[index][1]];
+        const offsets2 = [interval.offsets[index + 1][0], interval.offsets[index + 1][1]];
+        drawTracks(offsets1, offsets2, interval.colors[0])
+        L.polyline([pos1, pos2], {color: "black"}).addTo(map);
       }
     });
   } else {
@@ -82,19 +86,37 @@ function drawLine(station1, station2) {
   L.polyline(latlongs, { color: "green" }).addTo(map);
 }
 
-function drawTracks(stationA, stationB, color) {
+function drawTracks(offsetsA, offsetsB, color) {
+  try {
+    // Draw offset line for station B
+    //L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
-  // Draw offset line for station B
-  L.polyline(stationB.offsets, { color: "#00fff2" }).addTo(map); // Aqua
-
-  // Draw N and S offest positions:
-  L.circle(stationB.offsets[0], {radius: 20, color: "orange"}).addTo(map);
-  L.circle(stationB.offsets[1], {radius: 20, color: "yellow"}).addTo(map);
-  
-  //Draw lines between offsets:
-  L.polyline([stationA.offsets[0], stationB.offsets[0]], { color: color }).addTo(map);
-  L.polyline([stationA.offsets[1], stationB.offsets[1]], { color: color }).addTo(map);
+    // Draw N and S offest positions:
+    L.circle(offsetsB[0], {radius: 5, color: "grey"}).addTo(map);
+    L.circle(offsetsB[1], {radius: 5, color: "grey"}).addTo(map);
+    
+    //Draw lines between offsets:
+    L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
+    L.polyline([offsetsA[1], offsetsB[1]], { color: color }).addTo(map);
+  } catch (error) {
+    console.log(error);
+    debugger;
+  }
 }
+
+// function drawTracks(stationA, stationB, color) {
+
+//   // Draw offset line for station B
+//   L.polyline(stationB.offsets, { color: "#00fff2" }).addTo(map); // Aqua
+
+//   // Draw N and S offest positions:
+//   L.circle(stationB.offsets[0], {radius: 20, color: "orange"}).addTo(map);
+//   L.circle(stationB.offsets[1], {radius: 20, color: "yellow"}).addTo(map);
+  
+//   //Draw lines between offsets:
+//   L.polyline([stationA.offsets[0], stationB.offsets[0]], { color: color }).addTo(map);
+//   L.polyline([stationA.offsets[1], stationB.offsets[1]], { color: color }).addTo(map);
+// }
 
 function drawTrain(train) {
   console.log(

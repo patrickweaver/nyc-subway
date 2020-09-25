@@ -1,11 +1,19 @@
+import Victor from 'victor';
+
 export default class Interval {
-  constructor(nStation, sStation, colors, shape, followingStations={}) {
+  constructor(
+    nStation,
+    sStation,
+    colors,
+    shape,
+    followingStations={}
+  ) {
     this.nStation = nStation;
     this.sStation = sStation;
     this.followingStations = followingStations;
     this.colors = colors;
     this.shape = shape;
-    this.offsets = {};
+    this.offsets = Interval.mapPointsToOffsets(shape);
   }
 
   static combineIntervals(lineGroupIntervals, stations) {
@@ -35,10 +43,95 @@ export default class Interval {
         } else {
           const followingStationsWithColor = {[color]: followingStations};
           // Otherwise make a new interval (this happens if there are currently 0)
-          nStation.intervals.push(new Interval(nStation, sStation, [color], shape, followingStationsWithColor));
+          const numberShape = shape.map(i => i.map(parseFloat));
+          nStation.intervals.push(new Interval(nStation, sStation, [color], numberShape, followingStationsWithColor));
         }
       })
     }
+  }
+
+  static mapPointsToOffsets(shape) {
+    return shape.map((pointB, index) => {
+      let pointA = null;
+      let pointC = null;
+      if (index > 0) {
+        pointA = shape[index - 1];
+      }
+      if (index < shape.length - 1) {
+        pointC = shape[index + 1];
+      }
+      return Interval.findOffsetPoints(pointA, pointB, pointC, 20);
+    });
+  }
+
+  static findOffsetPoints(pointA, pointB, pointC, offsetLengthMeters) {
+  
+    const pos = {};
+    pos.a = pointA || null;
+    pos.b = pointB || null;
+    pos.c = pointC || null;
+    // Distance between points A & B and points B & C in meters:
+    let dLatAB, dLngAB, dLatCB, dLngCB;
+    [dLatAB, dLngAB] = Interval.dLatLng(pointB, pointA);
+    [dLatCB, dLngCB] = Interval.dLatLng(pointB, pointC);
+  
+    // Turn distances into vectors using Victor: http://victorjs.org/
+    const abVector = new Victor(dLatAB, dLngAB);
+    const cbVector = new Victor(dLatCB, dLngCB);
+  
+    // Point B is last in interval shape:
+    if (!pointC) {
+      const offsetAVector = abVector.clone().normalize().rotate(Math.PI / 2);
+      pointB.nOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, offsetLengthMeters);
+      pointB.sOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, -offsetLengthMeters);
+      return [pointB.nOffset, pointB.sOffset];
+  
+      // Point B is first in interval shape:
+    } else if (!pointA) {
+      const offsetCVector = cbVector.clone().normalize().rotate(Math.PI / 2);
+      
+      // Swap N and S for first point:
+      pointB.sOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthMeters);
+      pointB.nOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, -offsetLengthMeters);
+      return [pointB.nOffset, pointB.sOffset];
+    }
+  
+    // Create equal magnitude vectors with the same directions:
+    const abVectorEqLen = abVector.clone().multiply(new Victor(cbVector.length(), cbVector.length()));
+    const cbVectorEqLen = cbVector.clone().multiply(new Victor(abVector.length(), abVector.length()));
+  
+    // Create new vector of magnitude 1 meter that bisects abVector and cbVector:
+    const offsetBVector = abVectorEqLen.clone().add(cbVectorEqLen).normalize();
+
+    // Create 2 points on opposite sides of Point B 50 meters away
+    // where the angles bisect the lines to Points A and C:
+    const oPos = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, offsetLengthMeters);
+    const oPosNeg = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, -offsetLengthMeters);
+  
+    const crossProduct = abVector.cross(cbVector);
+    if (crossProduct < 0) {
+      return [oPosNeg, oPos];
+    } else {
+      return [oPos, oPosNeg];
+    }
+  }
+
+  // Convert meter vector back to Lat/Lng and find offset from set point (Point B):
+  static offsetFromPoint(pointLat, pointLng, normalizedOffsetMetersX, normalizedOffsetMetersY, offsetLengthMeters = 1) {
+    const lat = pointLat + (METER_LAT_OFFSET * normalizedOffsetMetersX * offsetLengthMeters);
+    const lng = pointLng + (METER_LNG_OFFSET * normalizedOffsetMetersY * offsetLengthMeters);
+    return [lat, lng];
+  }
+
+  // Extrat lat/lng and convert to meters:
+  static dLatLng(s0, s1) {
+    if (!s0 || !s1) {
+      return [0, 0];
+    }
+    return [
+      (s1.latitude - s0.latitude) / METER_LAT_OFFSET, 
+      (s1.longitude - s0.longitude) / METER_LNG_OFFSET
+    ];
   }
 }
 
