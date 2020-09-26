@@ -14,7 +14,7 @@ export default class Interval {
     this.followingStations = followingStations;
     this.colors = colors;
     this.shape = shape;
-    this.offsets = Interval.mapPointsToOffsets(shape, trackDistance, colors);
+    this.offsets = [];
   }
 
   static combineIntervals(lineGroupIntervals, stations) {
@@ -35,7 +35,7 @@ export default class Interval {
         // Find those station objects in stations
         const followingStations = nextIntervals.map(j => stations[j][1]);
 
-        // If interval exists for another color add current color
+        // If interval exists for another color add current color and calculate offsets
         const matchIndex = sStopIds.indexOf(sStation.stopId);
         if (matchIndex > -1) {
           const currInter = nStation.intervals[matchIndex];
@@ -47,6 +47,13 @@ export default class Interval {
           const numberShape = shape.map(i => i.map(parseFloat));
           nStation.intervals.push(new Interval(nStation, sStation, [color], numberShape, followingStationsWithColor));
         }
+      })
+
+      colorIntervals.forEach(i => {
+        const nStation = stations[i[0]];
+        nStation.intervals.forEach(j => {
+          j.offsets = Interval.mapPointsToOffsets(j.shape, trackDistance, j.colors);
+        })
       })
     }
   }
@@ -68,7 +75,7 @@ export default class Interval {
         if (index < shape.length - 1) {
           pointC = shape[index + 1];
         }
-        return Interval.findOffsetPoints(pointA, pointB, pointC, distance);
+        return Interval.findOffsetPoints(pointA, pointB, pointC, colorDistance);
       });
     })
     return colorOffsetPoints;

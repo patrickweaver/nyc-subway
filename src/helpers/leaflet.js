@@ -54,7 +54,6 @@ function drawStation(station, recenter = false) {
 }
 
 function drawInterval(interval) {
-  console.log(interval);
   if (!interval.nStation || !interval.sStation) return;
   if (interval.colors.length === 0) return;
   if (interval.shape.length > 0) {
@@ -63,10 +62,24 @@ function drawInterval(interval) {
         const pos1 = [interval.shape[index][0], interval.shape[index][1]];
         const pos2 = [interval.shape[index + 1][0], interval.shape[index + 1][1]];
         // L.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
-        const color0 = interval.colors[0];
-        const offsets1 = [interval.offsets[color0][index][0], interval.offsets[color0][index][1]];
-        const offsets2 = [interval.offsets[color0][index + 1][0], interval.offsets[color0][index + 1][1]];
-        drawTracks(offsets1, offsets2, color0)
+        if (interval.nStation.stopId === "R30") {
+          console.log("* * LEAFLET")
+          console.log(interval.nStation, interval.sStation)
+          console.log(interval.colors)
+          console.log("offsets:")
+          console.log(interval.offsets)
+        }
+        interval.colors.forEach(color => {
+          if (interval.nStation.stopId === "R30") {
+          console.log(color)
+          }
+          const offsets1 = [interval.offsets[color][index][0], interval.offsets[color][index][1]];
+          const offsets2 = [interval.offsets[color][index + 1][0], interval.offsets[color][index + 1][1]];
+          drawTracks(offsets1, offsets2, color)
+        })
+        if (interval.nStation.stopId === "R30") {
+        console.log("\n")
+        }
       }
     });
   } else {
