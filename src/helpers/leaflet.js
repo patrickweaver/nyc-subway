@@ -25,7 +25,7 @@ const markers = {
   stationCircle: {
     color: "#3F3F3F",
     fillColor: "#000000",
-    fillOpacity: 1.0,
+    fillOpacity: 0.3,
     radius: 50,
   },
 
@@ -62,24 +62,11 @@ function drawInterval(interval) {
         const pos1 = [interval.shape[index][0], interval.shape[index][1]];
         const pos2 = [interval.shape[index + 1][0], interval.shape[index + 1][1]];
         // L.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
-        if (interval.nStation.stopId === "R30") {
-          console.log("* * LEAFLET")
-          console.log(interval.nStation, interval.sStation)
-          console.log(interval.colors)
-          console.log("offsets:")
-          console.log(interval.offsets)
-        }
         interval.colors.forEach(color => {
-          if (interval.nStation.stopId === "R30") {
-          console.log(color)
-          }
           const offsets1 = [interval.offsets[color][index][0], interval.offsets[color][index][1]];
           const offsets2 = [interval.offsets[color][index + 1][0], interval.offsets[color][index + 1][1]];
           drawTracks(offsets1, offsets2, color)
         })
-        if (interval.nStation.stopId === "R30") {
-        console.log("\n")
-        }
       }
     });
   } else {
@@ -104,8 +91,8 @@ function drawTracks(offsetsA, offsetsB, color) {
     //L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
     // Draw N and S offest positions:
-    //L.circle(offsetsB[0], {radius: 5, color: "grey"}).addTo(map);
-    //L.circle(offsetsB[1], {radius: 5, color: "grey"}).addTo(map);
+    L.circle(offsetsB[0], {radius: 3, color: "pink"}).addTo(map);
+    L.circle(offsetsB[1], {radius: 3, color: "pink"}).addTo(map);
     
     //Draw lines between offsets:
     L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);

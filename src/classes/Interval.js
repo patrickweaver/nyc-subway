@@ -1,5 +1,5 @@
 import Victor from 'victor';
-const trackDistance = 20; // Meters
+const trackDistance = 10; // Meters
 
 export default class Interval {
   constructor(
@@ -65,7 +65,35 @@ export default class Interval {
     // coordinates from the shape.
     const colorOffsetPoints = {};
     colors.forEach((color, index) => {
-      const colorDistance = distance * (index + 1);
+
+      // Calculate the distance from the track shape center line each
+      // of the pair of each color's "tracks" should be. The placing
+      // depends on if there are an even number or odd number of colors
+      // running on that interval.
+      const numberOfColors = colors.length;
+      let colorDistances;
+      const side = index % 2 === 0 ? 1 : -1;
+      const adjustment = trackDistance / 2;
+      // Odd number of colors
+      if (numberOfColors % 2 !== 0) {
+        // On first index pair down the middle:
+        if (index === 0) {
+          colorDistances = [trackDistance / 2, -trackDistance / 2];
+        } else {
+          const base = trackDistance * (Math.ceil(index / 2) * 2);
+          console.log("i:", index, "b:", base, "s:", side);
+          colorDistances = [side * (base - adjustment), side * (base + adjustment)];
+        }
+      } else {
+      // Even number of colors
+        const base = trackDistance * ((Math.floor(index / 2) * 2) + 1)
+        console.log("i:", index, "b:", base);
+        colorDistances = [side * (base - adjustment), side * (base + adjustment)];
+      }
+      console.log(colorDistances)
+      
+      // Map the shape's points to a pair of sets of points for each color
+      // offset by a certain distance.
       colorOffsetPoints[color] = shape.map((pointB, index) => {
         let pointA = null;
         let pointC = null;
@@ -75,13 +103,14 @@ export default class Interval {
         if (index < shape.length - 1) {
           pointC = shape[index + 1];
         }
-        return Interval.findOffsetPoints(pointA, pointB, pointC, colorDistance);
+
+        return Interval.findOffsetPoints(pointA, pointB, pointC, colorDistances);
       });
     })
     return colorOffsetPoints;
   }
 
-  static findOffsetPoints(pointA, pointB, pointC, offsetLengthMeters) {
+  static findOffsetPoints(pointA, pointB, pointC, offsetLengthsMeters) {
   
     const pos = {};
     pos.a = pointA || null;
@@ -98,8 +127,8 @@ export default class Interval {
     // Point B is last in interval shape:
     if (!pointC) {
       const offsetAVector = abVector.clone().normalize().rotate(Math.PI / 2);
-      pointB.nOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, offsetLengthMeters);
-      pointB.sOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, -offsetLengthMeters);
+      pointB.nOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, offsetLengthsMeters[0]);
+      pointB.sOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, offsetLengthsMeters[1]);
       return [pointB.nOffset, pointB.sOffset];
   
       // Point B is first in interval shape:
@@ -107,8 +136,8 @@ export default class Interval {
       const offsetCVector = cbVector.clone().normalize().rotate(Math.PI / 2);
 
       // Swap N and S for first point:
-      pointB.sOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthMeters);
-      pointB.nOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, -offsetLengthMeters);
+      pointB.sOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthsMeters[0]);
+      pointB.nOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthsMeters[1]);
       return [pointB.nOffset, pointB.sOffset];
     }
   
@@ -121,8 +150,8 @@ export default class Interval {
 
     // Create 2 points on opposite sides of Point B 50 meters away
     // where the angles bisect the lines to Points A and C:
-    const oPos = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, offsetLengthMeters);
-    const oPosNeg = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, -offsetLengthMeters);
+    const oPos = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, offsetLengthsMeters[0]);
+    const oPosNeg = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, offsetLengthsMeters[1]);
   
     const crossProduct = abVector.cross(cbVector);
     if (crossProduct < 0) {
