@@ -27,7 +27,6 @@
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
 
   const lineColors = {};
-  console.log(lineGroups)
   lineGroups.forEach(i => {
     i.lines.forEach(j => {
       lineColors[j] = i.color
@@ -63,8 +62,13 @@
       stationStopIds.push(station.stopId);
     });
 
+    const lgis = {};
+    lgis.LightGreen = lineGroupIntervals.LightGreen.filter(i => i[1] === "F21");
+    lgis.Orange = lineGroupIntervals.Orange.filter(i => i[1] === "F21") 
+
     // Add Interval objects to Station objects from hard coded interval data
-    Interval.combineIntervals(lineGroupIntervals, stations);
+    //Interval.combineIntervals(lineGroupIntervals, stations);
+    Interval.combineIntervals(lgis, stations);
 
     // Draw tracks by drawing each interval lines between stations
     stationStopIds.forEach(s => {
@@ -72,11 +76,11 @@
       intervals.forEach(interval => {
         if (true || interval.nStation.stopId === "R32") {
           leaflet.drawInterval(interval);
-          // interval.shape.forEach((i, index) => {
-          //   if (index > 0) {
-          //     leaflet.drawSimpleLine(i, interval.shape[index - 1].slice(0, 2));
-          //   }
-          // })
+          interval.shape.forEach((i, index) => {
+            if (index > 0) {
+              leaflet.drawSimpleLine(i, interval.shape[index - 1].slice(0, 2));
+            }
+          })
         }
       })
       

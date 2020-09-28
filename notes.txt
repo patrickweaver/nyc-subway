@@ -39,3 +39,29 @@ Questions:
 
 
 - Look at schedule data between stops but be careful with exaggerated with last stop.
+
+
+9/28/2020 Outline:
+
+lineColors {}: The color of each lineId
+stations []: A Station object for each station
+stationStopIds []: Just stopIds, same order as stations
+
+
+
+1. Create lineColors object from lineGroups, maps each lineId to a color
+2. Main:
+    1. Draw map tiles [leaflet.drawMap()]
+    2. Create station objects from stationData [new Station(i)] and insert into staitons array
+    3. Create stationStopIds array with just stopIds and same order as stations
+    4. Interval.combineIntervals
+        1. Loop through colors in lineGroupIntervals
+            a. Loop through each interval in color
+                i. Store interval in nStation of interval
+                ii. Find following intervals and corresponding stations
+                iii. Create interval object
+                iv. Update the interval with each color it appears in
+            b. Loop through each interval in color
+                i. mapPointsToOffsets
+    5. Loop through stations (using stationStopIds array)
+        a. leaflet.drawInterval()

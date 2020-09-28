@@ -59,13 +59,15 @@ export default class Interval {
   }
 
   static mapPointsToOffsets(shape, trackDistance, colors) {
+    console.log("MP2O:", colors)
     // For each color return an array of pairs (each side
     // of the shape line) of offset points (which are
     // pairs of coordinates) that map to each pair of
     // coordinates from the shape.
     const colorOffsetPoints = {};
+    console.log({colors})
     colors.forEach((color, index) => {
-
+      console.log({color, index})
       // Calculate the distance from the track shape center line each
       // of the pair of each color's "tracks" should be. The placing
       // depends on if there are an even number or odd number of colors
@@ -101,6 +103,7 @@ export default class Interval {
           pointC = shape[index + 1];
         }
 
+        console.log(`${color}, ${pointA}, ${pointB}, ${pointC}, ${colorDistances}`)
         return Interval.findOffsetPoints(pointA, pointB, pointC, colorDistances);
       });
     })
@@ -108,7 +111,7 @@ export default class Interval {
   }
 
   static findOffsetPoints(pointA, pointB, pointC, offsetLengthsMeters) {
-  
+    
     const pos = {};
     pos.a = pointA || null;
     pos.b = pointB || null;
