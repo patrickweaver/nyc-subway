@@ -58,7 +58,7 @@ export default class Interval {
     }
   }
 
-  static mapPointsToOffsets(shape, distance, colors) {
+  static mapPointsToOffsets(shape, trackDistance, colors) {
     // For each color return an array of pairs (each side
     // of the shape line) of offset points (which are
     // pairs of coordinates) that map to each pair of
@@ -81,16 +81,13 @@ export default class Interval {
           colorDistances = [trackDistance / 2, -trackDistance / 2];
         } else {
           const base = trackDistance * (Math.ceil(index / 2) * 2);
-          console.log("i:", index, "b:", base, "s:", side);
           colorDistances = [side * (base - adjustment), side * (base + adjustment)];
         }
       } else {
       // Even number of colors
         const base = trackDistance * ((Math.floor(index / 2) * 2) + 1)
-        console.log("i:", index, "b:", base);
         colorDistances = [side * (base - adjustment), side * (base + adjustment)];
       }
-      console.log(colorDistances)
       
       // Map the shape's points to a pair of sets of points for each color
       // offset by a certain distance.
@@ -123,22 +120,21 @@ export default class Interval {
     // Turn distances into vectors using Victor: http://victorjs.org/
     const abVector = new Victor(dLatAB, dLngAB);
     const cbVector = new Victor(dLatCB, dLngCB);
-  
     // Point B is last in interval shape:
     if (!pointC) {
       const offsetAVector = abVector.clone().normalize().rotate(Math.PI / 2);
-      pointB.nOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, offsetLengthsMeters[0]);
-      pointB.sOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, offsetLengthsMeters[1]);
-      return [pointB.nOffset, pointB.sOffset];
+      const pointBNOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, -offsetLengthsMeters[1]);
+      const pointBSOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, -offsetLengthsMeters[0]);
+      return [pointBNOffset, pointBSOffset];
   
       // Point B is first in interval shape:
     } else if (!pointA) {
       const offsetCVector = cbVector.clone().normalize().rotate(Math.PI / 2);
 
       // Swap N and S for first point:
-      pointB.sOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthsMeters[0]);
-      pointB.nOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthsMeters[1]);
-      return [pointB.nOffset, pointB.sOffset];
+      const pointBSOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthsMeters[0]);
+      const pointBNOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthsMeters[1]);
+      return [pointBNOffset, pointBSOffset];
     }
   
     // Create equal magnitude vectors with the same directions:

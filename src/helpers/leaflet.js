@@ -85,6 +85,10 @@ function drawLine(station1, station2) {
   L.polyline(latlongs, { color: "green" }).addTo(map);
 }
 
+function drawSimpleLine(station1, station2) {
+  L.polyline([station1, station2], { color: "green" }).addTo(map);
+}
+
 function drawTracks(offsetsA, offsetsB, color) {
   try {
     // Draw offset line for station B
@@ -201,6 +205,7 @@ export default {
   markers: markers,
   drawStation: drawStation,
   drawLine: drawLine,
+  drawSimpleLine: drawSimpleLine,
   drawTracks: drawTracks,
   drawTrain: drawTrain,
   moveTrain: moveTrain,

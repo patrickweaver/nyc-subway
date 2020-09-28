@@ -70,8 +70,16 @@
     stationStopIds.forEach(s => {
       const intervals = stations[s].intervals;
       intervals.forEach(interval => {
-        leaflet.drawInterval(interval);
+        if (true || interval.nStation.stopId === "R32") {
+          leaflet.drawInterval(interval);
+          // interval.shape.forEach((i, index) => {
+          //   if (index > 0) {
+          //     leaflet.drawSimpleLine(i, interval.shape[index - 1].slice(0, 2));
+          //   }
+          // })
+        }
       })
+      
     })
 
     // const drawLine = "A";
