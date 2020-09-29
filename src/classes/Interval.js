@@ -1,5 +1,5 @@
 import Victor from 'victor';
-const trackDistance = 100; // Meters
+const trackDistance = 50; // Meters
 
 export default class Interval {
   constructor(
@@ -144,7 +144,7 @@ export default class Interval {
     pos.a = pointA || null;
     pos.b = pointB || null;
     pos.c = pointC || null;
-    console.log("Pos:", pos.a, pos.b, pos.c);
+    //console.log("Pos:", pos.a, pos.b, pos.c);
     // Distance between points A & B and points B & C in meters:
     let dLatAB, dLngAB, dLatCB, dLngCB;
     [dLatAB, dLngAB] = Interval.dLatLng(pointB, pointA);
@@ -153,23 +153,32 @@ export default class Interval {
     // Turn distances into vectors using Victor: http://victorjs.org/
     const abVector = new Victor(dLatAB, dLngAB);
     const cbVector = new Victor(dLatCB, dLngCB);
-    console.log("AB:", abVector);
-    console.log("CB:", cbVector)
+    //console.log("AB:", abVector);
+    //console.log("CB:", cbVector)
     // Point B is last in interval shape:
     if (!pointC) {
       const offsetAVector = abVector.clone().normalize().rotate(Math.PI / 2);
+
+      if (offsetAVector.horizontalAngle() < 0) {
+        offsetAVector.rotate(Math.PI);
+      }
+
       const pointBNOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, -offsetLengthsMeters[1]);
       const pointBSOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetAVector.x, offsetAVector.y, -offsetLengthsMeters[0]);
-      return [pointBNOffset, pointBSOffset];
+      return [pointBSOffset, pointBNOffset];
   
       // Point B is first in interval shape:
     } else if (!pointA) {
       const offsetCVector = cbVector.clone().normalize().rotate(Math.PI / 2);
 
+      if (offsetCVector.horizontalAngle() > 0) {
+        offsetCVector.rotate(Math.PI);
+      }
+
       // Swap N and S for first point:
       const pointBSOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthsMeters[0]);
       const pointBNOffset = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetCVector.x, offsetCVector.y, offsetLengthsMeters[1]);
-      return [pointBNOffset, pointBSOffset];
+      return [pointBSOffset, pointBNOffset];
     }
   
     // Create equal magnitude vectors with the same directions:
@@ -190,7 +199,12 @@ export default class Interval {
     
     const offsetBVectorNormal = offsetBVector.clone().normalize();
 
-    console.log("OBV:", offsetBVectorNormal, offsetBVector.length())
+    console.log("OBV:", offsetBVectorNormal, offsetBVectorNormal.horizontalAngle())
+
+    // Ensure tracks are on the right side of original shape
+    if (offsetBVectorNormal.horizontalAngle() > 0) {
+      offsetBVectorNormal.rotate(Math.PI);
+    }
 
 
     // Create 2 points, each of the offsetLenghts away from Point B

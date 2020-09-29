@@ -68,15 +68,15 @@
     lgis.Orange = lineGroupIntervals.Orange.filter(i => i[1] === "F21") 
 
     // Add Interval objects to Station objects from hard coded interval data
-    //combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
-    combinedIntervals = Interval.combineIntervals(lgis, stations);
+    combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
+    //combinedIntervals = Interval.combineIntervals(lgis, stations);
 
     // Draw tracks by drawing each interval lines between stations
     Object.keys(combinedIntervals).forEach(nStationId => {
       Object.keys(combinedIntervals[nStationId]).forEach(sStationId => {
         const interval = combinedIntervals[nStationId][sStationId];
         leaflet.drawInterval(interval);
-        leaflet.drawShapeDots(interval.shape);
+        //leaflet.drawShapeDots(interval.shape);
       })
     })
 
