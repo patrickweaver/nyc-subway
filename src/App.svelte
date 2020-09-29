@@ -22,6 +22,7 @@
   let routes = [];
   const stations = {};
   const stationStopIds = [];
+  let combinedIntervals = {};
 
   // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
@@ -67,23 +68,16 @@
     lgis.Orange = lineGroupIntervals.Orange.filter(i => i[1] === "F21") 
 
     // Add Interval objects to Station objects from hard coded interval data
-    //Interval.combineIntervals(lineGroupIntervals, stations);
-    Interval.combineIntervals(lgis, stations);
+    //combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
+    combinedIntervals = Interval.combineIntervals(lgis, stations);
 
     // Draw tracks by drawing each interval lines between stations
-    stationStopIds.forEach(s => {
-      const intervals = stations[s].intervals;
-      intervals.forEach(interval => {
-        if (true || interval.nStation.stopId === "R32") {
-          leaflet.drawInterval(interval);
-          interval.shape.forEach((i, index) => {
-            if (index > 0) {
-              leaflet.drawSimpleLine(i, interval.shape[index - 1].slice(0, 2));
-            }
-          })
-        }
+    Object.keys(combinedIntervals).forEach(nStationId => {
+      Object.keys(combinedIntervals[nStationId]).forEach(sStationId => {
+        const interval = combinedIntervals[nStationId][sStationId];
+        leaflet.drawInterval(interval);
+        leaflet.drawShapeDots(interval.shape);
       })
-      
     })
 
     // const drawLine = "A";

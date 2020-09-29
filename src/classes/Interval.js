@@ -6,68 +6,68 @@ export default class Interval {
     nStation,
     sStation,
     colors,
-    shape,
-    followingStations={}
+    shape//,
+    //followingStations={}
   ) {
     this.nStation = nStation;
     this.sStation = sStation;
-    this.followingStations = followingStations;
+    //this.followingStations = followingStations;
     this.colors = colors;
     this.shape = shape;
     this.offsets = [];
   }
 
   static combineIntervals(lineGroupIntervals, stations) {
-    // Loop over each set of logged intervals separated by line color
-    for (let color in lineGroupIntervals) {
-      const colorIntervals = lineGroupIntervals[color];
+    // Object to store combined intervals, key is
+    // nStation.stopId
+    const combinedIntervals = {};
+    // Loop over each set of logged intervals organized by line color
+    Object.keys(lineGroupIntervals).forEach(color => {
       // Loop over each logged interval for the color
-      colorIntervals.forEach(i => {
+      lineGroupIntervals[color].forEach(i => {
+        // Get station objects from stations
         const nStation = stations[i[0]];
         const sStation = stations[i[1]];
-        const shape = i[4];
-        const sStopIds = nStation.intervals.map(j => j.sStation.stopId);
-        
-        // Find stations after interval by
-        // Filtering current colors intervals to ones where the
-        // first station is our current station's second station
-        const nextIntervals = i.filter(j => j[0] == sStation.stopId);
-        // Find those station objects in stations
-        const followingStations = nextIntervals.map(j => stations[j][1]);
-
-        // If interval exists for another color add current color and calculate offsets
-        const matchIndex = sStopIds.indexOf(sStation.stopId);
-        if (matchIndex > -1) {
-          const currInter = nStation.intervals[matchIndex];
-          currInter.colors.push(color);
-          currInter.followingStations[color] = followingStations;
+        if (
+        // If interval has been seen add current color
+          combinedIntervals[nStation.stopId]
+          && combinedIntervals[nStation.stopId][sStation.stopId]
+        ) {
+          combinedIntervals[nStation.stopId][sStation.stopId].colors.push(color);
         } else {
-          const followingStationsWithColor = {[color]: followingStations};
-          // Otherwise make a new interval (this happens if there are currently 0)
+        // Otherwise create Interval object
+          // 🚸 Could find next interval and add first point (or second?) of that interval to shape so points meet.
+          const shape = i[4];
           const numberShape = shape.map(i => i.map(parseFloat));
-          nStation.intervals.push(new Interval(nStation, sStation, [color], numberShape, followingStationsWithColor));
+          const interval = new Interval(nStation, sStation, [color], numberShape);
+          // Add new interval to combinedIntervals
+          if (!combinedIntervals[nStation.stopId]) {
+            combinedIntervals[nStation.stopId] = {};
+          }
+          combinedIntervals[nStation.stopId][sStation.stopId] = interval;
         }
-      })
+      });
+    });
 
-      colorIntervals.forEach(i => {
-        const nStation = stations[i[0]];
-        nStation.intervals.forEach(j => {
-          j.offsets = Interval.mapPointsToOffsets(j.shape, trackDistance, j.colors);
-        })
+    // Loop over combinedIntervals to create offsetShapes:
+    Object.keys(combinedIntervals).forEach(nStationId => {
+      Object.keys(combinedIntervals[nStationId]).forEach(sStationId => {
+        const interval = combinedIntervals[nStationId][sStationId];
+        // 🚸 IDK why I'm using trackDistance as a param here even though the functions are in the same file.
+        interval.offsets = Interval.mapPointsToOffsets(interval.shape, trackDistance, interval.colors);
       })
-    }
+    });
+
+    return combinedIntervals;
   }
 
   static mapPointsToOffsets(shape, trackDistance, colors) {
-    console.log("MP2O:", colors)
     // For each color return an array of pairs (each side
     // of the shape line) of offset points (which are
     // pairs of coordinates) that map to each pair of
     // coordinates from the shape.
     const colorOffsetPoints = {};
-    console.log({colors})
     colors.forEach((color, index) => {
-      console.log({color, index})
       // Calculate the distance from the track shape center line each
       // of the pair of each color's "tracks" should be. The placing
       // depends on if there are an even number or odd number of colors
@@ -103,7 +103,7 @@ export default class Interval {
           pointC = shape[index + 1];
         }
 
-        console.log(`${color}, ${pointA}, ${pointB}, ${pointC}, ${colorDistances}`)
+        //console.log(`${color}, ${pointA}, ${pointB}, ${pointC}, ${colorDistances}`)
         return Interval.findOffsetPoints(pointA, pointB, pointC, colorDistances);
       });
     })

@@ -89,14 +89,20 @@ function drawSimpleLine(station1, station2) {
   L.polyline([station1, station2], { color: "green" }).addTo(map);
 }
 
+function drawShapeDots(shape) {
+  shape.forEach(i => {
+    L.circle(i, {radius: 1, color: "blue"}).addTo(map);
+  })
+}
+
 function drawTracks(offsetsA, offsetsB, color) {
   try {
     // Draw offset line for station B
     //L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
     // Draw N and S offest positions:
-    L.circle(offsetsB[0], {radius: 3, color: "pink"}).addTo(map);
-    L.circle(offsetsB[1], {radius: 3, color: "pink"}).addTo(map);
+    L.circle(offsetsB[0], {radius: 1, color: "red"}).addTo(map);
+    L.circle(offsetsB[1], {radius: 1, color: "red"}).addTo(map);
     
     //Draw lines between offsets:
     L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
@@ -206,6 +212,7 @@ export default {
   drawStation: drawStation,
   drawLine: drawLine,
   drawSimpleLine: drawSimpleLine,
+  drawShapeDots: drawShapeDots,
   drawTracks: drawTracks,
   drawTrain: drawTrain,
   moveTrain: moveTrain,
