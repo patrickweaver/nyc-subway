@@ -65,7 +65,7 @@ function drawInterval(interval) {
         interval.colors.forEach(color => {
           const offsets1 = [interval.offsets[color][index][0], interval.offsets[color][index][1]];
           const offsets2 = [interval.offsets[color][index + 1][0], interval.offsets[color][index + 1][1]];
-          drawTracks(offsets1, offsets2, color)
+          drawTracks(offsets1, offsets2, color, index)
         })
       }
     });
@@ -90,19 +90,21 @@ function drawSimpleLine(station1, station2) {
 }
 
 function drawShapeDots(shape) {
-  shape.forEach(i => {
-    L.circle(i, {radius: 1, color: "blue"}).addTo(map);
+  const dcs = ["red", "orange", "yellow", "green", "violet", "black"]
+  shape.forEach((i, index) => {
+    L.circle(i, {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
   })
 }
 
-function drawTracks(offsetsA, offsetsB, color) {
+function drawTracks(offsetsA, offsetsB, color, index) {
   try {
     // Draw offset line for station B
     //L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
     // Draw N and S offest positions:
-    L.circle(offsetsB[0], {radius: 1, color: "red"}).addTo(map);
-    L.circle(offsetsB[1], {radius: 1, color: "red"}).addTo(map);
+    const dcs = ["red", "orange", "yellow", "green", "violet", "black"]
+    L.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+    L.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
     
     //Draw lines between offsets:
     L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);

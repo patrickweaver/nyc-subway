@@ -1,5 +1,5 @@
 import Victor from 'victor';
-const trackDistance = 10; // Meters
+const trackDistance = 100; // Meters
 
 export default class Interval {
   constructor(
@@ -68,12 +68,14 @@ export default class Interval {
     // coordinates from the shape.
     const colorOffsetPoints = {};
     colors.forEach((color, index) => {
+      console.log({color, index});
       // Calculate the distance from the track shape center line each
       // of the pair of each color's "tracks" should be. The placing
       // depends on if there are an even number or odd number of colors
       // running on that interval.
       const numberOfColors = colors.length;
       let colorDistances;
+      let base;
       const side = index % 2 === 0 ? 1 : -1;
       const adjustment = trackDistance / 2;
       // Odd number of colors
@@ -82,14 +84,15 @@ export default class Interval {
         if (index === 0) {
           colorDistances = [trackDistance / 2, -trackDistance / 2];
         } else {
-          const base = trackDistance * (Math.ceil(index / 2) * 2);
+          base = trackDistance * (Math.ceil(index / 2) * 2);
           colorDistances = [side * (base - adjustment), side * (base + adjustment)];
         }
       } else {
       // Even number of colors
-        const base = trackDistance * ((Math.floor(index / 2) * 2) + 1)
+        base = trackDistance * ((Math.floor(index / 2) * 2) + 1)
         colorDistances = [side * (base - adjustment), side * (base + adjustment)];
       }
+      console.log({base, colorDistances})
       
       // Map the shape's points to a pair of sets of points for each color
       // offset by a certain distance.
@@ -102,27 +105,56 @@ export default class Interval {
         if (index < shape.length - 1) {
           pointC = shape[index + 1];
         }
-
-        //console.log(`${color}, ${pointA}, ${pointB}, ${pointC}, ${colorDistances}`)
-        return Interval.findOffsetPoints(pointA, pointB, pointC, colorDistances);
-      });
+        const dcs = ["red", "orange", "yellow", "green", "violet", "black"]
+        console.log(`${color}, ${pointB}, ${colorDistances}, ${dcs[index % dcs.length]}`)
+        
+        const op = Interval.findOffsetPoints(pointA, pointB, pointC, colorDistances);
+        return op;
+      })
+      
+      // If previous and next station are an equal distance from
+      // the middle station, and at opposite angles, the vector
+      // will be of magnitude 0, findOffsetPoints will return
+      // null instead of a pair of coordinates for each distance.
+      // This step replaces those null values with the average of
+      // the offset points for the previous and next stations
+      // which is the correct location in this case.
+      colorOffsetPoints[color] = colorOffsetPoints[color].map((i, index) => {
+        const oShape = colorOffsetPoints[color];
+        if (i === null) {
+          return [
+            [
+              (oShape[index - 1][0][0] + oShape[index + 1][0][0]) / 2,
+              (oShape[index - 1][0][1] + oShape[index + 1][0][1]) / 2
+            ],
+            [
+              (oShape[index - 1][1][0] + oShape[index + 1][1][0]) / 2,
+              (oShape[index - 1][1][1] + oShape[index + 1][1][1]) / 2
+            ]
+          ]
+        }
+        return i;
+      })
     })
     return colorOffsetPoints;
   }
 
   static findOffsetPoints(pointA, pointB, pointC, offsetLengthsMeters) {
-    
     const pos = {};
     pos.a = pointA || null;
     pos.b = pointB || null;
     pos.c = pointC || null;
+    console.log("Pos:", pos.a, pos.b, pos.c);
     // Distance between points A & B and points B & C in meters:
     let dLatAB, dLngAB, dLatCB, dLngCB;
     [dLatAB, dLngAB] = Interval.dLatLng(pointB, pointA);
     [dLatCB, dLngCB] = Interval.dLatLng(pointB, pointC);
+    console.log("ds:", Math.floor(dLatAB * 100) / 100, Math.floor(dLngAB * 100) / 100, Math.floor(dLatCB * 100) / 100, Math.floor(dLngCB * 100) / 100);
     // Turn distances into vectors using Victor: http://victorjs.org/
     const abVector = new Victor(dLatAB, dLngAB);
     const cbVector = new Victor(dLatCB, dLngCB);
+    console.log("AB:", abVector);
+    console.log("CB:", cbVector)
     // Point B is last in interval shape:
     if (!pointC) {
       const offsetAVector = abVector.clone().normalize().rotate(Math.PI / 2);
@@ -143,32 +175,54 @@ export default class Interval {
     // Create equal magnitude vectors with the same directions:
     const abVectorEqLen = abVector.clone().multiply(new Victor(cbVector.length(), cbVector.length()));
     const cbVectorEqLen = cbVector.clone().multiply(new Victor(abVector.length(), abVector.length()));
+
+    console.log("ABeq:", abVectorEqLen, abVectorEqLen.length())
+    console.log("CBeq:", cbVectorEqLen, cbVectorEqLen.length())
   
     // Create new vector of magnitude 1 meter that bisects abVector and cbVector:
-    const offsetBVector = abVectorEqLen.clone().add(cbVectorEqLen).normalize();
+    const offsetBVector = abVectorEqLen.clone().add(cbVectorEqLen);
+    // If station differences are of equal length and opposite
+    // angles just skip the station.
+    if (offsetBVector.length() === 0) {
+      return null;
+    }
+    
+    
+    const offsetBVectorNormal = offsetBVector.clone().normalize();
 
-    // Create 2 points on opposite sides of Point B 50 meters away
+    console.log("OBV:", offsetBVectorNormal, offsetBVector.length())
+
+
+    // Create 2 points, each of the offsetLenghts away from Point B
     // where the angles bisect the lines to Points A and C:
-    const oPos = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, offsetLengthsMeters[0]);
-    const oPosNeg = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVector.x, offsetBVector.y, offsetLengthsMeters[1]);
+    const oPos1 = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVectorNormal.x, offsetBVectorNormal.y, offsetLengthsMeters[0]);
+    const oPos2 = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVectorNormal.x, offsetBVectorNormal.y, offsetLengthsMeters[1]);
   
     const crossProduct = abVector.cross(cbVector);
-    if (crossProduct < 0) {
-      return [oPosNeg, oPos];
-    } else {
-      return [oPos, oPosNeg];
-    }
+    console.log("CP:", crossProduct);
+    return [oPos1, oPos2]
+    // if (crossProduct < 0) {
+    //   return [oPos1, oPos2];
+    // } else {
+    //   return [oPos2, oPos1];
+    // }
   }
 
   // Convert meter vector back to Lat/Lng and find offset from set point (Point B):
   static offsetFromPoint(pointLat, pointLng, normalizedOffsetMetersX, normalizedOffsetMetersY, offsetLengthMeters = 1) {
-    const lat = pointLat + (METER_LAT_OFFSET * normalizedOffsetMetersX * offsetLengthMeters);
-    const lng = pointLng + (METER_LNG_OFFSET * normalizedOffsetMetersY * offsetLengthMeters);
+    console.log("OLM:", offsetLengthMeters)
+    const latOffset = METER_LAT_OFFSET * normalizedOffsetMetersX * offsetLengthMeters;
+    const lngOffset = METER_LNG_OFFSET * normalizedOffsetMetersY * offsetLengthMeters;
+    console.log("LatO:", latOffset, normalizedOffsetMetersX);
+    console.log("LngO:", lngOffset, normalizedOffsetMetersY);
+    const lat = pointLat + latOffset;
+    const lng = pointLng + lngOffset;
     return [lat, lng];
   }
 
   // Extrat lat/lng and convert to meters:
   static dLatLng(s0, s1) {
+    // s0 and s1 are [lat, lng]
     if (!s0 || !s1) {
       return [0, 0];
     }
