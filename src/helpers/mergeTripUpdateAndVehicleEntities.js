@@ -1,6 +1,7 @@
 export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
-  //console.log(JSON.stringify(tripEntities));
   try {
+
+    // Separate into 4 categories depending on what fields are in the entity
     const tripUpdates = [], vehicles = [], alerts = [], unknown = [];
     tripEntities.forEach(i => {
       if (i.tripUpdate) {
@@ -14,8 +15,10 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
       }
     });
 
-    console.log("🧤", tripUpdates.length, vehicles.length, unknown.length)
+    //console.log("🧤", tripUpdates.length, vehicles.length, unknown.length)
 
+    // Unknown entities shouldn't happen, but sometimes new types appear
+    // 🚸 Update this to log errors rather than throw.
     if (unknown.length > 0) {
       console.log("🚨 🚨 🚨 🚨 🚨 🚨\n Unknown Entity:");
       console.log(JSON.stringify(unknown));
@@ -24,21 +27,20 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
       throw "Unknown Entity";
     }
 
+    // Extracts tripId property which can be the child of
+    // multiple kinds of properites.
     function extractTripIds(type, i) {
       let item = i;
       if (type) {
         if (!i[type]) throw `No type value for ${type} in ${JSON.stringify(i)}`;
         item = i[type];
-        
       }
       if (!item.trip) throw "No trip data.";
       if (!item.trip.tripId) throw "No trip id.";
       return item.trip.tripId;
     }
 
-    const tripUpdateIds = tripUpdates.map(extractTripIds.bind(this, "tripUpdate"));
-    const vehicleIds = vehicles.map(extractTripIds.bind(this, "vehicle"));
-
+    // Extract useful information from alert entities
     const tripAlerts = alerts.flatMap(i => {
       let alerts = [];
       if (!i.alert.informedEntity) {
@@ -61,9 +63,12 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
       return alerts;
     })
 
+    // Create arrays of tripIds for entity type arrays
+    const tripUpdateIds = tripUpdates.map(extractTripIds.bind(this, "tripUpdate"));
+    const vehicleIds = vehicles.map(extractTripIds.bind(this, "vehicle"));
     const alertIds = tripAlerts.map(extractTripIds.bind(this, null));
     
-    // Match entities for the same trip:
+    // Match entities for the same trip from the different types arrays:
     tripUpdateIds.forEach((id, index) => {
       const tripUpdateEntity = tripUpdates[index];
       const vehicleIndex = vehicleIds.indexOf(id);
@@ -84,7 +89,8 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
     });
 
     if (vehicles.length > 0) {
-      throw "Unmatched vehicles remaining: " + vehicles.length;
+      console.log("🚟 Unmatched vehicles remaining: " + vehicles.length);
+      //throw "Unmatched vehicles remaining: " + vehicles.length;
     }
 
     return tripUpdates;

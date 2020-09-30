@@ -79,7 +79,7 @@ export default function findTrainPosition(lastNextStationId, nextStopId, routeId
     //🚧 Calculate lat/long mid-way between the next statio and the previous
     // station.
     let waitTimes = null;
-    if (stationWaitTimes[routeId] && stationWaitTimes[routeId][nextStopId] && stationWaitTImes[routeId][nextStopId][direction]) {
+    if (stationWaitTimes[routeId] && stationWaitTimes[routeId][nextStopId] && stationWaitTimes[routeId][nextStopId][direction]) {
       waitTimes = stationWaitTimes[routeId][nextStopId][direction];
     } else {
       waitTimes = {avg: 120, max: 120};

@@ -17,7 +17,6 @@
   import leaflet from "./helpers/leaflet.js";
 
   // Initialize variables
-  var tripEntities = []; // Most recent API response
   const trainsArray = []; // Array of Train objects
   let routes = [];
   const stations = {};
@@ -63,55 +62,24 @@
       stationStopIds.push(station.stopId);
     });
 
-    const lgis = {};
-    lgis.LightGreen = lineGroupIntervals.LightGreen.filter(i => i[1] === "F21");
-    lgis.Orange = lineGroupIntervals.Orange.filter(i => i[1] === "F21") 
-
     // Add Interval objects to Station objects from hard coded interval data
     combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
-    //combinedIntervals = Interval.combineIntervals(lgis, stations);
 
     // Draw tracks by drawing each interval lines between stations
     Object.keys(combinedIntervals).forEach(nStationId => {
       Object.keys(combinedIntervals[nStationId]).forEach(sStationId => {
         const interval = combinedIntervals[nStationId][sStationId];
         leaflet.drawInterval(interval);
-        //leaflet.drawShapeDots(interval.shape);
       })
     })
-
-    // const drawLine = "A";
-
-    // for (let s in shapes[drawLine]) {
-    //   const shape = shapes[drawLine][s];
-    //   shape.forEach((s1, index) => {
-    //     const color = lineColors[drawLine];
-    //     if (!shape[index + 1]) return ;
-    //     const s2 = shape[index + 1];
-    //     const pos1 = {
-    //       latitude: s1[0],
-    //       longitude: s1[1]
-    //     }
-    //     const pos2 = {
-    //       latitude: s2[0],
-    //       longitude: s2[1]
-    //     }
-    //     leaflet.drawInterval([color], pos1, pos2);
-    //   })
-    // }
 
     // Draw dots for each station
     for (let i in stations) {
       leaflet.drawStation(stations[i]);
     }
 
-    // // Parse station data:
-    // const stationsAndTracks = parseRoutes(routes); // 🚸 Empty right now
-    // // Draw all the stations for each route
-    // routes.forEach(i => drawStations(i.stops, i.color));
-
-    // drawLoop();
-    // setInterval(drawLoop, updateFreqency);
+    drawLoop();
+    setInterval(drawLoop, updateFreqency);
 
   })();
 
@@ -120,48 +88,55 @@
   // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds
   async function drawLoop() {
     try {
-      const lineGroup = lineGroups[0];
-
-      // Get data from API
-      tripEntities = await api.getMtaFeed(lineGroup.apiSuffix);
-      //console.log(JSON.stringify(tripEntities))
-      
-      // Combine TripUpdate and Vehicle data:
-      const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);
-
-      console.log(`${tripEntities.length} entities becomes data for ${combinedTripEntities.length} trains`)
-      
-      // Validate data and create TripEntity objects
-      const tripEntityObjects = combinedTripEntities.map((i, index) => new TripEntity(i, index));
-      console.log(`Found ${tripEntityObjects.length} trip entity objects.`)
-
-      // 🚸 Only use "Current" type trips for map
-      const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
-      const types = {}
-      tripEntityObjects.forEach(i => {
-        if (types[i.type]) {
-          types[i.type] += 1
-        } else {
-          types[i.type] = 1
+      lineGroups.forEach(async lineGroup => {
+          
+        const activeLines = ["g"];
+        if (activeLines.indexOf(lineGroup.apiSuffix) < 0) {
+          return;
         }
-      });
-      console.log("📊 Types\n:", types)
-      console.log(`of those ${currentTrips.length} are current`);
-      //Draw each train at its updated position on the map
-      drawEachTrain(currentTrips);
+
+        // Get data from API for a specific line group
+        // 🚸 Maybe this should have a callback instead of awaiting?
+        const tripEntities = await api.getMtaFeed(lineGroup.apiSuffix);
+        //console.log(JSON.stringify(tripEntities))
+        
+        // Combine TripUpdate and Vehicle data:
+        const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);
+
+        console.log(`${combinedTripEntities.length} train updates for ${lineGroup.apiSuffix.toUpperCase()}`);
+        //console.log(`${tripEntities.length} entities becomes data for ${combinedTripEntities.length} trains`)
+        
+        // Validate data and create TripEntity objects
+        const tripEntityObjects = combinedTripEntities.map((i, index) => new TripEntity(i, index));
+        //console.log(`Found ${tripEntityObjects.length} trip entity objects.`)
+
+        // 🚸 Only use "Current" type trips for map
+        const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
+        
+        // const types = {}
+        // tripEntityObjects.forEach(i => {
+        //   if (types[i.type]) {
+        //     types[i.type] += 1
+        //   } else {
+        //     types[i.type] = 1
+        //   }
+        // });
+        //console.log("📊 Types\n:", types)
+        //console.log(`of those ${currentTrips.length} are current`);
+
+        //Draw each train at its updated position on the map
+        drawEachTrain(currentTrips, lineGroup.apiSuffix);
+      })
     } catch (error) {
       console.log("🖋Error:", error);
     }
   }
 
   // Draw each train on map
-  function drawEachTrain(currentTrips) {
-    console.log("🧮 Received data for", currentTrips.length, "trains", "(", currentTrips.map(i => i.index), ")")
-    
-    for (var i in currentTrips) {
-      let trainUpdate = currentTrips[i];
+  function drawEachTrain(currentTrips, lines) {
+    console.log(`drawing ${currentTrips.length} trains for ${lines.toUpperCase()}`)
+    currentTrips.forEach(trainUpdate => {
       try {
-        
         let trainObject = trainUpdate.createTrainOrFindTrainIn(trainsArray);
 
         // 🚸 What are the cases that cause this?
@@ -181,13 +156,15 @@
           if (trainObject.move) {
             trainObject.move = false;
             leaflet.moveTrain(trainObject);
+          } else {
+            console.log(`Not moving train ${trainObject.id}`)
           }
         }
         
       } catch (error) {
         console.log("Error:", error);
       }
-    }
+    })
   }
 
   function parseRoutes(routes) {

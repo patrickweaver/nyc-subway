@@ -8,6 +8,7 @@ async function getFeed(line=false) {
       line = 'all';
     }
     const response = await fetch(`/api/${line}`);
+    console.log(`Updating for ${line.toUpperCase()} lines`);
     return await response.json();
   } catch (error) {
     console.log("Error:");
@@ -21,7 +22,7 @@ function parseFeed(apiResponse) {
 
   const syncDate = LocalTime.fromCurrentTime();
   const timestampDate = LocalTime.fromTimestamp(timestamp);
-  console.log(`Syncing! at ${syncDate.printTime()} and API thinks it's ${timestampDate.printTime()}`)
+  //console.log(`Syncing! at ${syncDate.printTime()} and API thinks it's ${timestampDate.printTime()}`)
 
   const tripEntities = apiResponse.entity.map(i => {
     i.timestamp = timestamp;

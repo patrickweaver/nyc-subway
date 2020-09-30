@@ -43,7 +43,7 @@ export default class LocalTime {
   }
 
   static fromCurrentTime() {
-    console.log("TZ:", timezone);
+    //console.log("TZ:", timezone);
     return new LocalTime(DateTime.fromObject({zone: timezone}));
   }
 

@@ -6,21 +6,6 @@ const RAD_TO_DEG = 57.2958;
 let map; // Map var for leaflet
 
 const markers = {
-  // 🚧 Placeholder for train North Bound Train Icon
-  ngIcon: L.icon({
-    iconUrl: "/images/NG.png",
-    iconSize: [24, 24], // size of the icon
-    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-  }),
-
-
-  // 🚧 Placeholder for train South Bound Train Icon
-  sgIcon: L.icon({
-    iconUrl: "/images/SG.png",
-    iconSize: [24, 24], // size of the icon
-    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-  }),
-
   // Station
   stationCircle: {
     color: "#3F3F3F",
@@ -31,10 +16,11 @@ const markers = {
 
   // Train Circle:
   trainCircle: {
-    color: "#00FF00",
-    fillColor: "#44EE44",
+    color: "Black",
+    fillColor: "White",
     fillOpacity: 1,
-    radius: 40,
+    radius: 15,
+    weight: 1,
   },
 };
 
@@ -70,19 +56,11 @@ function drawInterval(interval) {
       }
     });
   } else {
+    // Fallback for if interval.offsets is not set
     const s1Pos = [interval.nStation.latitude, interval.nStation.longitude];
     const s2Pos = [interval.sStation.latitude, interval.sStation.longitude];
     L.polyline([s1Pos, s2Pos], {color: interval.colors[0]}).addTo(map);
   }
-}
-
-// Draw connecting line between stations
-function drawLine(station1, station2) {
-  var latlongs = [
-    [station1.latitude, station1.longitude],
-    [station2.latitude, station2.longitude],
-  ];
-  L.polyline(latlongs, { color: "green" }).addTo(map);
 }
 
 function drawSimpleLine(station1, station2) {
@@ -103,8 +81,8 @@ function drawTracks(offsetsA, offsetsB, color, index) {
 
     // Draw N and S offest positions:
     const dcs = ["red", "orange", "yellow", "green", "violet", "black"]
-    L.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
-    L.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+    //L.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+    //L.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
     
     //Draw lines between offsets:
     L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
@@ -115,44 +93,25 @@ function drawTracks(offsetsA, offsetsB, color, index) {
   }
 }
 
-// function drawTracks(stationA, stationB, color) {
-
-//   // Draw offset line for station B
-//   L.polyline(stationB.offsets, { color: "#00fff2" }).addTo(map); // Aqua
-
-//   // Draw N and S offest positions:
-//   L.circle(stationB.offsets[0], {radius: 20, color: "orange"}).addTo(map);
-//   L.circle(stationB.offsets[1], {radius: 20, color: "yellow"}).addTo(map);
-  
-//   //Draw lines between offsets:
-//   L.polyline([stationA.offsets[0], stationB.offsets[0]], { color: color }).addTo(map);
-//   L.polyline([stationA.offsets[1], stationB.offsets[1]], { color: color }).addTo(map);
-// }
-
 function drawTrain(train) {
-  console.log(
-    "🚇 New Train: (index:",
-    train.mostRecentTripEntity.index,
-    "), id:",
-    train.id,
-    "at",
-    train.latitude,
-    ",",
-    train.longitude,
-    "going",
-    train.direction,
-    "type:",
-    train.mostRecentTripEntity.type,
-    ", startimeTimestamp:",
-    train.mostRecentTripEntity.trip.startTimestamp
-  );
+  // console.log(
+  //   "🚇 New Train: (index:",
+  //   train.mostRecentTripEntity.index,
+  //   "), id:",
+  //   train.id,
+  //   "at",
+  //   train.latitude,
+  //   ",",
+  //   train.longitude,
+  //   "going",
+  //   train.direction,
+  //   "type:",
+  //   train.mostRecentTripEntity.type,
+  //   ", startimeTimestamp:",
+  //   train.mostRecentTripEntity.trip.startTimestamp
+  // );
 
   let bounds = L.latLng(train.latitude, train.longitude).toBounds(250);
-
-  let trainIcon = markers.sgIcon;
-  if (train.direction === "N") {
-    trainIcon = markers.ngIcon;
-  }
 
   const trainPosition = [train.latitude, train.longitude];
   //var trainMarker = L.marker(trainPosition, {icon: trainIcon}).addTo(map);
@@ -173,22 +132,23 @@ function moveTrain(train) {
 
   destinations.forEach((loc) => {
     const timer = durationElapsed;
+    // 🚸 Why does the "in" timing change?
     setTimeout(() => {
-      console.log(
-        "⏱ moving ",
-        train.id,
-        "to:",
-        loc.latitude,
-        ",",
-        loc.longitude,
-        "via",
-        destinations.length,
-        "destinations, for",
-        durationEach / 1000,
-        "in",
-        timer / 1000,
-        "seconds."
-      );
+      // console.log(
+      //   "⏱ moving ",
+      //   train.id,
+      //   "to:",
+      //   loc.latitude,
+      //   ",",
+      //   loc.longitude,
+      //   "via",
+      //   destinations.length,
+      //   "destinations, for",
+      //   durationEach / 1000,
+      //   "in",
+      //   timer / 1000,
+      //   "seconds."
+      // );
       train.marker.slideTo([loc.latitude, loc.longitude], {
         duration: durationEach,
         keepAtCenter: false,
@@ -212,7 +172,6 @@ function drawMap() {
 export default {
   markers: markers,
   drawStation: drawStation,
-  drawLine: drawLine,
   drawSimpleLine: drawSimpleLine,
   drawShapeDots: drawShapeDots,
   drawTracks: drawTracks,
