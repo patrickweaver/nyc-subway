@@ -26,7 +26,7 @@ export default class Train {
   
   // Update a train's lat/long based on it's most recent
   // next stationand expected arrival time.
-  locate() {
+  locate(combinedIntervals) {
 
     try {
 
@@ -68,7 +68,7 @@ export default class Train {
         throw 'Invalid train direction: ' + this.direction;
       }
   
-      const trainPos = findTrainPosition(this.nextStationId, nextStopId, this.routeId, this.direction, waitTimeEstimate);
+      const trainPos = findTrainPosition(this.nextStationId, nextStopId, this.routeId, this.direction, waitTimeEstimate, combinedIntervals);
 
       // Update .nextStationId for next update to read.
       this.nextStationId = nextStopId;

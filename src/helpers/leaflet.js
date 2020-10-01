@@ -19,7 +19,7 @@ const markers = {
     color: "Black",
     fillColor: "White",
     fillOpacity: 1,
-    radius: 15,
+    radius: 3,
     weight: 1,
   },
 };
@@ -81,8 +81,8 @@ function drawTracks(offsetsA, offsetsB, color, index) {
 
     // Draw N and S offest positions:
     const dcs = ["red", "orange", "yellow", "green", "violet", "black"]
-    //L.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
-    //L.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+    L.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+    L.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
     
     //Draw lines between offsets:
     L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);

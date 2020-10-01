@@ -15,6 +15,8 @@ export default class Interval {
     this.colors = colors;
     this.shape = shape;
     this.offsets = [];
+    this.distances = [];
+    this.totalDistance = 0;
   }
 
   static combineIntervals(lineGroupIntervals, stations) {
@@ -55,10 +57,25 @@ export default class Interval {
         const interval = combinedIntervals[nStationId][sStationId];
         // 🚸 IDK why I'm using trackDistance as a param here even though the functions are in the same file.
         interval.offsets = Interval.mapPointsToOffsets(interval.shape, trackDistance, interval.colors);
+        interval.calculateDistances();
       })
     });
 
     return combinedIntervals;
+  }
+
+  calculateDistances() {
+    const toVector = ([x, y]) => new Victor(x, y)
+    const shapeVectors = this.shape.map(toVector);
+    const distances = shapeVectors.reduce((distancesElapsed, point, index, shapeVectors) => {
+      const previousPoint = index > 0 ? shapeVectors[index - 1] : null;
+      const distanceFromPreviousPoint = previousPoint ? previousPoint.distance(point) : 0;
+      const distanceElapsed = previousPoint ? distancesElapsed[index - 1] : 0;
+      distancesElapsed.push(distanceElapsed + distanceFromPreviousPoint);
+      return distancesElapsed
+    }, [])
+    this.distances = distances;
+    this.totalDistance = distances[distances.length - 1];
   }
 
   static mapPointsToOffsets(shape, trackDistance, colors) {

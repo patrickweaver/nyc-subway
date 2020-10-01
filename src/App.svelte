@@ -144,7 +144,7 @@
           throw "Can't parse train at index " + i;
         }
 
-        trainObject.locate()
+        trainObject.locate(combinedIntervals)
 
         if (!trainObject.marker) {
           // New train is drawn on map:
