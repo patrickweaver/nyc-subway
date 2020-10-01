@@ -18,38 +18,20 @@
 
   // Initialize variables
   const trainsArray = []; // Array of Train objects
-  let routes = [];
-  const stations = {};
-  const stationStopIds = [];
-  let combinedIntervals = {};
+  const stations = {}; // Station objects with stopId keys
+  const stationStopIds = []; // Iterable array of station stopIds
+  let combinedIntervals = {}; // Intervals with combined data per lineGroup
 
   // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
   const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
 
+  // lineColors keys are lineIds
   const lineColors = {};
   lineGroups.forEach(i => {
     i.lines.forEach(j => {
       lineColors[j] = i.color
     });
   });
-
-  // const routeData = lineGroups.flatMap(lineGroup => {
-  //   return lineGroup.lines.map(line => {
-  //     return {
-  //       line: line,
-  //       color: lineGroup.color,
-  //     }
-  //   });
-  // });
-
-  // // Station data is hard coded
-  // // See ./data/stationData.js, which is generated from tools/stationData.csv
-  // routes = routeData.map(i => {
-  //   return {
-  //     stops: stationHelpers.getLineStops(i.line),
-  //     color: i.color,
-  //   }
-  // });
 
   (async function main() {
     // Draw the map tiles
@@ -144,7 +126,7 @@
           throw "Can't parse train at index " + i;
         }
 
-        trainObject.locate(combinedIntervals)
+        trainObject.locate(combinedIntervals, stations)
 
         if (!trainObject.marker) {
           // New train is drawn on map:

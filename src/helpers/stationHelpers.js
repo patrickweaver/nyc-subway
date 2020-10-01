@@ -3,32 +3,6 @@ import Station from "../classes/Station.js";
 import stationData from "../data/stationData.js";
 import lines from "../data/lines.js";
 
-// Find a full station object from a GTFS Stop Id
-function findByGTFS(gtfsId, containsDirection=false) {
-  let stationGtfsId = gtfsId;
-  if (containsDirection) {
-    // Split GTFS Id from station direction
-    stationGtfsId = gtfsId.substring(0, gtfsId.length - 1);
-    const direction = gtfsId.substring(gtfsId.length - 1, gtfsId.length);
-  }
-  // Create array of just GTFS Ids and find index of station
-  const gtfsArray = stationData.map(i => String(i['GTFS Stop ID']));
-  const index = gtfsArray.indexOf(stationGtfsId);
-  if (index === -1) {
-    console.log('🦞 Station not found: ', stationGtfsId);
-    return null;
-  }
-  // Get full station data using index
-  const station = stationData[index];
-  if (containsDirection) {
-    // Store direction and split Daytime Routes into array
-    station.direction = direction;
-  }
-  station.daytimeRoutesArray = String(station['Daytime Routes']).split(' ');
-  
-  return station;
-}
-
 // Compare two stations by where they are in the train's route
 function compareByLineOrder(lineOrder, a, b) {
   try {
@@ -115,6 +89,5 @@ function getLineStops(lineId) {
 
 
 export default {
-  findByGTFS: findByGTFS,
   getLineStops: getLineStops
 }

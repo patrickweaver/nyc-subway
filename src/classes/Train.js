@@ -28,7 +28,7 @@ export default class Train {
   
   // Update a train's lat/long based on it's most recent
   // next stationand expected arrival time.
-  locate(combinedIntervals) {
+  locate(combinedIntervals, stations) {
 
     try {
 
@@ -70,7 +70,7 @@ export default class Train {
         throw 'Invalid train direction: ' + this.direction;
       }
   
-      const trainPos = this.findTrainPosition(this.nextStationId, nextStopId, this.routeId, this.direction, waitTimeEstimate, combinedIntervals);
+      const trainPos = this.findPosition(nextStopId, waitTimeEstimate, combinedIntervals, stations);
 
       // Update .nextStationId for next update to read.
       this.nextStationId = nextStopId;
@@ -92,8 +92,10 @@ export default class Train {
     }
   }
 
-  findTrainPosition(lastNextStationId, nextStopId, routeId, direction, waitTimeEstimate, combinedIntervals) {
+  findPosition(nextStopId, waitTimeEstimate, combinedIntervals, stations) {
 
+    const routeId = this.routeId;
+    const direction = this.direction;
     try {
       
       // Confirm route is valid:
@@ -101,22 +103,22 @@ export default class Train {
         throw "Invalid routeId: " + routeId;
       }
       
-      // lastNextStation will help us find intermediate stations to animate
-      // train through.
+      // lastNextStation will help us find intermediate stations and points
+      // to animate train through.
       let lastNextStationIndex;
-      if (lastNextStationId && lastNextStationId !== nextStopId) {
+      if (this.lastNextStationId && this.lastNextStationId !== nextStopId) {
         // If this is not a new train to us, look up previous value for
         // next station index:
-        lastNextStationIndex = lines[routeId].indexOf(lastNextStationId);
+        lastNextStationIndex = lines[routeId].indexOf(this.lastNextStationId);
       }
       
       
       // nextStation and prevStation will help us calculate the current lat/long
       // of the train.
-      let nextStation = stationHelpers.findByGTFS(nextStopId);
-      let nextStationIndex = lines[routeId].indexOf(String(nextStation["GTFS Stop ID"]));
+      let nextStation = stations[nextStopId];
+      let nextStationIndex = lines[routeId].indexOf(String(nextStation.stopId));
       if (nextStationIndex == -1) {
-        throw `Can't find next station in line. (${nextStation["GTFS Stop ID"]}, ${routeId})`
+        throw `Can't find next station in line. (${nextStation.stopId}, ${routeId})`
       }
       let prevStation;
       let prevStationIndex;
@@ -132,7 +134,8 @@ export default class Train {
         && prevStationIndex >= 0
         && prevStationIndex < lines[routeId].length
       ) {
-        prevStation = stationHelpers.findByGTFS(lines[routeId][prevStationIndex])
+        const prevStationId = lines[routeId][prevStationIndex];
+        prevStation = stations[prevStationId];
       } else {
         debugger;
         // 🚧 Trains waiting to begin journey have next stop as first or last
@@ -151,7 +154,7 @@ export default class Train {
       const establish = bound => direction => (aStation, bStation) => {
         return bound === direction ? [aStation, bStation] : [bStation, aStation];
       }
-      const [firstStationId, secondStationId] = establish("N")(direction)(nextStation["GTFS Stop ID"], prevStation["GTFS Stop ID"])
+      const [firstStationId, secondStationId] = establish("N")(direction)(nextStation.stopId, prevStation.stopId)
       
       // Find interval based on nStation and sStation from nextStation and prevStation
       const interval = combinedIntervals[firstStationId][secondStationId];
@@ -168,9 +171,9 @@ export default class Train {
           i += directionOffset
         ) {
           const stationId = lines[routeId][i];
-          const station = stationHelpers.findByGTFS(stationId);
-          const latitude = station["GTFS Latitude"];
-          const longitude = station["GTFS Longitude"];
+          const station = stations[stationId];
+          const latitude = station.stopId;
+          const longitude = station.stopId;
           intermediateDestinations.push({
             latitude: latitude,
             longitude: longitude,
