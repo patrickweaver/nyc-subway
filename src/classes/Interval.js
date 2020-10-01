@@ -9,6 +9,7 @@ export default class Interval {
     shape//,
     //followingStations={}
   ) {
+    this.id = `${nStation.stopId}__${sStation.stopId}`;
     this.nStation = nStation;
     this.sStation = sStation;
     //this.followingStations = followingStations;
@@ -242,6 +243,15 @@ export default class Interval {
       (s1[0] - s0[0]) / METER_LAT_OFFSET, 
       (s1[1] - s0[1]) / METER_LNG_OFFSET
     ];
+  }
+
+  // ☢️ endingIndex is inclusive!
+  getPoints(color, direction, startingIndex = 0, endingIndex = this.distances.length - 1) {
+    const directionIndex = direction === "N" ? 0 : 1;
+    return this.offsets[color]
+      .map(i => i[directionIndex])
+      .filter((i, index) => index >= startingIndex && index <= endingIndex)
+      .map(i => ({latitude: i[0], longitude: i[1]}));
   }
 }
 

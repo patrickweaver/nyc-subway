@@ -1,5 +1,4 @@
 import lines from "../data/lines.js";
-import stationHelpers from "../helpers/stationHelpers.js";
 import stationWaitTimes from "../data/stationWaitTimes.js";
 import lineGroups from "../data/lineGroups.js";
 
@@ -13,7 +12,7 @@ export default class Train {
 
     this.direction = null;
     this.intermediateDestinations = [];
-    this.nextStationId = null;
+    this.nextStopId = null;
     this.currentInterval = null;
     this.currentIntervalNextPointIndex = null;
     this.latitude = null;
@@ -69,11 +68,13 @@ export default class Train {
       if (!(this.direction === 'N' || this.direction === 'S')) {
         throw 'Invalid train direction: ' + this.direction;
       }
-  
-      const trainPos = this.findPosition(nextStopId, waitTimeEstimate, combinedIntervals, stations);
 
-      // Update .nextStationId for next update to read.
-      this.nextStationId = nextStopId;
+      // Update .nextStopId for next update to read.
+      this.nextStopId = nextStopId;
+  
+      const trainPos = this.findPosition(waitTimeEstimate, combinedIntervals, stations);
+
+      
 
       if (!trainPos.latitude || !trainPos.longitude) {
         throw "Error finding lat/long."
@@ -92,10 +93,22 @@ export default class Train {
     }
   }
 
-  findPosition(nextStopId, waitTimeEstimate, combinedIntervals, stations) {
+  findPosition(waitTimeEstimate, combinedIntervals, stations) {
 
+    const nextStopId = this.nextStopId;
     const routeId = this.routeId;
     const direction = this.direction;
+    const lineColors = {};
+    // 🚸 This is repeated in App.svelete
+    lineGroups.forEach(i => {
+      i.lines.forEach(j => {
+        lineColors[j] = i.color
+      });
+    });
+
+    const lineColor = lineColors[routeId];
+    const directionIntervalOffsetIndex = direction === "N" ? 0 : 1;
+
     try {
       
       // Confirm route is valid:
@@ -157,98 +170,123 @@ export default class Train {
       const [firstStationId, secondStationId] = establish("N")(direction)(nextStation.stopId, prevStation.stopId)
       
       // Find interval based on nStation and sStation from nextStation and prevStation
+      // and retreive what was previously the currentInterval
       const interval = combinedIntervals[firstStationId][secondStationId];
-  
-      // Find every point on the track that the train is on between what was previously
-      // the next point and what the current location is.
-      const intermediateDestinations = [];
-      if (lastNextStationIndex && lastNextStationIndex !== nextStationIndex) {
-        // Add in between stations to .intermediateDestinations. Most
-        // of the time this won't add anything. 
-        for (
-          let i = lastNextStationIndex;
-          i !== nextStationIndex;
-          i += directionOffset
-        ) {
-          const stationId = lines[routeId][i];
-          const station = stations[stationId];
-          const latitude = station.stopId;
-          const longitude = station.stopId;
-          intermediateDestinations.push({
-            latitude: latitude,
-            longitude: longitude,
-            index: i
-          });
-        }
-      }
-  
-  
-  
-  
-  
-  
-      // Calculate the train's progress based on the current wait time to the next
-      // station and the average (or max) wait time for that interval.
-      let waitTimes = null;
-      if (stationWaitTimes[routeId] && stationWaitTimes[routeId][nextStopId] && stationWaitTimes[routeId][nextStopId][direction]) {
-        waitTimes = stationWaitTimes[routeId][nextStopId][direction];
-      } else {
-        waitTimes = {avg: 120, max: 120};
-      }
-      let progress = waitTimeEstimate / waitTimes.avg;
-      if (progress > 1) {
-        progress = waitTimeEstimate / waitTimes.max;
-        if (progress > 1) {
-          // 🚸 There may be a way to look into data here to see what might cause this situation
-          progress = 0;
-        }
-      }
-
-      const progressDistance = progress * interval.totalDistance;
-
-      const lineColors = {};
-      // 🚸 This is repeated in App.svelete
-      lineGroups.forEach(i => {
-        i.lines.forEach(j => {
-          lineColors[j] = i.color
-        });
-      });
-  
-      const lineColor = lineColors[routeId];
-      const directionIndex = direction === "N" ? 0 : 1;
       const lineColorOffsets = interval.offsets[lineColor];
       
-      // Train is at last point in the shape
-      // 🚸 If shapes are extended one point into and from
-      // the previous/next shape this will need to be refactored.
-      let trainLat, trainLong;
-      if (progress === 1) {
-        const lastPointIndex = interval.distances.length;
-        const trainLocation = lineColorOffsets[lastPointIndex][directionIndex];
-        trainLat = trainLocation[0];
-        trainLong = trainLocation[1]
-        //console.log("📌 train located by exact point")
-      } else {
-        const  prevPointIndex = interval.distances.reduce((prevPointIndex, distance, index) => {
-          return distance > progressDistance ? prevPointIndex : index;
-        });
-        const prevDistance = interval.distances[prevPointIndex];
-        const nextDistance = interval.distances[prevPointIndex + 1];
-  
-        const prevPoint = lineColorOffsets[prevPointIndex][directionIndex];
-        const nextPoint = lineColorOffsets[prevPointIndex + 1][directionIndex];
-        const pointProgress = (nextDistance - progressDistance) / (nextDistance - prevDistance);
-  
-        const dLat = pointProgress * (nextPoint[0] - prevPoint[0]);
-        const dLong = pointProgress * (nextPoint[1] - prevPoint[1]);
-        trainLat = prevPoint[0] + dLat;
-        trainLong = prevPoint[1] + dLong;
-        //console.log("💊 train located between points")
+      let lastUpdateInterval, lastUpdateNextPointIndex, lastUpdateIntervalPoints;
+      if (this.currentInterval) {
+        lastUpdateInterval = this.currentInterval;
+        lastUpdateNextPointIndex = this.currentIntervalNextPointIndex // property will be overwritten
+        const lastUpdateLineColorOffsets = lastUpdateInterval.offsets[lineColor];
+        lastUpdateIntervalPoints = lastUpdateLineColorOffsets[directionIntervalOffsetIndex];
       }
 
+      this.currentInterval = interval;
+
+      const progress = this.getProgress(waitTimeEstimate);
+      
+      let nextPoint, nextPointIndex, prevPoint, prevPointIndex, pointProgress;
+      if (progress === 1) {
+        // Train has reached exactly the end of the interval (0 seconds)
+        nextPointIndex = interval.distances.length - 1;
+        prevPointIndex = nextPointIndex - 1;
+        pointProgress = 1;
+      } else {
+        // Progress through the current interval's total distance
+        const progressDistance = progress * interval.totalDistance;
+
+        // Find the last point in the interval the train passed
+        prevPointIndex = interval.distances.reduce((prevPointIndex, distance, index) => {
+          return distance > progressDistance ? prevPointIndex : index;
+        });
+        nextPointIndex = prevPointIndex + 1
+
+        // Save that point as lat/lng
+        prevPoint = lineColorOffsets[prevPointIndex][directionIntervalOffsetIndex];
+
+        // Find how far in distance the train has progressed between prev and next points
+        const prevDistance = interval.distances[prevPointIndex];
+        const nextDistance = interval.distances[prevPointIndex + 1];
+        const dNextPrev = nextDistance - prevDistance;
+        const dCurrentPrev = progressDistance - prevDistance;
+        pointProgress = dCurrentPrev / dNextPrev;
+      }
+
+      nextPoint = lineColorOffsets[nextPointIndex][directionIntervalOffsetIndex];
+      this.currentIntervalNextPointIndex = nextPointIndex;
+
+      // If train is at exactly the end of the interval there is no previous point
+      let trainPos;
+      if (!prevPoint) {
+        trainPos = nextPoint;
+      } else {
+      // Otherwise weight an average between the nextPoint and prevPoint based on
+      // point progress
+        const dLat = pointProgress * (nextPoint[0] - prevPoint[0]);
+        const dLong = pointProgress * (nextPoint[1] - prevPoint[1]);
+        trainPos = [prevPoint[0] + dLat, prevPoint[1] + dLong];
+      }
+
+      // Find every point on the track that the train is on between what was previously
+      // the next point and what the current location is and save in intermediateDestinations.
+      let intermediateDestinations = [];
+      // If this is the first time we have seen the train there is no previousInterval.
+      if (lastUpdateInterval) {
+        // Train is not still in the same interval
+        if (lastUpdateInterval.id !== interval.id) {
+          // Add the rest of the points in the interval it was in
+          const lastIndex = lastUpdateInterval.distances.length - 1;
+          const pointsFromLastUpdateInterval = lastUpdateInterval.getPoints(lineColor, direction, lastUpdateNextPointIndex, lastIndex);
+          intermediateDestinations = intermediateDestinations.concat(pointsFromLastUpdateInterval);
+        // 🧱 Find the rest of the intervals we may have passed and add their points
+
+        }
+
+      }
+
+          // // Train has passed any new points (otherwise there
+          // // are no intermediateDestinations)
+          // if (lastUpdateNextPointIndex > nextPointIndex) {
+          //   // Last point it passed in this interval is the previous point it passed.
+          //   lastUpdateIntervalLastPointPassedIndex = prevPointIndex;
+          // }
+
+      // 🧱 Add the points we have passed from the new currentInterval
+
+
+      // for (let i = this.currentIntervalNextPointIndex; i <= prevLastPassedPointIndex; i++) {
+      //   const point = previousIntervalPoints[i];
+      //   intermediateDestinations.push({
+      //     latitude: point[0],
+      //     longitude: point[1],
+      //   })
+      // }
+
+      
+      // if (lastNextStationIndex && lastNextStationIndex !== nextStationIndex) {
+      //   // Add in between stations to .intermediateDestinations. Most
+      //   // of the time this won't add anything. 
+      //   for (
+      //     let i = lastNextStationIndex;
+      //     i !== nextStationIndex;
+      //     i += directionOffset
+      //   ) {
+      //     const stationId = lines[routeId][i];
+      //     const station = stations[stationId];
+      //     const latitude = station.stopId;
+      //     const longitude = station.stopId;
+      //     intermediateDestinations.push({
+      //       latitude: latitude,
+      //       longitude: longitude
+      //     });
+      //   }
+      // }
+      
+
       return {
-        latitude: trainLat,
-        longitude: trainLong,
+        latitude: trainPos[0],
+        longitude: trainPos[1],
         intermediateDestinations: intermediateDestinations
       }
   
@@ -256,6 +294,29 @@ export default class Train {
       console.log("Error finding train location:\n", error)
       return null;
     }
+  }
+
+  // Calculate the train's progress based on the current wait time to the next
+  // station and the average (or max) wait time for that interval.
+  getProgress(waitTimeEstimate) {
+    const nextStopId = this.nextStopId;
+    const routeId = this.routeId;
+    const direction = this.direction;
+    let waitTimes = null;
+    if (stationWaitTimes[routeId] && stationWaitTimes[routeId][nextStopId] && stationWaitTimes[routeId][nextStopId][direction]) {
+      waitTimes = stationWaitTimes[routeId][nextStopId][direction];
+    } else {
+      waitTimes = {avg: 120, max: 120};
+    }
+    let progress = waitTimeEstimate / waitTimes.avg;
+    if (progress > 1) {
+      progress = waitTimeEstimate / waitTimes.max;
+      if (progress > 1) {
+        // 🚸 There may be a way to look into data here to see what might cause this situation
+        progress = 0;
+      }
+    }
+    return progress;
   }
 
 }
