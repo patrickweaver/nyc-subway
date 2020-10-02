@@ -108,6 +108,7 @@ export default class Train {
 
     const lineColor = lineColors[routeId];
     const directionIntervalOffsetIndex = direction === "N" ? 0 : 1;
+    const directionOffset = direction === "N" ? -1 : 1; // "S" if not "N"
 
     try {
       
@@ -116,18 +117,8 @@ export default class Train {
         throw "Invalid routeId: " + routeId;
       }
       
-      // lastNextStation will help us find intermediate stations and points
-      // to animate train through.
-      let lastNextStationIndex;
-      if (this.lastNextStationId && this.lastNextStationId !== nextStopId) {
-        // If this is not a new train to us, look up previous value for
-        // next station index:
-        lastNextStationIndex = lines[routeId].indexOf(this.lastNextStationId);
-      }
       
-      
-      // nextStation and prevStation will help us calculate the current lat/long
-      // of the train.
+      // Locate train between two stations based on the direction and the nextStation
       let nextStation = stations[nextStopId];
       let nextStationIndex = lines[routeId].indexOf(String(nextStation.stopId));
       if (nextStationIndex == -1) {
@@ -138,22 +129,20 @@ export default class Train {
   
       // Previous Station index will be different relative to next
       // Station depending on direction of train.
-      // 🚸Next station could be index 0?
-      let directionOffset = direction === "N" ? -1 : 1; // "S" if not "N"
       prevStationIndex = nextStationIndex - directionOffset;
       
       if (
         !prevStation
-        && prevStationIndex >= 0
-        && prevStationIndex < lines[routeId].length
+        && prevStationIndex >= 0 // nextStation is first in array, direction is "S"
+        && prevStationIndex < lines[routeId].length // nextStation is last, direction is "N"
       ) {
         const prevStationId = lines[routeId][prevStationIndex];
         prevStation = stations[prevStationId];
       } else {
-        debugger;
         // 🚧 Trains waiting to begin journey have next stop as first or last
         // but will not have a previous station index.
         console.log("⏱ Next Stop:", nextStopId, "Route Id:", routeId, "Direction:", direction);
+        debugger;
         throw 'Invalid previous station index.'
       }
       
@@ -163,23 +152,25 @@ export default class Train {
       }
   
       // Set the order of the nextStation and prevStation based on whether
-      // the train is going N or S.
+      // the train is going N or S. The order will be used to look up the 
+      // current interval which has the nStation as the first key and the
+      // sStation as the second key.
       const establish = bound => direction => (aStation, bStation) => {
         return bound === direction ? [aStation, bStation] : [bStation, aStation];
       }
-      const [firstStationId, secondStationId] = establish("N")(direction)(nextStation.stopId, prevStation.stopId)
+      const [nStationId, sStationId] = establish("N")(direction)(nextStation.stopId, prevStation.stopId)
       
       // Find interval based on nStation and sStation from nextStation and prevStation
       // and retreive what was previously the currentInterval
-      const interval = combinedIntervals[firstStationId][secondStationId];
-      const lineColorOffsets = interval.offsets[lineColor];
+      const interval = combinedIntervals[nStationId][sStationId];
+      const intervalLineColorOffsets = interval.offsets[lineColor];
       
       let lastUpdateInterval, lastUpdateNextPointIndex, lastUpdateIntervalPoints;
       if (this.currentInterval) {
         lastUpdateInterval = this.currentInterval;
-        lastUpdateNextPointIndex = this.currentIntervalNextPointIndex // property will be overwritten
-        const lastUpdateLineColorOffsets = lastUpdateInterval.offsets[lineColor];
-        lastUpdateIntervalPoints = lastUpdateLineColorOffsets[directionIntervalOffsetIndex];
+        lastUpdateNextPointIndex = this.currentIntervalNextPointIndex // saving becuase property will be overwritten
+        const lastUpdateIntervalLineColorOffsets = lastUpdateInterval.offsets[lineColor];
+        lastUpdateIntervalPoints = lastUpdateIntervalLineColorOffsets[directionIntervalOffsetIndex];
       }
 
       this.currentInterval = interval;
@@ -189,7 +180,7 @@ export default class Train {
       let nextPoint, nextPointIndex, prevPoint, prevPointIndex, pointProgress;
       if (progress === 1) {
         // Train has reached exactly the end of the interval (0 seconds)
-        nextPointIndex = interval.distances.length - 1;
+        nextPointIndex = interval.distances[direction].length - 1;
         prevPointIndex = nextPointIndex - 1;
         pointProgress = 1;
       } else {
@@ -197,23 +188,24 @@ export default class Train {
         const progressDistance = progress * interval.totalDistance;
 
         // Find the last point in the interval the train passed
-        prevPointIndex = interval.distances.reduce((prevPointIndex, distance, index) => {
+        // 🚸 Double check this
+        prevPointIndex = interval.distances[direction].reduce((prevPointIndex, distance, index) => {
           return distance > progressDistance ? prevPointIndex : index;
         });
-        nextPointIndex = prevPointIndex + 1
+        nextPointIndex = prevPointIndex + 1;
 
         // Save that point as lat/lng
-        prevPoint = lineColorOffsets[prevPointIndex][directionIntervalOffsetIndex];
+        prevPoint = intervalLineColorOffsets[prevPointIndex][directionIntervalOffsetIndex];
 
         // Find how far in distance the train has progressed between prev and next points
-        const prevDistance = interval.distances[prevPointIndex];
-        const nextDistance = interval.distances[prevPointIndex + 1];
+        const prevDistance = interval.distances[direction][prevPointIndex];
+        const nextDistance = interval.distances[direction][prevPointIndex + 1];
         const dNextPrev = nextDistance - prevDistance;
         const dCurrentPrev = progressDistance - prevDistance;
         pointProgress = dCurrentPrev / dNextPrev;
       }
 
-      nextPoint = lineColorOffsets[nextPointIndex][directionIntervalOffsetIndex];
+      nextPoint = intervalLineColorOffsets[nextPointIndex][directionIntervalOffsetIndex];
       this.currentIntervalNextPointIndex = nextPointIndex;
 
       // If train is at exactly the end of the interval there is no previous point
@@ -236,21 +228,32 @@ export default class Train {
         // Train is not still in the same interval
         if (lastUpdateInterval.id !== interval.id) {
           // Add the rest of the points in the interval it was in
-          const lastIndex = lastUpdateInterval.distances.length - 1;
+          const lastIndex = lastUpdateInterval.distances[direction].length - 1;
           const pointsFromLastUpdateInterval = lastUpdateInterval.getPoints(lineColor, direction, lastUpdateNextPointIndex, lastIndex);
           intermediateDestinations = intermediateDestinations.concat(pointsFromLastUpdateInterval);
-        // 🧱 Find the rest of the intervals we may have passed and add their points
+        
+          // 🧱 Find the rest of the intervals we may have passed and add their points
+        
+          const intermediateIntervals = [];
+          const ciNStopId = interval.nStation.stopId;
+          const cNStationIndex = lines[routeId].indexOf(ciNStopId);
+          const luiNStopId = lastUpdateInterval.nStation.stopId;
+          const luiNStationIndex = lines[routeId].indexOf(luiNStopId);
+
+          for (let i = luiNStationIndex + directionOffset; i !== cNStationIndex; i += directionOffset) {
+            const piNStationStopId = lines[routeId][i];
+            const piSStationStopId = lines[routeId][i + directionOffset];
+            const prevInterval = combinedIntervals[piNStationStopId][piSStationStopId];
+            intermediateDestinations = intermediateDestinations.concat(prevInterval.getPoints(lineColor, direction));
+            debugger;
+          }
+          
 
         }
 
       }
 
-          // // Train has passed any new points (otherwise there
-          // // are no intermediateDestinations)
-          // if (lastUpdateNextPointIndex > nextPointIndex) {
-          //   // Last point it passed in this interval is the previous point it passed.
-          //   lastUpdateIntervalLastPointPassedIndex = prevPointIndex;
-          // }
+      intermediateDestinations = intermediateDestinations.concat(interval.getPoints(lineColor, direction, 0, prevPointIndex));
 
       // 🧱 Add the points we have passed from the new currentInterval
 

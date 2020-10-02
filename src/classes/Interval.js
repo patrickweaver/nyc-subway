@@ -16,7 +16,7 @@ export default class Interval {
     this.colors = colors;
     this.shape = shape;
     this.offsets = [];
-    this.distances = [];
+    this.distances = {"N": [], "S": []};
     this.totalDistance = 0;
   }
 
@@ -68,15 +68,21 @@ export default class Interval {
   calculateDistances() {
     const toVector = ([x, y]) => new Victor(x, y)
     const shapeVectors = this.shape.map(toVector);
-    const distances = shapeVectors.reduce((distancesElapsed, point, index, shapeVectors) => {
+
+    // Function to reduce shape points to array of the cumulative distances
+    // between each of them
+    const shapeToDistances = (distancesElapsed, point, index, shapeVectors) => {
       const previousPoint = index > 0 ? shapeVectors[index - 1] : null;
       const distanceFromPreviousPoint = previousPoint ? previousPoint.distance(point) : 0;
       const distanceElapsed = previousPoint ? distancesElapsed[index - 1] : 0;
       distancesElapsed.push(distanceElapsed + distanceFromPreviousPoint);
       return distancesElapsed
-    }, [])
-    this.distances = distances;
-    this.totalDistance = distances[distances.length - 1];
+    }
+
+    const sDistances = shapeVectors.reduce(shapeToDistances, []);
+    const nDistances = [...shapeVectors].reverse().reduce(shapeToDistances,[]);
+    this.distances = { "N": nDistances, "S": sDistances }
+    this.totalDistance = nDistances[0];
   }
 
   static mapPointsToOffsets(shape, trackDistance, colors) {
@@ -149,6 +155,14 @@ export default class Interval {
         }
         return i;
       })
+
+      // Reverse direction of S bound offset shapes:
+      const sOffsetPoints = colorOffsetPoints[color].map(i => i[1]);
+      sOffsetPoints.reverse();
+      colorOffsetPoints[color] = colorOffsetPoints[color].map((i, index) => {
+        i[1] = sOffsetPoints[index];
+        return i;
+      });
     })
     return colorOffsetPoints;
   }
@@ -212,11 +226,11 @@ export default class Interval {
 
     // Create 2 points, each of the offsetLenghts away from Point B
     // where the angles bisect the lines to Points A and C:
-    const oPos1 = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVectorNormal.x, offsetBVectorNormal.y, offsetLengthsMeters[0]);
-    const oPos2 = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVectorNormal.x, offsetBVectorNormal.y, offsetLengthsMeters[1]);
+    const nPos = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVectorNormal.x, offsetBVectorNormal.y, offsetLengthsMeters[0]);
+    const sPos = Interval.offsetFromPoint(pos.b[0], pos.b[1], offsetBVectorNormal.x, offsetBVectorNormal.y, offsetLengthsMeters[1]);
   
     const crossProduct = abVector.cross(cbVector);
-    return [oPos1, oPos2]
+    return [nPos, sPos]
     // if (crossProduct < 0) {
     //   return [oPos1, oPos2];
     // } else {
@@ -246,7 +260,7 @@ export default class Interval {
   }
 
   // ☢️ endingIndex is inclusive!
-  getPoints(color, direction, startingIndex = 0, endingIndex = this.distances.length - 1) {
+  getPoints(color, direction, startingIndex = 0, endingIndex = this.distances.N.length - 1) {
     const directionIndex = direction === "N" ? 0 : 1;
     return this.offsets[color]
       .map(i => i[directionIndex])
