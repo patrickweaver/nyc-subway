@@ -80,7 +80,7 @@ export default class Interval {
     }
 
     const sDistances = shapeVectors.reduce(shapeToDistances, []);
-    const nDistances = [...shapeVectors].reverse().reduce(shapeToDistances,[]);
+    const nDistances = [...shapeVectors].reverse().reduce(shapeToDistances,[]).reverse();
     this.distances = { "N": nDistances, "S": sDistances }
     this.totalDistance = nDistances[0];
   }
@@ -156,13 +156,13 @@ export default class Interval {
         return i;
       })
 
-      // Reverse direction of S bound offset shapes:
-      const sOffsetPoints = colorOffsetPoints[color].map(i => i[1]);
-      sOffsetPoints.reverse();
-      colorOffsetPoints[color] = colorOffsetPoints[color].map((i, index) => {
-        i[1] = sOffsetPoints[index];
-        return i;
-      });
+      // // Reverse direction of S bound offset shapes:
+      // const sOffsetPoints = colorOffsetPoints[color].map(i => i[1]);
+      // sOffsetPoints.reverse();
+      // colorOffsetPoints[color] = colorOffsetPoints[color].map((i, index) => {
+      //   i[1] = sOffsetPoints[index];
+      //   return i;
+      // });
     })
     return colorOffsetPoints;
   }
@@ -263,9 +263,18 @@ export default class Interval {
   getPoints(color, direction, startingIndex = 0, endingIndex = this.distances.N.length - 1) {
     const directionIndex = direction === "N" ? 0 : 1;
     return this.offsets[color]
-      .map(i => i[directionIndex])
+      .map((i, index) => {
+        const ii = [...i[directionIndex]];
+        ii.push(index);
+        return ii;
+      })
       .filter((i, index) => index >= startingIndex && index <= endingIndex)
-      .map(i => ({latitude: i[0], longitude: i[1]}));
+      .map(i => ({
+        latitude: i[0],
+        longitude: i[1],
+        index: i[2],
+        interval: this.id
+      }));
   }
 }
 

@@ -141,6 +141,7 @@
           } else {
             console.log(`Not moving train ${trainObject.id}`)
           }
+          console.log(""); // 🚸
         }
         
       } catch (error) {

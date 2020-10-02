@@ -15,11 +15,18 @@ const markers = {
   },
 
   // Train Circle:
-  trainCircle: {
+  trainCircleN: {
     color: "Black",
     fillColor: "White",
     fillOpacity: 1,
-    radius: 3,
+    radius: 15,
+    weight: 1,
+  },
+  trainCircleS: {
+    color: "Black",
+    fillColor: "Pink",
+    fillOpacity: 1,
+    radius: 15,
     weight: 1,
   },
 };
@@ -115,7 +122,8 @@ function drawTrain(train) {
 
   const trainPosition = [train.latitude, train.longitude];
   //var trainMarker = L.marker(trainPosition, {icon: trainIcon}).addTo(map);
-  const trainMarker = L.circle(trainPosition, markers.trainCircle).addTo(map);
+  const tmo = train.direction === "N" ? markers.trainCircleN : markers.trainCircleS;
+  const trainMarker = L.circle(trainPosition, tmo).addTo(map);
   return trainMarker;
 }
 
@@ -123,8 +131,10 @@ function moveTrain(train) {
   console.log("🛎 Moving train:", train.id, "going", train.direction);
   const totalDuration = UPDATE_FREQUENCY_IN_SECONDS * 1000;
   const destinations = train.intermediateDestinations;
+  //const destinations = [];
   train.intermediateDestinations = [];
   destinations.push({ latitude: train.latitude, longitude: train.longitude });
+  //debugger;
   const numberOfDestinations = destinations.length;
   const durationEach = totalDuration / numberOfDestinations;
 
