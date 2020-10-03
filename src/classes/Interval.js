@@ -260,9 +260,17 @@ export default class Interval {
   }
 
   // ☢️ endingIndex is inclusive!
-  getPoints(color, direction, startingIndex = 0, endingIndex = this.distances.N.length - 1) {
-    const directionIndex = direction === "N" ? 0 : 1;
-    return this.offsets[color]
+  getPoints(color, direction, sIndex = 0, eIndex = this.distances.N.length - 1) {
+    let directionIndex = 1;
+    let startingIndex = sIndex;
+    let endingIndex = eIndex;
+    if (direction === "N") {
+      directionIndex = 0;
+      startingIndex = eIndex;
+      endingIndex = sIndex;
+    }
+
+    let points = this.offsets[color]
       .map((i, index) => {
         const ii = [...i[directionIndex]];
         ii.push(index);
@@ -275,6 +283,9 @@ export default class Interval {
         index: i[2],
         interval: this.id
       }));
+    if (direction === "N") {
+      points.reverse();
+    }
   }
 }
 
