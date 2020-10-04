@@ -19,14 +19,14 @@ const markers = {
     color: "Black",
     fillColor: "White",
     fillOpacity: 1,
-    radius: 15,
+    radius: 30,
     weight: 1,
   },
   trainCircleS: {
     color: "Black",
     fillColor: "Pink",
     fillOpacity: 1,
-    radius: 15,
+    radius: 30,
     weight: 1,
   },
 };
@@ -88,8 +88,8 @@ function drawTracks(offsetsA, offsetsB, color, index) {
 
     // Draw N and S offest positions:
     const dcs = ["red", "orange", "yellow", "green", "violet", "black"]
-    L.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
-    L.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+    //L.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+    //L.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
     
     //Draw lines between offsets:
     L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
@@ -133,9 +133,6 @@ function moveTrain(train) {
   let destinations = train.intermediateDestinations;
   train.intermediateDestinations = [];
 
-  // Add train position to destinations
-  destinations.push({ latitude: train.latitude, longitude: train.longitude, index: train.index });
-
   // There may be duplicate destinations from beginning/end of intervals
   // or if progress is 0:
   destinations = destinations.reduce((acc, cur, index) => {
@@ -150,36 +147,21 @@ function moveTrain(train) {
     return acc;
   }, []);
 
-  const numberOfDestinations = destinations.length;
-  const durationEach = totalDuration / numberOfDestinations;
-
+  const totalDistance = destinations.reduce((a, c) => a + c.distance, 0);
   let durationElapsed = 0;
 
   destinations.forEach((loc) => {
     const timer = durationElapsed;
+    const duration = totalDuration * (loc.distance / totalDistance);
     // 🚸 Why does the "in" timing change?
     setTimeout(() => {
-      // console.log(
-      //   "⏱ moving ",
-      //   train.id,
-      //   "to:",
-      //   loc.latitude,
-      //   ",",
-      //   loc.longitude,
-      //   "via",
-      //   destinations.length,
-      //   "destinations, for",
-      //   durationEach / 1000,
-      //   "in",
-      //   timer / 1000,
-      //   "seconds."
-      // );
+      // console.log("⏱ moving ", train.id, "to:", loc.latitude, ",", loc.longitude, "via", destinations.length, "destinations, for", durationEach / 1000, "in", timer / 1000, "seconds.");
       train.marker.slideTo([loc.latitude, loc.longitude], {
-        duration: durationEach,
+        duration: duration,
         keepAtCenter: false,
       });
     }, timer);
-    durationElapsed += durationEach;
+    durationElapsed += duration;
   });
 }
 

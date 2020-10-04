@@ -1,5 +1,5 @@
 import Victor from 'victor';
-const trackDistance = 20; // Meters
+const trackDistance = 25; // Meters
 
 export default class Interval {
   constructor(
@@ -42,6 +42,17 @@ export default class Interval {
           // 🚸 Could find next interval and add first point (or second?) of that interval to shape so points meet.
           const shape = i[4];
           const numberShape = shape.map(i => i.map(parseFloat));
+          // Add in station lat/longs
+          if (
+            !shape[0]
+            || (numberShape[0][0] !== nStation.latitude && numberShape[0][1] !== nStation.longitude)
+          ) {
+            numberShape.unshift([nStation.latitude, nStation.longitude])
+          }
+          const last = numberShape[numberShape.length - 1];
+          if (last[0] !== sStation.latitude && last[1] !== sStation.longitude) {
+            numberShape.push([sStation.latitude, sStation.longitude])
+          }
           const interval = new Interval(nStation, sStation, [color], numberShape);
           // Add new interval to combinedIntervals
           if (!combinedIntervals[nStation.stopId]) {
@@ -269,7 +280,7 @@ export default class Interval {
       startingIndex = eIndex;
       endingIndex = sIndex;
     }
-
+    
     let points = this.offsets[color]
       .map((i, index) => {
         const ii = [...i[directionIndex]];
@@ -281,11 +292,12 @@ export default class Interval {
         latitude: i[0],
         longitude: i[1],
         index: i[2],
-        interval: this.id
+        interval: this.id,
       }));
     if (direction === "N") {
       points.reverse();
     }
+
 
     return points;
   }

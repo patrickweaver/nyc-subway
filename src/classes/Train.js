@@ -2,6 +2,8 @@ import lines from "../data/lines.js";
 import stationWaitTimes from "../data/stationWaitTimes.js";
 import lineGroups from "../data/lineGroups.js";
 
+import Victor from 'victor';
+
 export default class Train {
   constructor(
     id,
@@ -24,7 +26,6 @@ export default class Train {
     this.routeId = null;
     this.scheduledAt = null;
     this.progress = 0;
-    this.index = 0;
   }
   
   // Update a train's lat/long based on it's most recent
@@ -86,7 +87,6 @@ export default class Train {
 
       this.latitude = trainPos.latitude;
       this.longitude = trainPos.longitude;
-      this.index = trainPos.index;
       this.intermediateDestinations = trainPos.intermediateDestinations
 
     } catch (error) {
@@ -96,7 +96,7 @@ export default class Train {
 
   findPosition(waitTimeEstimate, combinedIntervals, stations) {
 
-    console.log(`\n\n🗺 Locating train ${this.id} going ${this.direction}`);
+    // ✍️console.log(`\n\n🗺 Locating train ${this.id} going ${this.direction}`);
     const nextStopId = this.nextStopId;
     const routeId = this.routeId;
     const direction = this.direction;
@@ -154,7 +154,7 @@ export default class Train {
         throw "Can't find previous station"
       }
 
-      console.log(`🦄 ${this.id} prevStop: ${prevStation.name}, Next stop: ${nextStation.name}, arriving in ${waitTimeEstimate}`)
+      // ✍️console.log(`🦄 ${this.id} prevStop: ${prevStation.name}, Next stop: ${nextStation.name}, arriving in ${waitTimeEstimate}`)
   
       // Set the order of the nextStation and prevStation based on whether
       // the train is going N or S. The order will be used to look up the 
@@ -190,29 +190,27 @@ export default class Train {
       }
       // Save progress for next tick to compare.
       this.progress = progress;
+      // Progress through the current interval's total distance
+      const progressDistance = progress * interval.totalDistance;
 
-
-      console.log(`🎞 ${this.id} -- ${direction} bound train has progressed ${Math.floor(progress * 100)}% or ${progress * interval.totalDistance} (raw p:${progress})through ${interval.id} which has ${interval.distances[direction].length} points and is ${interval.totalDistance} long`)
+      // ✍️console.log(`🎞 ${this.id} -- ${direction} bound train has progressed ${Math.floor(progress * 100)}% or ${progress * interval.totalDistance} (raw p:${progress})through ${interval.id} which has ${interval.distances[direction].length} points and is ${interval.totalDistance} long`)
       let nextPoint, nextPointIndex, prevPoint, prevPointIndex, pointProgress;
       const lastPointIndex = interval.distances[direction].length - 1;
       const penultimatePointIndex = lastPointIndex - 1;
       if (progress === 1) {
       // Train has reached exactly the end of the interval (0 seconds)
-        console.log(`🖲🖲🖲🖲🖲🖲 ${this.id} PROGRESS EXACTLY 1`)
+        // ✍️console.log(`🖲🖲🖲🖲🖲🖲 ${this.id} PROGRESS EXACTLY 1`)
         nextPointIndex = N ? 0 : lastPointIndex;
         prevPointIndex = N ? 1 : penultimatePointIndex;
         pointProgress = 1;
       } else if (progress === 0) {
       // Train has reached exactly the beginning of the interval (reported wait
       // time matches estimate)
-        console.log(`💿💿💿💿💿💿 ${this.id} PROGRESS EXACTLY 0`)
+        // ✍️console.log(`💿💿💿💿💿💿 ${this.id} PROGRESS EXACTLY 0`)
         nextPointIndex = N ? penultimatePointIndex : 1;
-        prevPointIndex = N ? lastPoinIndex : 0;
+        prevPointIndex = N ? lastPointIndex : 0;
         pointProgress = 0;
       } else {
-        // Progress through the current interval's total distance
-        const progressDistance = progress * interval.totalDistance;
-
         // Find the last point in the interval the train passed
         // 🚸 Double check this
         prevPointIndex = interval.distances[direction].reduce((prevPointIndex, distance, index) => {
@@ -269,7 +267,7 @@ export default class Train {
         trainPos = [prevPoint[0] + dLat, prevPoint[1] + dLong];
       }
 
-      console.log(`⛺️ ${this.id} -- Interval: ${interval.id}, progress: ${progress}, nextPoint: ${nextPointIndex}, pointProgress: ${pointProgress}`);
+      // ✍️console.log(`⛺️ ${this.id} -- Interval: ${interval.id}, progress: ${progress}, nextPoint: ${nextPointIndex}, pointProgress: ${pointProgress}`);
 
       // Find every point on the track that the train is on between what was previously
       // the next point and what the current location is and save in intermediateDestinations.
@@ -279,18 +277,18 @@ export default class Train {
       // If this is the first time we have seen the train there is no previousInterval.
       if (lastUpdateInterval) {
         
-        console.log(this.id, `🕰 lastUpdateInterval: ${lastUpdateInterval.id}`);
+        // ✍️console.log(this.id, `🕰 lastUpdateInterval: ${lastUpdateInterval.id}`);
         // Train is not still in the same interval
         if (lastUpdateInterval.id !== interval.id) {
-          console.log(this.id, `🏡 in new interval (${interval.id}), previous was ${lastUpdateInterval.id}`);
+          // ✍️console.log(this.id, `🏡 in new interval (${interval.id}), previous was ${lastUpdateInterval.id}`);
           // Add the rest of the points in the interval it was in
           const lastIndex = N ? 0 : lastUpdateInterval.distances[direction].length - 1;
           const pointsFromLastUpdateInterval = lastUpdateInterval.getPoints(lineColor, direction, lastUpdateNextPointIndex, lastIndex);
           intermediateDestinations = intermediateDestinations.concat(pointsFromLastUpdateInterval);
           intermediatePoints.push(`${lastUpdateNextPointIndex} to ${lastIndex} from ${lastUpdateInterval.id}`)
-          console.log(`💎 ${this.id} finishing interval from %c${lastUpdateNextPointIndex}%c to %c${lastIndex}%c`, "color: red;", "color: black;", "color: red;", "color: black;")
-          console.log("💚", this.id, intermediatePoints);
-          console.log(this.id, intermediateDestinations.length, intermediateDestinations)
+          // ✍️console.log(`💎 ${this.id} finishing interval from %c${lastUpdateNextPointIndex}%c to %c${lastIndex}%c`, "color: red;", "color: black;", "color: red;", "color: black;")
+          // ✍️console.log("💚", this.id, intermediatePoints);
+          // ✍️console.log(this.id, intermediateDestinations.length, intermediateDestinations)
 
           // 🧱 Find the rest of the intervals we may have passed and add their points
           const intermediateIntervals = [];
@@ -311,11 +309,11 @@ export default class Train {
               debugger;
             }
             const prevInterval = combinedIntervals[piNStationStopId][piSStationStopId];
-            console.log(`🔋 ${this.id} -- Looping intervals: N: ${piNStationStopId} (${stations[piNStationStopId].name}), S: ${piSStationStopId} (${stations[piSStationStopId].name}), Interval: ${prevInterval ? prevInterval.id : 'Invalid Interval'}`);
+            // ✍️console.log(`🔋 ${this.id} -- Looping intervals: N: ${piNStationStopId} (${stations[piNStationStopId].name}), S: ${piSStationStopId} (${stations[piSStationStopId].name}), Interval: ${prevInterval ? prevInterval.id : 'Invalid Interval'}`);
             if (!prevInterval) {
               debugger
             }
-            console.log(`🌋 ${this.id} -- Also passed interval ${prevInterval.id}`)
+            // ✍️console.log(`🌋 ${this.id} -- Also passed interval ${prevInterval.id}`)
             // If this is the current interval:
             const startIndex = N ? prevInterval.distances[direction].length - 1 : 0;
             let endIndex = N ? 0 : prevInterval.distances[direction].length - 1;
@@ -333,7 +331,7 @@ export default class Train {
           if (lastUpdateNextPointIndex < nextPointIndex) {
             intermediateDestinations = intermediateDestinations.concat(interval.getPoints(lineColor, direction, lastUpdateNextPointIndex, prevPointIndex));
             intermediatePoints.push(`${lastUpdateNextPointIndex} to ${prevPointIndex} from ${interval.id}`)
-            console.log(`🛢 ${this.id} moving withing interval from %c${lastUpdateNextPointIndex}%c to %c${prevPointIndex}%c`, "color: red;", "color: black;", "color: red;", "color: black;")
+            // ✍️console.log(`🛢 ${this.id} moving withing interval from %c${lastUpdateNextPointIndex}%c to %c${prevPointIndex}%c`, "color: red;", "color: black;", "color: red;", "color: black;")
           }
         }
 
@@ -368,13 +366,42 @@ export default class Train {
       //     });
       //   }
       // }
-      console.log("🧡", this.id, intermediatePoints);
-      console.log(this.id, intermediateDestinations.length, intermediateDestinations)
+
+      // Add train position to destinations
+      intermediateDestinations.push({
+        latitude: trainPos[0],
+        longitude: trainPos[1],
+        index: (prevPointIndex + nextPointIndex) / 2,
+        interval: interval.id
+      });
+
+      // 🚸 This is repeated calculations but it's happening in different places
+      // so it's easier to just do it all again
+      // Calculate distances between points:
+      intermediateDestinations.map((d, index) => {
+        let distance, v1;
+        if (index === 0) {
+          v1 = new Victor(this.latitude, this.longitude);
+          
+        } else {
+          const prev = intermediateDestinations[index - 1];
+          v1 = new Victor(prev.latitude, prev.longitude);
+        }
+        const v2 = new Victor(d.latitude, d.longitude);
+        d.distance = v1.distance(v2);
+        return d;
+      })
+
+      if (intermediateDestinations[0] && intermediateDestinations[0].distance === 0) {
+        intermediateDestinations = intermediateDestinations.slice(1, intermediateDestinations.length);
+      }
+
+      // ✍️console.log("🧡", this.id, intermediatePoints);
+      // ✍️console.log(this.id, intermediateDestinations.length, intermediateDestinations)
 
       return {
         latitude: trainPos[0],
         longitude: trainPos[1],
-        index: (nextPointIndex + prevPointIndex) / 2,
         intermediateDestinations: intermediateDestinations
       }
   

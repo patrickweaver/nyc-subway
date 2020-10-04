@@ -10,8 +10,8 @@ export default class Station {
     this.borough = s["Borough"];
     this.routes = s["Daytime Routes"].toString().split(" ");
     this.structureType = s["Structure"];
-    this.latitude = s["GTFS Latitude"];
-    this.longitude = s["GTFS Longitude"];
+    this.latitude = parseFloat(s["GTFS Latitude"]);
+    this.longitude = parseFloat(s["GTFS Longitude"]);
     this.directionLabel = {
       n: s["North Direction Label"],
       s: s["South Direction Label"]

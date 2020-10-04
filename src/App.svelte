@@ -72,8 +72,8 @@
     try {
       lineGroups.forEach(async lineGroup => {
           
-        const activeLines = ["g"];
-        if (activeLines.indexOf(lineGroup.apiSuffix) < 0) {
+        const activeLines = []//["g"];
+        if (activeLines.length > 0 && activeLines.indexOf(lineGroup.apiSuffix) < 0) {
           return;
         }
 
