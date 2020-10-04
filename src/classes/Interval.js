@@ -1,5 +1,5 @@
 import Victor from 'victor';
-const trackDistance = 10; // Meters
+const trackDistance = 20; // Meters
 
 export default class Interval {
   constructor(
@@ -286,6 +286,8 @@ export default class Interval {
     if (direction === "N") {
       points.reverse();
     }
+
+    return points;
   }
 }
 

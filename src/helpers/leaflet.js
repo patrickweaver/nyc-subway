@@ -130,11 +130,26 @@ function drawTrain(train) {
 function moveTrain(train) {
   console.log("🛎 Moving train:", train.id, "going", train.direction);
   const totalDuration = UPDATE_FREQUENCY_IN_SECONDS * 1000;
-  const destinations = train.intermediateDestinations;
-  //const destinations = [];
+  let destinations = train.intermediateDestinations;
   train.intermediateDestinations = [];
-  destinations.push({ latitude: train.latitude, longitude: train.longitude });
-  //debugger;
+
+  // Add train position to destinations
+  destinations.push({ latitude: train.latitude, longitude: train.longitude, index: train.index });
+
+  // There may be duplicate destinations from beginning/end of intervals
+  // or if progress is 0:
+  destinations = destinations.reduce((acc, cur, index) => {
+    if (index === 0) {
+      acc.push(cur);
+    } else {
+      const last = acc[acc.length - 1];
+      if (last.latitude !== cur.latitude || last.longitude !== cur.longitude) {
+        acc.push(cur);
+      }
+    }
+    return acc;
+  }, []);
+
   const numberOfDestinations = destinations.length;
   const durationEach = totalDuration / numberOfDestinations;
 

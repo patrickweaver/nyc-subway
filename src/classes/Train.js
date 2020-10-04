@@ -24,6 +24,7 @@ export default class Train {
     this.routeId = null;
     this.scheduledAt = null;
     this.progress = 0;
+    this.index = 0;
   }
   
   // Update a train's lat/long based on it's most recent
@@ -85,6 +86,7 @@ export default class Train {
 
       this.latitude = trainPos.latitude;
       this.longitude = trainPos.longitude;
+      this.index = trainPos.index;
       this.intermediateDestinations = trainPos.intermediateDestinations
 
     } catch (error) {
@@ -190,17 +192,22 @@ export default class Train {
       this.progress = progress;
 
 
-      console.log(`🎞 ${this.id} -- ${direction} bound train has progressed ${Math.floor(progress * 100)}% or ${progress * interval.totalDistance} through ${interval.id} which has ${interval.distances[direction].length} points and is ${interval.totalDistance} long`)
-      
+      console.log(`🎞 ${this.id} -- ${direction} bound train has progressed ${Math.floor(progress * 100)}% or ${progress * interval.totalDistance} (raw p:${progress})through ${interval.id} which has ${interval.distances[direction].length} points and is ${interval.totalDistance} long`)
       let nextPoint, nextPointIndex, prevPoint, prevPointIndex, pointProgress;
+      const lastPointIndex = interval.distances[direction].length - 1;
+      const penultimatePointIndex = lastPointIndex - 1;
       if (progress === 1) {
-        // Train has reached exactly the end of the interval (0 seconds)
-        nextPointIndex = interval.distances[direction].length - 1;
-        prevPointIndex = nextPointIndex - 1;
+      // Train has reached exactly the end of the interval (0 seconds)
+        console.log(`🖲🖲🖲🖲🖲🖲 ${this.id} PROGRESS EXACTLY 1`)
+        nextPointIndex = N ? 0 : lastPointIndex;
+        prevPointIndex = N ? 1 : penultimatePointIndex;
         pointProgress = 1;
       } else if (progress === 0) {
-        prevPointIndex = interval.distances[direction].length - 1;
-        nextPointIndex = prevPointIndex - 1;
+      // Train has reached exactly the beginning of the interval (reported wait
+      // time matches estimate)
+        console.log(`💿💿💿💿💿💿 ${this.id} PROGRESS EXACTLY 0`)
+        nextPointIndex = N ? penultimatePointIndex : 1;
+        prevPointIndex = N ? lastPoinIndex : 0;
         pointProgress = 0;
       } else {
         // Progress through the current interval's total distance
@@ -292,11 +299,15 @@ export default class Train {
           const luiNStopId = lastUpdateInterval.nStation.stopId;
           const luiNStationIndex = lines[routeId].indexOf(luiNStopId);
 
+          // 
           for (let i = luiNStationIndex + directionOffset; i !== cNStationIndex + directionOffset; i += directionOffset) {
             const piNStationStopId = lines[routeId][i];
             const piSStationStopId = lines[routeId][i + 1];
             if (!combinedIntervals[piNStationStopId] || !combinedIntervals[piNStationStopId][piSStationStopId]) {
               console.log("Invalid Interval!")
+              // What seems to happen here is that the previous update
+              // gave incorrect data.
+              // 🚸 Maybe remove train?
               debugger;
             }
             const prevInterval = combinedIntervals[piNStationStopId][piSStationStopId];
@@ -313,8 +324,7 @@ export default class Train {
             }
             intermediateDestinations = intermediateDestinations.concat(prevInterval.getPoints(lineColor, direction, startIndex, endIndex));
             intermediatePoints.push(`${startIndex} to ${endIndex} from ${prevInterval.id}`)
-            console.log("🧡", this.id, intermediatePoints);
-            console.log(this.id, intermediateDestinations.length, intermediateDestinations)
+            
           }
           
 
@@ -358,10 +368,13 @@ export default class Train {
       //     });
       //   }
       // }
-      
+      console.log("🧡", this.id, intermediatePoints);
+      console.log(this.id, intermediateDestinations.length, intermediateDestinations)
+
       return {
         latitude: trainPos[0],
         longitude: trainPos[1],
+        index: (nextPointIndex + prevPointIndex) / 2,
         intermediateDestinations: intermediateDestinations
       }
   
