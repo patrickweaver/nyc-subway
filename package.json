@@ -28,7 +28,7 @@
     "csvtojson": "^2.0.10",
     "date-fns": "^2.9.0",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "gtfs-realtime-bindings": "0.0.5",
     "leaflet": "^1.6.0",
     "leaflet.marker.slideto": "^0.2.0",
