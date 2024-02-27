@@ -16,14 +16,14 @@ export async function getFeed(feedId = null) {
     const response = await fetch(url, { headers });
     if (!response.ok) {
       const error = new Error(
-        `${response.url}: ${response.status} ${response.statusText}`,
+        `${response.url}: ${response.status} ${response.statusText}`
       );
       error.response = response;
       throw error;
     }
     const buffer = await response.arrayBuffer();
     const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
-      new Uint8Array(buffer),
+      new Uint8Array(buffer)
     );
     return feed;
   } catch (error) {

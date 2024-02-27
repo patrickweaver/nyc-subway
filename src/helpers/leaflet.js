@@ -9,6 +9,7 @@ import {
 } from "../config";
 
 const RAD_TO_DEG = 57.2958;
+const UPDATE_FREQUENCY_IN_SECONDS = 10;
 
 let map; // Map var for leaflet
 

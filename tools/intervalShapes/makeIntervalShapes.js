@@ -81,7 +81,7 @@ try {
                 ) {
                   currIntervalShapesStrs.push(shapeString);
                   currIntervalShapes.push(
-                    shapes[line][lineVar].slice(s1Ind, s2Ind + 1),
+                    shapes[line][lineVar].slice(s1Ind, s2Ind + 1)
                   );
                 }
               }
@@ -112,9 +112,7 @@ try {
   }
 
   const intervalShapesCopy = `// Parsed data from shapes.txt file from GTFS download
-  // and logged (and cleaned up) intervals from stopTimeUpdates
-
-  export default `;
+  // and logged (and cleaned up) intervals from stopTimeUpdates default export  `;
 
   const filename = "./tools/intervalShapes/intervalShapes.js";
   fs.writeFile(
@@ -123,7 +121,7 @@ try {
     function (err) {
       if (err) return console.log("Error:\n", err);
       console.log(`Interval shapes file updated.`);
-    },
+    }
   );
 } catch (error) {
   console.log("Error writing file\n", error);

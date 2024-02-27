@@ -63,8 +63,8 @@ export function logLocations(apiResponse) {
       const type = e.tripUpdate
         ? "Trip Update"
         : e.vehicle
-          ? "Vehicle"
-          : "Unknown";
+        ? "Vehicle"
+        : "Unknown";
 
       let tripRow = `${timestamp}, ${e.id}, ${type}, `;
       let stuMetaRow = `${timestamp}, ${e.id}, ${type}, `;
@@ -73,7 +73,7 @@ export function logLocations(apiResponse) {
         const tu = e.tripUpdate;
         const startTimestamp = timestampFromDateAndTime(
           tu.trip.startDate,
-          tu.trip.startTime,
+          tu.trip.startTime
         );
         tripRow += `${tu.trip.tripId}, ${tu.trip.startTime}, ${tu.trip.startDate}, ${tu.trip.routeId}, ${startTimestamp}, ${index}, ${apiResponse.entity.length}, `;
         stuMetaRow += `${tu.trip.tripId}, ${tu.trip.startTime}, ${tu.trip.startDate}, ${tu.trip.routeId}, ${startTimestamp}, ${index}, ${apiResponse.entity.length}, `;

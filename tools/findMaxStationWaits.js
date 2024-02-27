@@ -46,7 +46,7 @@ async function main() {
   console.log(JSON.stringify(allLinesWaitTimes));
 
   const data = new Uint8Array(
-    Buffer.from("export default " + JSON.stringify(allLinesWaitTimes)),
+    Buffer.from("export default " + JSON.stringify(allLinesWaitTimes))
   );
   fs.writeFile(saveFilePath, data, (err) => {
     if (err) throw err;

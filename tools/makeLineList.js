@@ -36,7 +36,7 @@ async function getLineGroup(lineGroup) {
     const apiResponse = await getFeed(lineGroup.apiSuffix);
     // Filter to only entities with a tripUpdate property
     const tripUpdateEntities = apiResponse.entity.filter((i) =>
-      i.tripUpdate ? true : false,
+      i.tripUpdate ? true : false
     );
 
     // Filter to only valid South bound trips for each line.
@@ -73,7 +73,7 @@ async function getLineGroup(lineGroup) {
         if (!update.tripUpdate.stopTimeUpdate[0]) return null;
         // remove direction from stopId string
         return update.tripUpdate.stopTimeUpdate.map((stationUpdate) =>
-          stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1),
+          stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1)
         );
       });
     });
@@ -108,7 +108,7 @@ async function getLineGroup(lineGroup) {
           ") at",
           new Date().getHours(),
           ":",
-          new Date().getMinutes(),
+          new Date().getMinutes()
         );
         lines[line] = lineStopIdsUpdates[longestIndex];
       }
@@ -117,7 +117,7 @@ async function getLineGroup(lineGroup) {
     console.log(
       "👺 makeLineList Error for line",
       lineGroup.lines.join(""),
-      ":",
+      ":"
     );
     console.log("💋  💋  💋  💋  💋  💋  💋  💋  ");
     console.log(error);

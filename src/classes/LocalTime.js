@@ -37,7 +37,7 @@ export default class LocalTime {
         minute: HHMMSS.substring(3, 5),
         second: HHMMSS.substring(6, 8),
       },
-      { zone: timezone },
+      { zone: timezone }
     );
     return new LocalTime(datetime);
   }

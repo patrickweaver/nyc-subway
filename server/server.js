@@ -81,7 +81,7 @@ app.get("/api/:line", async function (req, res) {
         shouldUpdate ? "💡 new" : "💾 cached"
       } response for line ${line} to client with ${
         feedResponse.entity.length
-      } items.`,
+      } items.`
     );
 
     res.json(feedResponse);

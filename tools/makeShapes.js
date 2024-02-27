@@ -64,7 +64,7 @@ try {
     function (err) {
       if (err) return console.log("Error:\n", err);
       console.log(`Shapes file updated.`);
-    },
+    }
   );
 } catch (error) {
   console.log("Error writing file\n", error);

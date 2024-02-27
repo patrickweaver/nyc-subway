@@ -11,7 +11,7 @@ export function timestampFromDateAndTime(startDate, startTime) {
       minute: startTime.substring(3, 5),
       second: startTime.substring(6, 8),
     },
-    { zone: timezone },
+    { zone: timezone }
   );
 
   const timestamp = new Date(startTimestampDT.toISO()).getTime() / 1000;

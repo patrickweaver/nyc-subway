@@ -45,7 +45,7 @@ async function main() {
       function (err) {
         if (err) return console.log("Error:\n", err);
         console.log(`stop ID line data written to ${filename}`);
-      },
+      }
     );
   } catch (error) {
     console.log("Error writing file");
