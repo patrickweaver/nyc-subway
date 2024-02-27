@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>NYC Subway</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/images/manh-square.png" type="image/png" />
+    <link rel="stylesheet" href="bundle.css" />
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Ariel", sans-serif;
+      }
+
+      #map {
+        height: 100vh;
+        flex: 0 0 100%;
+        z-index: 1;
+        cursor: default;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 // A list of pairs of stationIds, this is the same as /src/data/lineGroupIntervals.js
 
-module.exports = {
+export default {
   Blue: [
     ["H08", "H09", "Beach 44 St (A)", "Beach 36 St (A)"],
     ["H09", "H10", "Beach 36 St (A)", "Beach 25 St (A)"],
@@ -18,10 +18,20 @@ module.exports = {
     ["A64", "A65", "111 St (A)", "Ozone Park - Lefferts Blvd (A)"],
     //["A51", "A55", "Broadway Jct (A C)", "Euclid Av (A C)"], // EXPRESS
     ["A61", "H02", "Rockaway Blvd (A)", "Aqueduct - N Conduit Av (A)"],
-    ["H02","H03","Aqueduct - N Conduit Av (A)","Howard Beach - JFK Airport (A)"],
+    [
+      "H02",
+      "H03",
+      "Aqueduct - N Conduit Av (A)",
+      "Howard Beach - JFK Airport (A)",
+    ],
     //["A46", "A48", "Nostrand Av (A C)", "Utica Av (A C)"], // EXPRESS
     //["A48", "A51", "Utica Av (A C)", "Broadway Jct (A C)"], // EXPRESS
-    ["A41","A42","Jay St - MetroTech (A C F)","Hoyt - Schermerhorn Sts (A C G)"],
+    [
+      "A41",
+      "A42",
+      "Jay St - MetroTech (A C F)",
+      "Hoyt - Schermerhorn Sts (A C G)",
+    ],
     //["A42", "A46", "Hoyt - Schermerhorn Sts (A C G)", "Nostrand Av (A C)"], // EXPRESS
     //["A32", "A34", "W 4 St (A C E)", "Canal St (A C E)"], // EXPRESS
     ["A34", "A36", "Canal St (A C E)", "Chambers St (A C)"],
@@ -29,7 +39,12 @@ module.exports = {
     ["A38", "A40", "Fulton St (A C)", "High St (A C)"],
     ["A40", "A41", "High St (A C)", "Jay St - MetroTech (A C F)"],
     //["A24", "A27", "59 St - Columbus Circle (A B C D)", "42 St - Port Authority Bus Terminal (A C E)",], // EXPRESS
-    ["A27","A28","42 St - Port Authority Bus Terminal (A C E)","34 St - Penn Station (A C E)"],
+    [
+      "A27",
+      "A28",
+      "42 St - Port Authority Bus Terminal (A C E)",
+      "34 St - Penn Station (A C E)",
+    ],
     //["A28", "A31", "34 St - Penn Station (A C E)", "14 St (A C E)"], // EXPRESS
     ["A31", "A32", "14 St (A C E)", "W 4 St (A C E)"],
     ["A03", "A05", "Dyckman St (A)", "190 St (A)"],
@@ -63,7 +78,12 @@ module.exports = {
     ["A21", "A22", "81 St - Museum of Natural History (B C)", "72 St (B C)"],
     ["A22", "A24", "72 St (B C)", "59 St - Columbus Circle (A B C D)"],
     ["A24", "A25", "59 St - Columbus Circle (A B C D)", "50 St (C E)"],
-    ["A25","A27","50 St (C E)","42 St - Port Authority Bus Terminal (A C E)"],
+    [
+      "A25",
+      "A27",
+      "50 St (C E)",
+      "42 St - Port Authority Bus Terminal (A C E)",
+    ],
     ["A28", "A30", "34 St - Penn Station (A C E)", "23 St (C E)"],
     ["A30", "A31", "23 St (C E)", "14 St (A C E)"],
     ["A10", "A11", "163 St - Amsterdam Av (C)", "155 St (C)"],
@@ -85,16 +105,31 @@ module.exports = {
     //["G14","G21","Jackson Hts - Roosevelt Av (E F M R)","Queens Plaza (E M R)"],  // 🚸 EXPRESS??
     //["G08","G14","Forest Hills - 71 Av (E F M R)","Jackson Hts - Roosevelt Av (E F M R)"],  // 🚸 EXPRESS??
     //["F06","G08","Kew Gardens - Union Tpke (E F)","Forest Hills - 71 Av (E F M R)",], // EXPRESS??
-    ["G06","G07","Sutphin Blvd - Archer Av - JFK Airport (E J Z)","Jamaica - Van Wyck (E)"],
+    [
+      "G06",
+      "G07",
+      "Sutphin Blvd - Archer Av - JFK Airport (E J Z)",
+      "Jamaica - Van Wyck (E)",
+    ],
     //["G07", "F06", "Jamaica - Van Wyck (E)", "Kew Gardens - Union Tpke (E F)"], // EXPRESS??
     //["F01", "F03", "Jamaica - 179 St (F)", "Parsons Blvd (F)"], // ALTERNATE
     //["F03", "F06", "Parsons Blvd (F)", "Kew Gardens - Union Tpke (E F)"], // ALTERNATE
-    ["G05","G06","Jamaica Center - Parsons/Archer (E J Z)","Sutphin Blvd - Archer Av - JFK Airport (E J Z)"],
+    [
+      "G05",
+      "G06",
+      "Jamaica Center - Parsons/Archer (E J Z)",
+      "Sutphin Blvd - Archer Av - JFK Airport (E J Z)",
+    ],
     //["H19", "H04", "Unknown station Blue", "Broad Channel (A S)"], // UNKNOWN STATION
     //["A61", "A62", "Rockaway Blvd (A)", "Unknown station Blue"], //UNKNOWN STATION
     //["A62", "A63", "Unknown station Blue", "104 St (A)"], // UNKNOWN STATION
     ["G07", "F05", "Jamaica - Van Wyck (E)", "Briarwood - Van Wyck Blvd (E F)"],
-    ["F05","F06","Briarwood - Van Wyck Blvd (E F)","Kew Gardens - Union Tpke (E F)"],
+    [
+      "F05",
+      "F06",
+      "Briarwood - Van Wyck Blvd (E F)",
+      "Kew Gardens - Union Tpke (E F)",
+    ],
     ["F06", "F07", "Kew Gardens - Union Tpke (E F)", "75 Av (E F)"],
     ["F07", "G08", "75 Av (E F)", "Forest Hills - 71 Av (E F M R)"],
     //["A27","A31","42 St - Port Authority Bus Terminal (A C E)","14 St (A C E)",],  // EXPRESS??
@@ -134,7 +169,12 @@ module.exports = {
     //["D31", "D35", "Newkirk Plaza (B Q)", "Kings Hwy (B Q)"], // EXPRESS
     ["R30", "D24", "DeKalb Av (B Q R)", "Atlantic Av - Barclays Ctr (B Q)"],
     ["D24", "D25", "Atlantic Av - Barclays Ctr (B Q)", "7 Av (B Q)"],
-    ["D16","D17","42 St - Bryant Pk (B D F M)","34 St - Herald Sq (B D F M)"],
+    [
+      "D16",
+      "D17",
+      "42 St - Bryant Pk (B D F M)",
+      "34 St - Herald Sq (B D F M)",
+    ],
     ["D17", "D20", "34 St - Herald Sq (B D F M)", "W 4 St (B D F M)"],
     ["D20", "D21", "W 4 St (B D F M)", "Broadway-Lafayette St (B D F M)"],
     ["D21", "D22", "Broadway-Lafayette St (B D F M)", "Grand St (B D)"],
@@ -143,7 +183,12 @@ module.exports = {
     ["A22", "A24", "72 St (B C)", "59 St - Columbus Circle (A B C D)"],
     ["A24", "D14", "59 St - Columbus Circle (A B C D)", "7 Av (B D E)"],
     ["D14", "D15", "7 Av (B D E)", "47-50 Sts - Rockefeller Ctr (B D F M)"],
-    ["D15","D16","47-50 Sts - Rockefeller Ctr (B D F M)","42 St - Bryant Pk (B D F M)"],
+    [
+      "D15",
+      "D16",
+      "47-50 Sts - Rockefeller Ctr (B D F M)",
+      "42 St - Bryant Pk (B D F M)",
+    ],
     ["A15", "A16", "125 St (A B C D)", "116 St (B C)"],
     ["A16", "A17", "116 St (B C)", "Cathedral Pkwy (110 St) (B C)"],
     ["A17", "A18", "Cathedral Pkwy (110 St) (B C)", "103 St (B C)"],
@@ -180,7 +225,12 @@ module.exports = {
     //["D13", "A15", "145 St (B D)", "125 St (A B C D)"], // EXPRESS
     //["A15", "A24", "125 St (A B C D)", "59 St - Columbus Circle (A B C D)"], // EXPRESS
     ["D01", "D03", "Norwood - 205 St (D)", "Bedford Park Blvd (B D)"],
-    ["D42","D43","W 8 St - NY Aquarium (F Q)","Coney Island - Stillwell Av (D F N Q)"],
+    [
+      "D42",
+      "D43",
+      "W 8 St - NY Aquarium (F Q)",
+      "Coney Island - Stillwell Av (D F N Q)",
+    ],
     ["F32", "F33", "Bay Pkwy (F)", "Avenue N (F)"],
     ["F33", "F34", "Avenue N (F)", "Avenue P (F)"],
     ["F34", "F35", "Avenue P (F)", "Kings Hwy (F)"],
@@ -214,12 +264,17 @@ module.exports = {
     ["B08", "B10", "Lexington Av/63 St (F Q)", "57 St (F)"],
     //["G08","G14","Forest Hills - 71 Av (E F M R)","Jackson Hts - Roosevelt Av (E F M R)"], // EXPRESS
     //["G14","B04","Jackson Hts - Roosevelt Av (E F M R)","21 St - Queensbridge (F)"], // EXPRESS
-    ["G20","B04","36 St (M R)","21 St - Queensbridge (F)"], // Not a real interval, but where the tracks are
+    ["G20", "B04", "36 St (M R)", "21 St - Queensbridge (F)"], // Not a real interval, but where the tracks are
     ["F01", "F02", "Jamaica - 179 St (F)", "169 St (F)"],
     ["F02", "F03", "169 St (F)", "Parsons Blvd (F)"],
     ["F03", "F04", "Parsons Blvd (F)", "Sutphin Blvd (F)"],
     ["F04", "F05", "Sutphin Blvd (F)", "Briarwood - Van Wyck Blvd (E F)"],
-    ["F05","F06","Briarwood - Van Wyck Blvd (E F)","Kew Gardens - Union Tpke (E F)"],
+    [
+      "F05",
+      "F06",
+      "Briarwood - Van Wyck Blvd (E F)",
+      "Kew Gardens - Union Tpke (E F)",
+    ],
     ["F06", "F07", "Kew Gardens - Union Tpke (E F)", "75 Av (E F)"],
     ["F07", "G08", "75 Av (E F)", "Forest Hills - 71 Av (E F M R)"],
     ["M10", "M09", "Central Av (M)", "Knickerbocker Av (M)"],
@@ -311,8 +366,18 @@ module.exports = {
     ["J12", "J13", "121 St (J Z)", "111 St (J)"],
     ["J13", "J14", "111 St (J)", "104 St (J Z)"],
     ["J14", "J15", "104 St (J Z)", "Woodhaven Blvd (J Z)"],
-    ["G05","G06","Jamaica Center - Parsons/Archer (E J Z)","Sutphin Blvd - Archer Av - JFK Airport (E J Z)"],
-    ["G06","J12","Sutphin Blvd - Archer Av - JFK Airport (E J Z)","121 St (J Z)"],
+    [
+      "G05",
+      "G06",
+      "Jamaica Center - Parsons/Archer (E J Z)",
+      "Sutphin Blvd - Archer Av - JFK Airport (E J Z)",
+    ],
+    [
+      "G06",
+      "J12",
+      "Sutphin Blvd - Archer Av - JFK Airport (E J Z)",
+      "121 St (J Z)",
+    ],
   ],
   Yellow: [
     ["N10", "D43", "86 St (N)", "Coney Island - Stillwell Av (D F N Q)"],
@@ -359,7 +424,12 @@ module.exports = {
     ["Q03", "B08", "72 St (Q)", "Lexington Av/63 St (F Q)"],
     ["B08", "R14", "Lexington Av/63 St (F Q)", "57 St - 7 Av (N Q R W)"],
     //["R14", "R16", "57 St - 7 Av (N Q R W)", "Times Sq - 42 St (N Q R W)"], // EXPRESS
-    ["D42","D43","W 8 St - NY Aquarium (F Q)","Coney Island - Stillwell Av (D F N Q)"],
+    [
+      "D42",
+      "D43",
+      "W 8 St - NY Aquarium (F Q)",
+      "Coney Island - Stillwell Av (D F N Q)",
+    ],
     ["D40", "D41", "Brighton Beach (B Q)", "Ocean Pkwy (Q)"],
     ["D41", "D42", "Ocean Pkwy (Q)", "W 8 St - NY Aquarium (F Q)"],
     ["D31", "D32", "Newkirk Plaza (B Q)", "Avenue H (B Q)"],
@@ -479,8 +549,18 @@ module.exports = {
     ["246", "247", "Newkirk Av (2 5)", "Flatbush Av - Brooklyn College (2 5)"],
     ["235", "236", "Atlantic Av - Barclays Ctr (2 3)", "Bergen St (2 3)"],
     ["236", "237", "Bergen St (2 3)", "Grand Army Plaza (2 3)"],
-    ["237","238","Grand Army Plaza (2 3)","Eastern Pkwy - Brooklyn Museum (2 3)"],
-    ["238","239","Eastern Pkwy - Brooklyn Museum (2 3)","Franklin Av (2 3 4 5)"],
+    [
+      "237",
+      "238",
+      "Grand Army Plaza (2 3)",
+      "Eastern Pkwy - Brooklyn Museum (2 3)",
+    ],
+    [
+      "238",
+      "239",
+      "Eastern Pkwy - Brooklyn Museum (2 3)",
+      "Franklin Av (2 3 4 5)",
+    ],
     ["239", "241", "Franklin Av (2 3 4 5)", "President St (2 5)"],
     ["241", "242", "President St (2 5)", "Sterling St (2 5)"],
     ["242", "243", "Sterling St (2 5)", "Winthrop St (2 5)"],
@@ -542,8 +622,18 @@ module.exports = {
     ["246", "247", "Newkirk Av (2 5)", "Flatbush Av - Brooklyn College (2 5)"],
     ["235", "236", "Atlantic Av - Barclays Ctr (2 3)", "Bergen St (2 3)"],
     ["236", "237", "Bergen St (2 3)", "Grand Army Plaza (2 3)"],
-    ["237","238","Grand Army Plaza (2 3)","Eastern Pkwy - Brooklyn Museum (2 3)"],
-    ["238","239","Eastern Pkwy - Brooklyn Museum (2 3)","Franklin Av (2 3 4 5)"],
+    [
+      "237",
+      "238",
+      "Grand Army Plaza (2 3)",
+      "Eastern Pkwy - Brooklyn Museum (2 3)",
+    ],
+    [
+      "238",
+      "239",
+      "Eastern Pkwy - Brooklyn Museum (2 3)",
+      "Franklin Av (2 3 4 5)",
+    ],
     ["239", "241", "Franklin Av (2 3 4 5)", "President St (2 5)"],
     ["241", "242", "President St (2 5)", "Sterling St (2 5)"],
     ["242", "243", "Sterling St (2 5)", "Winthrop St (2 5)"],
@@ -581,21 +671,46 @@ module.exports = {
     // ["635","640","14 St - Union Sq (4 5 6)","Brooklyn Bridge - City Hall (4 5 6)"], // EXPRESS
     // ["621", "626", "125 St (4 5 6)", "86 St (4 5 6)"], // EXPRESS
     // ["626", "629", "86 St (4 5 6)", "59 St (4 5 6)"], // EXPRESS
-    ["415","416","149 St - Grand Concourse (4)","138 St - Grand Concourse (4 5)"],
+    [
+      "415",
+      "416",
+      "149 St - Grand Concourse (4)",
+      "138 St - Grand Concourse (4 5)",
+    ],
     ["416", "621", "138 St - Grand Concourse (4 5)", "125 St (4 5 6)"],
     ["412", "413", "170 St (4)", "167 St (4)"],
     ["413", "414", "167 St (4)", "161 St - Yankee Stadium (4)"],
-    ["414","415","161 St - Yankee Stadium (4)","149 St - Grand Concourse (4)"],
+    [
+      "414",
+      "415",
+      "161 St - Yankee Stadium (4)",
+      "149 St - Grand Concourse (4)",
+    ],
     ["409", "410", "Burnside Av (4)", "176 St (4)"],
     ["410", "411", "176 St (4)", "Mt Eden Av (4)"],
     ["411", "412", "Mt Eden Av (4)", "170 St (4)"],
-    ["402","405","Mosholu Pkwy (4)","Bedford Park Blvd - Lehman College (4)"],
-    ["405","406","Bedford Park Blvd - Lehman College (4)","Kingsbridge Rd (4)"],
+    [
+      "402",
+      "405",
+      "Mosholu Pkwy (4)",
+      "Bedford Park Blvd - Lehman College (4)",
+    ],
+    [
+      "405",
+      "406",
+      "Bedford Park Blvd - Lehman College (4)",
+      "Kingsbridge Rd (4)",
+    ],
     ["406", "407", "Kingsbridge Rd (4)", "Fordham Rd (4)"],
     ["407", "408", "Fordham Rd (4)", "183 St (4)"],
     ["408", "409", "183 St (4)", "Burnside Av (4)"],
     ["401", "402", "Woodlawn (4)", "Mosholu Pkwy (4)"],
-    ["222","416","149 St - Grand Concourse (2 5)","138 St - Grand Concourse (4 5)"],
+    [
+      "222",
+      "416",
+      "149 St - Grand Concourse (2 5)",
+      "138 St - Grand Concourse (4 5)",
+    ],
     ["504", "505", "Pelham Pkwy (5)", "Morris Park (5)"],
     ["505", "213", "Morris Park (5)", "E 180 St (2 5)"],
     ["502", "503", "Baychester Av (5)", "Gun Hill Rd (5)"],

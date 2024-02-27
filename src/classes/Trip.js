@@ -16,9 +16,8 @@ export default class Trip {
     })();
 
     // Second precision Unix timestamp
-    this.startTimestamp = this.startTime ? LocalTime
-      .fromYYMMDD_HHMMSS(startDate, startTime)
-      .secondPrecisionTS()
+    this.startTimestamp = this.startTime
+      ? LocalTime.fromYYMMDD_HHMMSS(startDate, startTime).secondPrecisionTS()
       : null;
   }
 }

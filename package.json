@@ -1,46 +1,39 @@
 {
   "name": "nyc-subway",
-  "version": "0.0.1",
-  "description": "A real time map of the New York City Subway",
-  "main": "server/server.js",
+  "private": true,
+  "version": "0.2024.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && node -r dotenv/config server/server.js",
-    "dev": "npm run watch & node -r dotenv/config server/server.js",
-    "build": "rollup -c",
-    "watch": "rollup -c -w"
+    "dev": "node -r dotenv/config server/server.js & vite",
+    "dev:server": "node -r dotenv/config server/server.js",
+    "dev:app": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/patrickweaver/nyc-subway.git"
-  },
-  "author": "Patrick Weaver",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/patrickweaver/nyc-subway/issues"
-  },
-  "homepage": "https://github.com/patrickweaver/nyc-subway#readme",
-  "engines": {
-    "node": "10.x"
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.0.2",
+    "@tsconfig/svelte": "^5.0.2",
+    "@types/leaflet": "^1.9.8",
+    "svelte": "^4.2.11",
+    "svelte-check": "^3.6.4",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.4"
   },
   "dependencies": {
-    "@rollup/plugin-replace": "^2.3.0",
+    "cors": "^2.8.5",
     "csvtojson": "^2.0.10",
-    "date-fns": "^2.9.0",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "gtfs-realtime-bindings": "0.0.5",
-    "leaflet": "^1.6.0",
-    "leaflet.marker.slideto": "^0.2.0",
-    "luxon": "^1.24.1",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.5",
-    "rollup": "^1.29.0",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-svelte": "^5.1.1",
-    "sqlite3": "^4.1.1",
-    "svelte": "^3.16.7",
+    "date-fns": "^3.3.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "gtfs-realtime-bindings": "^1.1.1",
+    "leaflet": "^1.9.4",
+    "leaflet.marker.slideto": "^0.3.0",
+    "luxon": "^3.4.4",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
+    "sqlite3": "^5.1.7",
     "victor": "^1.1.0"
   }
 }

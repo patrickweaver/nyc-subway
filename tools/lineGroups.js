@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   {
     lines: ["A", "C", "E"],
     apiSuffix: "ace",
@@ -43,5 +43,5 @@ module.exports = [
     lines: ["SIR"],
     apiSuffix: "si",
     color: "SteelBlue",
-  }
-]
+  },
+];

@@ -1,29 +1,23 @@
-const fs = require('fs');
-const rp = require('request-promise');
+import fs from "fs";
 
-const feedIds = require('./feeds.js');
+import feedIds from "./feeds.js";
 
 // init sqlite db
-const dbFile = __dirname + '/data/sqlite.db';
+const dbFile = __dirname + "/data/sqlite.db";
 const exists = fs.existsSync(dbFile);
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database(dbFile);
 
-
 (async function main() {
-
   db.serialize(() => {
-
     // Create db table if db didn't previously exist:
     if (!exists) {
       db.run(
-        'CREATE TABLE WaitTimes (id INTEGER PRIMARY KEY AUTOINCREMENT, stopId TEXT, gTFSStopId TEXT, direction TEXT, seconds INTEGER, timestamp INTEGER, tripId TEXT, startDate TEXT, dayOfWeek INTEGER, line TEXT)'
+        "CREATE TABLE WaitTimes (id INTEGER PRIMARY KEY AUTOINCREMENT, stopId TEXT, gTFSStopId TEXT, direction TEXT, seconds INTEGER, timestamp INTEGER, tripId TEXT, startDate TEXT, dayOfWeek INTEGER, line TEXT)"
       );
-      console.log('New table WaitTimes created!');
+      console.log("New table WaitTimes created!");
     }
   });
-
-
 
   for (var m in feedIds) {
     feedId = feedIds[m];
@@ -34,23 +28,25 @@ const db = new sqlite3.Database(dbFile);
       const feedResponse = await getFeedData(feedId);
 
       if (!feedResponse) {
-        throw "Error getting feed data."
+        throw "Error getting feed data.";
       }
 
-      if (!feedResponse.header || !feedResponse.header.timestamp || !feedResponse.entity) {
+      if (
+        !feedResponse.header ||
+        !feedResponse.header.timestamp ||
+        !feedResponse.entity
+      ) {
         console.log("Feed Id:", feedId);
         console.log(feedResponse);
-        throw "Feed data invalid."
+        throw "Feed data invalid.";
       }
 
-      console.log('Retrieved Feed at:', feedResponse.header.timestamp);
+      console.log("Retrieved Feed at:", feedResponse.header.timestamp);
 
       const apiTime = parseInt(feedResponse.header.timestamp);
       const entity = feedResponse.entity;
 
-      console.log('Logging', entity.length, 'train trips.');
-
-      
+      console.log("Logging", entity.length, "train trips.");
 
       // Each item in entity is either a train trip
       // a trip is all the stops one train will make,
@@ -69,7 +65,7 @@ const db = new sqlite3.Database(dbFile);
             continue;
           }
 
-          if(tripUpdate.stopTimeUpdate.length < 1) {
+          if (tripUpdate.stopTimeUpdate.length < 1) {
             // No stop timing information available
             // (could be start or end of the line).
             continue;
@@ -94,9 +90,14 @@ const db = new sqlite3.Database(dbFile);
 
             const stopId = update.stopId;
             const gTFSStopId = stopId.substring(0, stopId.length - 1);
-            const direction = stopId.substring(gTFSStopId.length, stopId.length);
+            const direction = stopId.substring(
+              gTFSStopId.length,
+              stopId.length
+            );
 
-            const seconds = parseInt(update.arrival.time) - parseInt(previousUpdate.arrival.time);
+            const seconds =
+              parseInt(update.arrival.time) -
+              parseInt(previousUpdate.arrival.time);
 
             stopUpdates.push({
               stopId: stopId,
@@ -106,10 +107,9 @@ const db = new sqlite3.Database(dbFile);
               timestamp: apiTime,
               tripId: tripId,
               startDate: startDate,
-              dayOfWeek: (new Date(apiTime * 1000)).getDay(),
-              line: routeId
-            })
-
+              dayOfWeek: new Date(apiTime * 1000).getDay(),
+              line: routeId,
+            });
           }
         }
       }
@@ -125,27 +125,34 @@ const db = new sqlite3.Database(dbFile);
           `INSERT INTO WaitTimes (stopId, gTFSStopId, direction, seconds, timestamp, tripId, startDate, dayOfWeek, line) VALUES ("${wt.stopId}", "${wt.gTFSStopId}", "${wt.direction}", "${wt.seconds}", "${wt.timestamp}", "${wt.tripId}", "${wt.startDate}", "${wt.dayOfWeek}", "${wt.line}")`
         );
       });
-
     }
   }
 })();
 
 async function getFeedData(feedId) {
-  var options = {
-    uri: `http://localhost:${process.env.PORT}/api/${feedId}`,
-    json: true
-  };
-
-  console.log(options)
-
   try {
-    const feedResponse = await rp(options);
+    const url = `http://localhost:${process.env.PORT}/api/${feedId}`;
+    const headers = [
+      // ["x-api-key", process.env.MTA_API_KEY],
+      ["Content-Type", "application/json"],
+    ];
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      const error = new Error(
+        `${response.url}: ${response.status} ${response.statusText}`
+      );
+      error.response = response;
+      throw error;
+    }
+    const buffer = await response.arrayBuffer();
+    const feedResponse =
+      GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
+        new Uint8Array(buffer)
+      );
     return feedResponse;
   } catch (error) {
     console.log("Error:");
     console.log(error);
-    return {error: error}
+    return { error: error };
   }
 }
-
-

@@ -14,9 +14,8 @@ export default class Station {
     this.longitude = parseFloat(s["GTFS Longitude"]);
     this.directionLabel = {
       n: s["North Direction Label"],
-      s: s["South Direction Label"]
-    }
+      s: s["South Direction Label"],
+    };
     //this.intervals = [];
   }
-
 }

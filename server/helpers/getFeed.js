@@ -1,34 +1,34 @@
-const rp = require('request-promise');
-const GtfsRealtimeBindings = require('gtfs-realtime-bindings');
-const feeds = require('./feeds')
+import GtfsRealtimeBindings from "gtfs-realtime-bindings";
+import { feeds } from "./feeds.js";
 
-const baseUri = 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs';
+const baseUri =
+  "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs";
 
-module.exports = async function(feedId=null) {
-
+export async function getFeed(feedId = null) {
   try {
-
     // Passed feedId does not correspond to any line
     if (feedId && feeds[feedId] === undefined) {
-      throw "Invalid feedId"
+      throw "Invalid feedId";
     }
 
-    var options = {
-      uri: baseUri + feeds[feedId],
-      encoding: null,
-      headers: {
-        'User-Agent': 'Request-Promise',
-        'x-api-key': process.env.MTA_API_KEY
-      }
-    };
-  
-    const feedResponse = await rp(options);
-    // The response is a GTFS object, which needs to be decoded:
-    const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(feedResponse);
+    const url = baseUri + feeds[feedId];
+    const headers = [["x-api-key", process.env.MTA_API_KEY]];
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      const error = new Error(
+        `${response.url}: ${response.status} ${response.statusText}`,
+      );
+      error.response = response;
+      throw error;
+    }
+    const buffer = await response.arrayBuffer();
+    const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
+      new Uint8Array(buffer),
+    );
     return feed;
   } catch (error) {
-    console.log("Error: " + error);
+    console.log("Error:\n" + error);
     //console.log(error);
-    return {error: error}
+    return { error: error };
   }
 }

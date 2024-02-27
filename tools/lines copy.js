@@ -1,6 +1,6 @@
 // A list of station Ids, this is the same as /src/data/lines.js
 
-module.exports = {
+export default {
   1: [
     "101",
     "103",

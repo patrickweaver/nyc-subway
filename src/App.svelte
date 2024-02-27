@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   // Import classes
   import Station from "./classes/Station.js";
   import TripEntity from "./classes/TripEntity.js";
@@ -22,14 +22,14 @@
   const stationStopIds = []; // Iterable array of station stopIds
   let combinedIntervals = {}; // Intervals with combined data per lineGroup
 
-  // UPDATE_FREQUENCY_IN_SECONDS is set in /config.js
-  const updateFreqency = parseInt(UPDATE_FREQUENCY_IN_SECONDS) * 1000;
+  const UPDATE_FREQUENCY_IN_SECONDS = 10;
+  const updateFreqency = UPDATE_FREQUENCY_IN_SECONDS * 1000;
 
   // lineColors keys are lineIds
   const lineColors = {};
-  lineGroups.forEach(i => {
-    i.lines.forEach(j => {
-      lineColors[j] = i.color
+  lineGroups.forEach((i) => {
+    i.lines.forEach((j) => {
+      lineColors[j] = i.color;
     });
   });
 
@@ -37,43 +37,42 @@
     // Draw the map tiles
     leaflet.drawMap();
 
-    // Create a Station object from hard coded station data
-    stationData.forEach(i => {
-      const station = new Station(i)
-      stations[station.stopId] = station;
-      stationStopIds.push(station.stopId);
-    });
+    // // Create a Station object from hard coded station data
+    // stationData.forEach((i) => {
+    //   const station = new Station(i);
+    //   stations[station.stopId] = station;
+    //   stationStopIds.push(station.stopId);
+    // });
 
-    // Add Interval objects to Station objects from hard coded interval data
-    combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
+    // // Add Interval objects to Station objects from hard coded interval data
+    // combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
 
-    // Draw tracks by drawing each interval lines between stations
-    Object.keys(combinedIntervals).forEach(nStationId => {
-      Object.keys(combinedIntervals[nStationId]).forEach(sStationId => {
-        const interval = combinedIntervals[nStationId][sStationId];
-        leaflet.drawInterval(interval);
-      })
-    })
+    // // Draw tracks by drawing each interval lines between stations
+    // Object.keys(combinedIntervals).forEach((nStationId) => {
+    //   Object.keys(combinedIntervals[nStationId]).forEach((sStationId) => {
+    //     const interval = combinedIntervals[nStationId][sStationId];
+    //     leaflet.drawInterval(interval);
+    //   });
+    // });
 
-    // Draw dots for each station
-    for (let i in stations) {
-      leaflet.drawStation(stations[i]);
-    }
+    // // Draw dots for each station
+    // for (let i in stations) {
+    //   leaflet.drawStation(stations[i]);
+    // }
 
-    drawLoop();
-    setInterval(drawLoop, updateFreqency);
-
+    // drawLoop();
+    // setInterval(drawLoop, updateFreqency);
   })();
-
-
 
   // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds
   async function drawLoop() {
     try {
-      lineGroups.forEach(async lineGroup => {
-          
-        const activeLines = []//["g"];
-        if (activeLines.length > 0 && activeLines.indexOf(lineGroup.apiSuffix) < 0) {
+      lineGroups.forEach(async (lineGroup) => {
+        const activeLines = []; //["g"];
+        if (
+          activeLines.length > 0 &&
+          activeLines.indexOf(lineGroup.apiSuffix) < 0
+        ) {
           return;
         }
 
@@ -81,20 +80,29 @@
         // 🚸 Maybe this should have a callback instead of awaiting?
         const tripEntities = await api.getMtaFeed(lineGroup.apiSuffix);
         //console.log(JSON.stringify(tripEntities))
-        
-        // Combine TripUpdate and Vehicle data:
-        const combinedTripEntities = mergeTripUpdateAndVehicleEntities(tripEntities);
 
-        console.log(`${combinedTripEntities.length} train updates for ${lineGroup.apiSuffix.toUpperCase()}`);
+        // Combine TripUpdate and Vehicle data:
+        const combinedTripEntities =
+          mergeTripUpdateAndVehicleEntities(tripEntities);
+
+        console.log(
+          `${
+            combinedTripEntities.length
+          } train updates for ${lineGroup.apiSuffix.toUpperCase()}`
+        );
         //console.log(`${tripEntities.length} entities becomes data for ${combinedTripEntities.length} trains`)
-        
+
         // Validate data and create TripEntity objects
-        const tripEntityObjects = combinedTripEntities.map((i, index) => new TripEntity(i, index));
+        const tripEntityObjects = combinedTripEntities.map(
+          (i, index) => new TripEntity(i, index)
+        );
         //console.log(`Found ${tripEntityObjects.length} trip entity objects.`)
 
         // 🚸 Only use "Current" type trips for map
-        const currentTrips = tripEntityObjects.filter(i => i.type === "Current");
-        
+        const currentTrips = tripEntityObjects.filter(
+          (i) => i.type === "Current"
+        );
+
         // const types = {}
         // tripEntityObjects.forEach(i => {
         //   if (types[i.type]) {
@@ -108,7 +116,7 @@
 
         //Draw each train at its updated position on the map
         drawEachTrain(currentTrips, lineGroup.apiSuffix);
-      })
+      });
     } catch (error) {
       console.log("🖋Error:", error);
     }
@@ -116,8 +124,10 @@
 
   // Draw each train on map
   function drawEachTrain(currentTrips, lines) {
-    console.log(`drawing ${currentTrips.length} trains for ${lines.toUpperCase()}`)
-    currentTrips.forEach(trainUpdate => {
+    console.log(
+      `drawing ${currentTrips.length} trains for ${lines.toUpperCase()}`
+    );
+    currentTrips.forEach((trainUpdate) => {
       try {
         let trainObject = trainUpdate.createTrainOrFindTrainIn(trainsArray);
 
@@ -126,55 +136,51 @@
           throw "Can't parse train at index " + i;
         }
 
-        trainObject.locate(combinedIntervals, stations)
+        trainObject.locate(combinedIntervals, stations);
 
         if (!trainObject.marker) {
           // New train is drawn on map:
           trainObject.marker = leaflet.drawTrain(trainObject);
           trainsArray.push(trainObject);
-
         } else {
-          // Existing train is moved if lat or long has changed: 
+          // Existing train is moved if lat or long has changed:
           if (trainObject.move) {
             trainObject.move = false;
             leaflet.moveTrain(trainObject);
           } else {
-            console.log(`Not moving train ${trainObject.id}`)
+            console.log(`Not moving train ${trainObject.id}`);
           }
           console.log(""); // 🚸
         }
-        
       } catch (error) {
         console.log("Error:", error);
       }
-    })
+    });
   }
 
   function parseRoutes(routes) {
-    const combinedRoutes = routes.flatMap(i => {
-      return i.stops.map(j => {
+    const combinedRoutes = routes.flatMap((i) => {
+      return i.stops.map((j) => {
         j.colors = [i.color];
         return j;
-      })
-    })
+      });
+    });
 
     const uniqueStations = {};
-    combinedRoutes.forEach(i => {
+    combinedRoutes.forEach((i) => {
       const latlng = `${i.latitude}_${i.longitude}`;
-      console.log(i)
+      console.log(i);
       if (!uniqueStations[latlng]) {
         uniqueStations[latlng] = i;
       } else {
-        uniqueStations[latlng]
+        uniqueStations[latlng];
       }
-    })
-
+    });
   }
 
   function drawStations(routeStops, color) {
     let prevStation = null;
     for (let i = 0; i < routeStops.length; i++) {
-
       // Create station object
       const station = routeStops[i];
 
@@ -189,9 +195,7 @@
       prevStation = station;
     }
   }
-
 </script>
 
 <style>
-
 </style>

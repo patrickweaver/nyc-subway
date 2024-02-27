@@ -1,13 +1,14 @@
 // Gets feed from backend
 
 import LocalTime from "../classes/LocalTime.js";
+const baseURI = "http://localhost:3000";
 
-async function getFeed(line=false) {
+async function getFeed(line = false) {
   try {
     if (!line) {
-      line = 'all';
+      line = "all";
     }
-    const response = await fetch(`/api/${line}`);
+    const response = await fetch(`${baseURI}/api/${line}`);
     console.log(`Updating for ${line.toUpperCase()} lines`);
     return await response.json();
   } catch (error) {
@@ -24,7 +25,7 @@ function parseFeed(apiResponse) {
   const timestampDate = LocalTime.fromTimestamp(timestamp);
   //console.log(`Syncing! at ${syncDate.printTime()} and API thinks it's ${timestampDate.printTime()}`)
 
-  const tripEntities = apiResponse.entity.map(i => {
+  const tripEntities = apiResponse.entity.map((i) => {
     i.timestamp = timestamp;
     return i;
   });
@@ -39,5 +40,5 @@ async function getMtaFeed(feedId) {
 }
 
 export default {
-  getMtaFeed: getMtaFeed
-}
+  getMtaFeed: getMtaFeed,
+};

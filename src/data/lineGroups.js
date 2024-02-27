@@ -43,7 +43,7 @@ const lineGroups = [
     lines: ["SIR"],
     apiSuffix: "si",
     color: "SteelBlue",
-  }
-]
+  },
+];
 
-export default lineGroups
+export default lineGroups;

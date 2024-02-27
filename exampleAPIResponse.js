@@ -12,49 +12,49 @@ A train NOT currently on a trip wil have a "vehicle" property.
 */
 
 const apiResponse = {
-  "header": { "gtfsRealtimeVersion": "1.0", "timestamp": "1597674316" },
-  "entity": [
+  header: { gtfsRealtimeVersion: "1.0", timestamp: "1597674316" },
+  entity: [
     {
-      "id": "000001G",
-      "tripUpdate": {
-        "trip": {
-          "tripId": "059500_G..N",
-          "startTime": "09:55:00",
-          "startDate": "20200817",
-          "routeId": "G"
+      id: "000001G",
+      tripUpdate: {
+        trip: {
+          tripId: "059500_G..N",
+          startTime: "09:55:00",
+          startDate: "20200817",
+          routeId: "G",
         },
-        "stopTimeUpdate": [
+        stopTimeUpdate: [
           {
-            "arrival": { "time": "1597674307" },
-            "departure": { "time": "1597674307" },
-            "stopId": "G26N"
+            arrival: { time: "1597674307" },
+            departure: { time: "1597674307" },
+            stopId: "G26N",
           },
           {
-            "arrival": { "time": "1597674401" },
-            "departure": { "time": "1597674401" },
-            "stopId": "G24N"
+            arrival: { time: "1597674401" },
+            departure: { time: "1597674401" },
+            stopId: "G24N",
           },
           {
-            "arrival": { "time": "1597674461" },
-            "departure": { "time": "1597674461" },
-            "stopId": "G22N"
-          }
-        ]
-      }
+            arrival: { time: "1597674461" },
+            departure: { time: "1597674461" },
+            stopId: "G22N",
+          },
+        ],
+      },
     },
     {
-      "id": "000002G",
-      "vehicle": {
-        "trip": {
-          "tripId": "059500_G..N",
-          "startTime": "09:55:00",
-          "startDate": "20200817",
-          "routeId": "G"
+      id: "000002G",
+      vehicle: {
+        trip: {
+          tripId: "059500_G..N",
+          startTime: "09:55:00",
+          startDate: "20200817",
+          routeId: "G",
         },
-        "currentStopSequence": 18,
-        "timestamp": "1597674307",
-        "stopId": "G26"
-      }
-    }
-  ]
-}
+        currentStopSequence: 18,
+        timestamp: "1597674307",
+        stopId: "G26",
+      },
+    },
+  ],
+};

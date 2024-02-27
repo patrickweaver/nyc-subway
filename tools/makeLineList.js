@@ -1,17 +1,16 @@
-require('dotenv').config();
-const fs = require("fs");
-const getFeed = require("../server/helpers/getFeed.js");
-const mergeTripUpdateAndVehicleEntities = require("./mergeTripUpdateAndVehicleEntities.js");
+require("dotenv").config();
+import fs from "fs";
+import getFeed from "../server/helpers/getFeed.js";
+import mergeTripUpdateAndVehicleEntities from "./mergeTripUpdateAndVehicleEntities.js";
 
 var lines = require("./lines.js");
 
-const lineGroups = require("./lineGroups.js");
+import lineGroups from "./lineGroups.js";
 
 main();
 setInterval(main, 1000 * 60 * 5);
 
 async function main() {
-
   for (lineGroup of lineGroups) {
     await getLineGroup(lineGroup);
   }
@@ -19,7 +18,7 @@ async function main() {
   try {
     const linesCopy = `// A list of station Ids, this is the same as /src/data/lines.js
 
-    module.exports = `
+    export default `;
 
     const filename = "./tools/lines.js";
     fs.writeFile(filename, linesCopy + JSON.stringify(lines), function (err) {
@@ -27,7 +26,7 @@ async function main() {
       console.log(`stop ID line data written to ${filename}`);
     });
   } catch (error) {
-    console.log("Error writing file")
+    console.log("Error writing file");
   }
 }
 
@@ -36,19 +35,22 @@ async function getLineGroup(lineGroup) {
     // Request line group data from API:
     const apiResponse = await getFeed(lineGroup.apiSuffix);
     // Filter to only entities with a tripUpdate property
-    const tripUpdateEntities = apiResponse.entity.filter(i => i.tripUpdate ? true : false)
+    const tripUpdateEntities = apiResponse.entity.filter((i) =>
+      i.tripUpdate ? true : false,
+    );
 
     // Filter to only valid South bound trips for each line.
     const tripUpdatesByLine = [];
-    lineGroup.lines.forEach(line => {
-      lineTripEntities = tripUpdateEntities.filter(i => {
+    lineGroup.lines.forEach((line) => {
+      lineTripEntities = tripUpdateEntities.filter((i) => {
         if (!i.tripUpdate) return false;
         if (!i.tripUpdate.trip) return false;
         if (!i.tripUpdate.trip.routeId) return false;
         if (!i.tripUpdate.trip.tripId) return false;
-        const tripId = i.tripUpdate.trip.tripId
+        const tripId = i.tripUpdate.trip.tripId;
         let direction;
-        if (!tripId.split("..")[1]) { // Sometimes there is one dot??
+        if (!tripId.split("..")[1]) {
+          // Sometimes there is one dot??
           direction = tripId.split(".")[1][0];
         } else {
           direction = tripId.split("..")[1][0];
@@ -64,13 +66,15 @@ async function getLineGroup(lineGroup) {
     });
 
     // Extract stopIds from tripUpdatesByLine with direction removed
-    const updateStopIds = tripUpdatesByLine.map(lineUpdates => {
-      return lineUpdates.map(update => {
+    const updateStopIds = tripUpdatesByLine.map((lineUpdates) => {
+      return lineUpdates.map((update) => {
         if (!update.tripUpdate) return null;
         if (!update.tripUpdate.stopTimeUpdate) return null;
         if (!update.tripUpdate.stopTimeUpdate[0]) return null;
         // remove direction from stopId string
-        return update.tripUpdate.stopTimeUpdate.map(stationUpdate => stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1));
+        return update.tripUpdate.stopTimeUpdate.map((stationUpdate) =>
+          stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1),
+        );
       });
     });
 
@@ -86,20 +90,37 @@ async function getLineGroup(lineGroup) {
           longestIndex = index;
           longestLength = i.length;
         }
-      })
+      });
 
       // If list of updates is longer (includes more stops) than what we had previously
       // then replace it.
-      if (longestLength > 0 && (!lines[line] || lines[line].length < longestLength)) {
-        console.log("🐙 Found more for", line, ":", longestLength, "(used to be", lines[line] ? lines[line].length : "empty", ") at", (new Date()).getHours(), ":", (new Date()).getMinutes());
+      if (
+        longestLength > 0 &&
+        (!lines[line] || lines[line].length < longestLength)
+      ) {
+        console.log(
+          "🐙 Found more for",
+          line,
+          ":",
+          longestLength,
+          "(used to be",
+          lines[line] ? lines[line].length : "empty",
+          ") at",
+          new Date().getHours(),
+          ":",
+          new Date().getMinutes(),
+        );
         lines[line] = lineStopIdsUpdates[longestIndex];
       }
     });
-
   } catch (error) {
-    console.log("👺 makeLineList Error for line", lineGroup.lines.join(""), ":");
-    console.log("💋  💋  💋  💋  💋  💋  💋  💋  ")
+    console.log(
+      "👺 makeLineList Error for line",
+      lineGroup.lines.join(""),
+      ":",
+    );
+    console.log("💋  💋  💋  💋  💋  💋  💋  💋  ");
     console.log(error);
-    console.log("💋  💋  💋  💋  💋  💋  💋  💋  ")
+    console.log("💋  💋  💋  💋  💋  💋  💋  💋  ");
   }
 }
