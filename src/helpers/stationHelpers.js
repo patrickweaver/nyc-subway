@@ -7,8 +7,8 @@ import lines from "../data/lines.js";
 function compareByLineOrder(lineOrder, a, b) {
   try {
     // Isolate GTFS Stop Id
-    let aId = a['GTFS Stop ID'].toString();
-    let bId = b['GTFS Stop ID'].toString();
+    let aId = a["GTFS Stop ID"].toString();
+    let bId = b["GTFS Stop ID"].toString();
 
     // Find index of GTFS Stop Id in line order
     let aIndex = lineOrder.indexOf(aId);
@@ -30,13 +30,11 @@ function compareByLineOrder(lineOrder, a, b) {
       return 1;
     }
     return 0;
-
   } catch (error) {
-    console.log("⛔️ Error:", error)
+    console.log("⛔️ Error:", error);
     return error;
   }
 }
-
 
 // Get the stations where the train currently stops
 // 🚸 Implementation has 'Daytime Routes' hard coded.
@@ -44,7 +42,7 @@ function getLineStops(lineId) {
   lineId = lineId.toUpperCase();
   // Filter out all stations where train doesn't stop:
   function lineStopsAtStation(stationDataItem) {
-    const linesArray = String(stationDataItem['Daytime Routes']).split(' ');
+    const linesArray = String(stationDataItem["Daytime Routes"]).split(" ");
     if (linesArray.indexOf(lineId) > -1) {
       return true;
     }
@@ -56,16 +54,14 @@ function getLineStops(lineId) {
   // more than one line.
   let compare = compareByLineOrder.bind(this, lines[lineId]);
   lineStations.sort(compare);
-  
-  // Split Daytime Routes into array
-  const formattedLineStations = lineStations.map(
-    station => {
-      station.daytimeRoutesArray = String(station['Daytime Routes']).split(' ');
-      return station;
-    }
-  );
 
-  const stationObjects = formattedLineStations.map(s => new Station(s));
+  // Split Daytime Routes into array
+  const formattedLineStations = lineStations.map((station) => {
+    station.daytimeRoutesArray = String(station["Daytime Routes"]).split(" ");
+    return station;
+  });
+
+  const stationObjects = formattedLineStations.map((s) => new Station(s));
 
   const stationsWithOffsets = stationObjects.map(
     (stationB, index, stations) => {
@@ -75,19 +71,22 @@ function getLineStops(lineId) {
         stationA = stations[index - 1];
       }
       if (index < stations.length - 1) {
-        stationC = stations[index + 1]
+        stationC = stations[index + 1];
       }
 
-      stationB.offsets = Station.findOffsetPoints(stationA, stationB, stationC, 20);
+      stationB.offsets = Station.findOffsetPoints(
+        stationA,
+        stationB,
+        stationC,
+        20,
+      );
       return stationB;
-    }
-  )
+    },
+  );
 
   return stationsWithOffsets;
 }
 
-
-
 export default {
-  getLineStops: getLineStops
-}
+  getLineStops: getLineStops,
+};

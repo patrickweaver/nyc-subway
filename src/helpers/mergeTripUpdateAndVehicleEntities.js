@@ -1,15 +1,17 @@
 export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
   try {
-
     // Separate into 4 categories depending on what fields are in the entity
-    const tripUpdates = [], vehicles = [], alerts = [], unknown = [];
-    tripEntities.forEach(i => {
+    const tripUpdates = [],
+      vehicles = [],
+      alerts = [],
+      unknown = [];
+    tripEntities.forEach((i) => {
       if (i.tripUpdate) {
         tripUpdates.push(i);
       } else if (i.vehicle) {
         vehicles.push(i);
       } else if (i.alert) {
-        alerts.push(i)
+        alerts.push(i);
       } else {
         unknown.push(i);
       }
@@ -41,33 +43,35 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
     }
 
     // Extract useful information from alert entities
-    const tripAlerts = alerts.flatMap(i => {
+    const tripAlerts = alerts.flatMap((i) => {
       let alerts = [];
       if (!i.alert.informedEntity) {
         console.log("No informedEntity");
-        console.log(i.alert)
+        console.log(i.alert);
         return alerts;
         //throw "No informedEntity";
       }
       alerts = i.alert.informedEntity;
       if (
-        i.alert.headerText
-        && i.alert.headerText.translation
-        && i.alert.headerText.translation[0]
+        i.alert.headerText &&
+        i.alert.headerText.translation &&
+        i.alert.headerText.translation[0]
       ) {
-        alerts = alerts.map(j => {
+        alerts = alerts.map((j) => {
           j.texts = i.alert.headerText.translation;
           return j;
         });
       }
       return alerts;
-    })
+    });
 
     // Create arrays of tripIds for entity type arrays
-    const tripUpdateIds = tripUpdates.map(extractTripIds.bind(this, "tripUpdate"));
+    const tripUpdateIds = tripUpdates.map(
+      extractTripIds.bind(this, "tripUpdate"),
+    );
     const vehicleIds = vehicles.map(extractTripIds.bind(this, "vehicle"));
     const alertIds = tripAlerts.map(extractTripIds.bind(this, null));
-    
+
     // Match entities for the same trip from the different types arrays:
     tripUpdateIds.forEach((id, index) => {
       const tripUpdateEntity = tripUpdates[index];
@@ -94,7 +98,6 @@ export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
     }
 
     return tripUpdates;
-
   } catch (error) {
     console.log("⛔️ Error:", error);
     return [];

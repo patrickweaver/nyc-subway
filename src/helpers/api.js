@@ -2,10 +2,10 @@
 
 import LocalTime from "../classes/LocalTime.js";
 
-async function getFeed(line=false) {
+async function getFeed(line = false) {
   try {
     if (!line) {
-      line = 'all';
+      line = "all";
     }
     const response = await fetch(`/api/${line}`);
     console.log(`Updating for ${line.toUpperCase()} lines`);
@@ -24,7 +24,7 @@ function parseFeed(apiResponse) {
   const timestampDate = LocalTime.fromTimestamp(timestamp);
   //console.log(`Syncing! at ${syncDate.printTime()} and API thinks it's ${timestampDate.printTime()}`)
 
-  const tripEntities = apiResponse.entity.map(i => {
+  const tripEntities = apiResponse.entity.map((i) => {
     i.timestamp = timestamp;
     return i;
   });
@@ -39,5 +39,5 @@ async function getMtaFeed(feedId) {
 }
 
 export default {
-  getMtaFeed: getMtaFeed
-}
+  getMtaFeed: getMtaFeed,
+};

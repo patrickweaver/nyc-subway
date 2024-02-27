@@ -9,9 +9,9 @@ module.exports = function timestampFromDateAndTime(startDate, startTime) {
     hour: startTime.substring(0, 2),
     minute: startTime.substring(3, 5),
     second: startTime.substring(6, 8),
-    zone: timezone
-  })
+    zone: timezone,
+  });
 
-  const timestamp = (new Date(startTimestampDT.toISO())).getTime() / 1000;
+  const timestamp = new Date(startTimestampDT.toISO()).getTime() / 1000;
   return timestamp;
-}
+};

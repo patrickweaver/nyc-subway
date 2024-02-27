@@ -43,5 +43,5 @@ module.exports = [
     lines: ["SIR"],
     apiSuffix: "si",
     color: "SteelBlue",
-  }
-]
+  },
+];

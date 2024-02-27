@@ -2,6 +2,7 @@ import L from "leaflet";
 import * as leafletMarkerSlideTo from "leaflet.marker.slideto";
 
 const RAD_TO_DEG = 57.2958;
+const UPDATE_FREQUENCY_IN_SECONDS = 10;
 
 let map; // Map var for leaflet
 
@@ -53,20 +54,29 @@ function drawInterval(interval) {
     interval.shape.forEach((i, index) => {
       if (index < interval.shape.length - 1) {
         const pos1 = [interval.shape[index][0], interval.shape[index][1]];
-        const pos2 = [interval.shape[index + 1][0], interval.shape[index + 1][1]];
+        const pos2 = [
+          interval.shape[index + 1][0],
+          interval.shape[index + 1][1],
+        ];
         // L.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
-        interval.colors.forEach(color => {
-          const offsets1 = [interval.offsets[color][index][0], interval.offsets[color][index][1]];
-          const offsets2 = [interval.offsets[color][index + 1][0], interval.offsets[color][index + 1][1]];
-          drawTracks(offsets1, offsets2, color, index)
-        })
+        interval.colors.forEach((color) => {
+          const offsets1 = [
+            interval.offsets[color][index][0],
+            interval.offsets[color][index][1],
+          ];
+          const offsets2 = [
+            interval.offsets[color][index + 1][0],
+            interval.offsets[color][index + 1][1],
+          ];
+          drawTracks(offsets1, offsets2, color, index);
+        });
       }
     });
   } else {
     // Fallback for if interval.offsets is not set
     const s1Pos = [interval.nStation.latitude, interval.nStation.longitude];
     const s2Pos = [interval.sStation.latitude, interval.sStation.longitude];
-    L.polyline([s1Pos, s2Pos], {color: interval.colors[0]}).addTo(map);
+    L.polyline([s1Pos, s2Pos], { color: interval.colors[0] }).addTo(map);
   }
 }
 
@@ -75,10 +85,10 @@ function drawSimpleLine(station1, station2) {
 }
 
 function drawShapeDots(shape) {
-  const dcs = ["red", "orange", "yellow", "green", "violet", "black"]
+  const dcs = ["red", "orange", "yellow", "green", "violet", "black"];
   shape.forEach((i, index) => {
-    L.circle(i, {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
-  })
+    L.circle(i, { radius: 1, color: dcs[index % dcs.length] }).addTo(map);
+  });
 }
 
 function drawTracks(offsetsA, offsetsB, color, index) {
@@ -87,10 +97,10 @@ function drawTracks(offsetsA, offsetsB, color, index) {
     //L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
     // Draw N and S offest positions:
-    const dcs = ["red", "orange", "yellow", "green", "violet", "black"]
+    const dcs = ["red", "orange", "yellow", "green", "violet", "black"];
     //L.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
     //L.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
-    
+
     //Draw lines between offsets:
     L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
     L.polyline([offsetsA[1], offsetsB[1]], { color: color }).addTo(map);
@@ -122,7 +132,8 @@ function drawTrain(train) {
 
   const trainPosition = [train.latitude, train.longitude];
   //var trainMarker = L.marker(trainPosition, {icon: trainIcon}).addTo(map);
-  const tmo = train.direction === "N" ? markers.trainCircleN : markers.trainCircleS;
+  const tmo =
+    train.direction === "N" ? markers.trainCircleN : markers.trainCircleS;
   const trainMarker = L.circle(trainPosition, tmo).addTo(map);
   return trainMarker;
 }

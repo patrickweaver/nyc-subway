@@ -6,7 +6,6 @@ const timezone = TIMEZONE;
 // .env.
 
 export default class LocalTime {
-
   // Construtor takes a DateTime object and
   // probably should be used, instead use the
   // static methods.
@@ -19,13 +18,12 @@ export default class LocalTime {
     // This is invalid for train data before 1975
     // and will break in the year 6723.
 
-    let fullTS = timestamp
+    let fullTS = timestamp;
     if (fullTS < 150000000000) {
       fullTS *= 1000;
     }
 
-    const datetime = DateTime.fromMillis(fullTS)
-      .setZone(timezone);
+    const datetime = DateTime.fromMillis(fullTS).setZone(timezone);
     return new LocalTime(datetime);
   }
 
@@ -37,14 +35,14 @@ export default class LocalTime {
       hour: HHMMSS.substring(0, 2),
       minute: HHMMSS.substring(3, 5),
       second: HHMMSS.substring(6, 8),
-      zone: timezone
+      zone: timezone,
     });
     return new LocalTime(datetime);
   }
 
   static fromCurrentTime() {
     //console.log("TZ:", timezone);
-    return new LocalTime(DateTime.fromObject({zone: timezone}));
+    return new LocalTime(DateTime.fromObject({ zone: timezone }));
   }
 
   secondPrecisionTS() {
@@ -54,5 +52,4 @@ export default class LocalTime {
   printTime() {
     return this.datetime.toLocaleString(DateTime.TIME_WITH_SECONDS);
   }
-
 }
