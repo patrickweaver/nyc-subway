@@ -1,13 +1,14 @@
 <script lang="ts">
+  import { type StationData } from "./types.js";
   // Import classes
-  import Station from "./classes/Station.js";
+  import Station from "./classes/Station";
   import TripEntity from "./classes/TripEntity.js";
   import Interval from "./classes/Interval.js";
 
   // Import hard coded data
-  import stationData from "./data/stationData.js";
+  import { stationData } from "./data";
   import lineGroups from "./data/lineGroups.js";
-  import lineGroupIntervals from "./data/lineGroupIntervalsWithShapes.js";
+  import lineGroupIntervals from "./data/lineGroupIntervalsWithShapes";
   import shapes from "./data/shapes.js";
 
   // Import helpers
@@ -18,8 +19,8 @@
 
   // Initialize variables
   const trainsArray = []; // Array of Train objects
-  const stations = {}; // Station objects with stopId keys
-  const stationStopIds = []; // Iterable array of station stopIds
+  const stations: { [key: string]: Station } = {};
+  const stationStopIds: string[] = [];
   let combinedIntervals = {}; // Intervals with combined data per lineGroup
 
   const UPDATE_FREQUENCY_IN_SECONDS = 10;
@@ -34,18 +35,17 @@
   });
 
   (async function main() {
-    // Draw the map tiles
     leaflet.drawMap();
 
-    // // Create a Station object from hard coded station data
-    // stationData.forEach((i) => {
-    //   const station = new Station(i);
-    //   stations[station.stopId] = station;
-    //   stationStopIds.push(station.stopId);
-    // });
+    // Create a Station object from hard coded station data
+    stationData.forEach((i) => {
+      const station = new Station(i);
+      stations[station.stopId] = station;
+      stationStopIds.push(station.stopId);
+    });
 
-    // // Add Interval objects to Station objects from hard coded interval data
-    // combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
+    // Add Interval objects to Station objects from hard coded interval data
+    combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
 
     // // Draw tracks by drawing each interval lines between stations
     // Object.keys(combinedIntervals).forEach((nStationId) => {

@@ -3,6 +3,7 @@ import stationWaitTimes from "../data/stationWaitTimes.js";
 import lineGroups from "../data/lineGroups.js";
 
 import Victor from "victor";
+import type { LineColor, LineName } from "../types.js";
 
 export default class Train {
   constructor(id, tripEntity) {
@@ -100,7 +101,7 @@ export default class Train {
     const routeId = this.routeId;
     const direction = this.direction;
     const N = direction === "N";
-    const lineColors = {};
+    const lineColors: { [key in LineName]?: LineColor } = {};
     // 🚸 This is repeated in App.svelete
     lineGroups.forEach((i) => {
       i.lines.forEach((j) => {

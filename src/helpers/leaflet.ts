@@ -1,17 +1,24 @@
-import L from "leaflet";
+import Leaflet, { latLng, type MapOptions } from "leaflet";
+import "leaflet/dist/leaflet.css";
 // import leafletMarkerSlideTo from "leaflet.marker.slideto";
 
 import {
+  MAP_ATTRIBUTION,
   MAP_CENTER,
-  MAP_ZOOM,
+  MAP_ZOOM_DEFAULT,
+  MAP_ZOOM_MAX,
   TILE_LAYER,
   UPDATE_FREQUENCY_IN_SECONDS,
 } from "../config";
 
-const RAD_TO_DEG = 57.2958;
-const UPDATE_FREQUENCY_IN_SECONDS = 10;
+const options: MapOptions = {
+  center: latLng(MAP_CENTER[0], MAP_CENTER[1]),
+  zoom: MAP_ZOOM_DEFAULT,
+};
 
-let map; // Map var for leaflet
+const RAD_TO_DEG = 57.2958;
+
+let map: Leaflet.Map;
 
 const markers = {
   // Station
@@ -42,9 +49,10 @@ const markers = {
 // Draw stations on map (happens on first load)
 function drawStation(station, recenter = false) {
   if (!station.latitude || !station.longitude) return;
-  L.circle([station.latitude, station.longitude], markers.stationCircle).addTo(
-    map
-  );
+  Leaflet.circle(
+    [station.latitude, station.longitude],
+    markers.stationCircle
+  ).addTo(map);
   // 🚸 Can implement functionality when a station is clicked on.
   //.on("click", onMarkerClick);
   /*
@@ -65,7 +73,7 @@ function drawInterval(interval) {
           interval.shape[index + 1][0],
           interval.shape[index + 1][1],
         ];
-        // L.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
+        // Leaflet.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
         interval.colors.forEach((color) => {
           const offsets1 = [
             interval.offsets[color][index][0],
@@ -83,34 +91,34 @@ function drawInterval(interval) {
     // Fallback for if interval.offsets is not set
     const s1Pos = [interval.nStation.latitude, interval.nStation.longitude];
     const s2Pos = [interval.sStation.latitude, interval.sStation.longitude];
-    L.polyline([s1Pos, s2Pos], { color: interval.colors[0] }).addTo(map);
+    Leaflet.polyline([s1Pos, s2Pos], { color: interval.colors[0] }).addTo(map);
   }
 }
 
 function drawSimpleLine(station1, station2) {
-  L.polyline([station1, station2], { color: "green" }).addTo(map);
+  Leaflet.polyline([station1, station2], { color: "green" }).addTo(map);
 }
 
 function drawShapeDots(shape) {
   const dcs = ["red", "orange", "yellow", "green", "violet", "black"];
   shape.forEach((i, index) => {
-    L.circle(i, { radius: 1, color: dcs[index % dcs.length] }).addTo(map);
+    Leaflet.circle(i, { radius: 1, color: dcs[index % dcs.length] }).addTo(map);
   });
 }
 
 function drawTracks(offsetsA, offsetsB, color, index) {
   try {
     // Draw offset line for station B
-    //L.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
+    //Leaflet.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
     // Draw N and S offest positions:
     const dcs = ["red", "orange", "yellow", "green", "violet", "black"];
-    //L.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
-    //L.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+    //Leaflet.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+    //Leaflet.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
 
     //Draw lines between offsets:
-    L.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
-    L.polyline([offsetsA[1], offsetsB[1]], { color: color }).addTo(map);
+    Leaflet.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
+    Leaflet.polyline([offsetsA[1], offsetsB[1]], { color: color }).addTo(map);
   } catch (error) {
     console.log(error);
     debugger;
@@ -135,13 +143,13 @@ function drawTrain(train) {
   //   train.mostRecentTripEntity.trip.startTimestamp
   // );
 
-  let bounds = L.latLng(train.latitude, train.longitude).toBounds(250);
+  let bounds = Leaflet.latLng(train.latitude, train.longitude).toBounds(250);
 
   const trainPosition = [train.latitude, train.longitude];
-  //var trainMarker = L.marker(trainPosition, {icon: trainIcon}).addTo(map);
+  //var trainMarker = Leaflet.marker(trainPosition, {icon: trainIcon}).addTo(map);
   const tmo =
     train.direction === "N" ? markers.trainCircleN : markers.trainCircleS;
-  const trainMarker = L.circle(trainPosition, tmo).addTo(map);
+  const trainMarker = Leaflet.circle(trainPosition, tmo).addTo(map);
   return trainMarker;
 }
 
@@ -184,12 +192,12 @@ function moveTrain(train) {
 }
 
 function drawMap() {
-  map = L.map("map").setView(MAP_CENTER, MAP_ZOOM);
+  map = Leaflet.map("map", options);
   map.zoomControl.setPosition("bottomleft");
-  L.tileLayer(TILE_LAYER, {
-    attribution:
-      '<a href="/map-attribution" target="_blank">Map Attribution</a> &#124; <a href="/terms-of-use" target="_blank">Terms of Use</a>',
-    maxZoom: 18,
+  Leaflet.tileLayer(TILE_LAYER, {
+    attribution: MAP_ATTRIBUTION,
+    maxZoom: MAP_ZOOM_MAX,
+    crossOrigin: true,
   }).addTo(map);
   return map;
 }

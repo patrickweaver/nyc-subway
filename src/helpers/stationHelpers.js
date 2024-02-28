@@ -1,6 +1,6 @@
-import Station from "../classes/Station.js";
+import Station from "../classes/Station";
 
-import stationData from "../data/stationData.js";
+import stationData from "../data/stationData";
 import lines from "../data/lines.js";
 
 // Compare two stations by where they are in the train's route
@@ -78,10 +78,10 @@ function getLineStops(lineId) {
         stationA,
         stationB,
         stationC,
-        20,
+        20
       );
       return stationB;
-    },
+    }
   );
 
   return stationsWithOffsets;

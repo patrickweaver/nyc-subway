@@ -1,4 +1,5 @@
-export default [
+import { type StationData } from "../types";
+const stationData: StationData[] = [
   {
     "Station ID": 1,
     "Complex ID": 1,
@@ -7440,3 +7441,4 @@ export default [
     "South Direction Label": "Tottenville",
   },
 ];
+export default stationData;

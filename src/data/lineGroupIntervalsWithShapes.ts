@@ -1,7 +1,7 @@
 // Parsed data from shapes.txt file from GTFS download
 // and logged (and cleaned up) intervals from stopTimeUpdates
-
-export default {
+import type { LineGroupIntervals } from "../types";
+const lineGroupIntervals: LineGroupIntervals = {
   Blue: [
     [
       "H08",
@@ -12727,3 +12727,4 @@ export default {
     ["S27", "S26", "Grasmere (SIR)", "Old Town (SIR)", []],
   ],
 };
+export default lineGroupIntervals;

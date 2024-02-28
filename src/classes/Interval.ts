@@ -1,14 +1,25 @@
 import Victor from "victor";
+import Station from "../classes/Station";
+import type { LineColor, LineGroupIntervals, TrainDirection } from "../types";
 const trackDistance = 25; // Meters
 const METER_LNG_OFFSET = 0.000011855720423170624;
 const METER_LAT_OFFSET = 0.000008983152841324227;
 
 export default class Interval {
+  id: string;
+  nStation: Station;
+  sStation: Station;
+  colors: LineColor[];
+  shape: [number, number][];
+  offsets: { [key in LineColor]?: [number, number][][] };
+  distances: { N: number[]; S: number[] };
+  totalDistance: number;
+
   constructor(
-    nStation,
-    sStation,
-    colors,
-    shape, //,
+    nStation: Station,
+    sStation: Station,
+    colors: LineColor[],
+    shape: [number, number][]
     //followingStations={}
   ) {
     this.id = `${nStation.stopId}__${sStation.stopId}`;
@@ -17,44 +28,58 @@ export default class Interval {
     //this.followingStations = followingStations;
     this.colors = colors;
     this.shape = shape;
-    this.offsets = [];
+    this.offsets = {};
     this.distances = { N: [], S: [] };
     this.totalDistance = 0;
   }
 
-  static combineIntervals(lineGroupIntervals, stations) {
+  static combineIntervals(
+    lineGroupIntervals: LineGroupIntervals,
+    stations: { [key: string]: Station }
+  ) {
     // Object to store combined intervals, key is
     // nStation.stopId
-    const combinedIntervals = {};
+    const combinedIntervals: {
+      [key: string]: {
+        [key: string]: Interval;
+      };
+    } = {};
     // Loop over each set of logged intervals organized by line color
-    Object.keys(lineGroupIntervals).forEach((color) => {
+    Object.keys(lineGroupIntervals).forEach((_color) => {
+      const color = _color as LineColor;
       // Loop over each logged interval for the color
-      lineGroupIntervals[color].forEach((i) => {
+      lineGroupIntervals[color].forEach((intervalData) => {
         // Get station objects from stations
-        const nStation = stations[i[0]];
-        const sStation = stations[i[1]];
-        if (
-          // If interval has been seen add current color
-          combinedIntervals[nStation.stopId] &&
-          combinedIntervals[nStation.stopId][sStation.stopId]
-        ) {
-          combinedIntervals[nStation.stopId][sStation.stopId].colors.push(
-            color,
-          );
+        const nStationId = intervalData[0];
+        const sStationId = intervalData[1];
+        const nStation = stations[nStationId];
+        const sStation = stations[sStationId];
+
+        const intervalInMap =
+          combinedIntervals[nStation.stopId]?.[sStation.stopId];
+        if (intervalInMap) {
+          intervalInMap.colors.push(color);
         } else {
           // Otherwise create Interval object
           // 🚸 Could find next interval and add first point (or second?) of that interval to shape so points meet.
-          const shape = i[4];
-          const numberShape = shape.map((i) => i.map(parseFloat));
+          const shape = intervalData[4];
+          const numberShape = shape.map((i) => i.map(parseFloat)) as [
+            number,
+            number
+          ][];
           // Add in station lat/longs
+          // 🍄 Not sure why this needs to happen
+          const first = numberShape[0];
+          const last = numberShape[numberShape.length - 1];
           if (
+            // 🍄 is this necessary?
             !shape[0] ||
-            (numberShape[0][0] !== nStation.latitude &&
-              numberShape[0][1] !== nStation.longitude)
+            (first?.[0] !== nStation.latitude &&
+              first?.[1] !== nStation.longitude)
           ) {
             numberShape.unshift([nStation.latitude, nStation.longitude]);
           }
-          const last = numberShape[numberShape.length - 1];
+
           if (last[0] !== sStation.latitude && last[1] !== sStation.longitude) {
             numberShape.push([sStation.latitude, sStation.longitude]);
           }
@@ -62,7 +87,7 @@ export default class Interval {
             nStation,
             sStation,
             [color],
-            numberShape,
+            numberShape
           );
           // Add new interval to combinedIntervals
           if (!combinedIntervals[nStation.stopId]) {
@@ -78,11 +103,12 @@ export default class Interval {
       Object.keys(combinedIntervals[nStationId]).forEach((sStationId) => {
         const interval = combinedIntervals[nStationId][sStationId];
         // 🚸 IDK why I'm using trackDistance as a param here even though the functions are in the same file.
-        interval.offsets = Interval.mapPointsToOffsets(
+        const offsets = Interval.mapPointsToOffsets(
           interval.shape,
           trackDistance,
-          interval.colors,
+          interval.colors
         );
+        interval.offsets = offsets;
         interval.calculateDistances();
       });
     });
@@ -91,12 +117,18 @@ export default class Interval {
   }
 
   calculateDistances() {
-    const toVector = ([x, y]) => new Victor(x, y);
+    const toVector: (xy: [number, number]) => Victor = ([x, y]) =>
+      new Victor(x, y);
     const shapeVectors = this.shape.map(toVector);
 
     // Function to reduce shape points to array of the cumulative distances
     // between each of them
-    const shapeToDistances = (distancesElapsed, point, index, shapeVectors) => {
+    const shapeToDistances = (
+      distancesElapsed: number[],
+      point: Victor,
+      index: number,
+      shapeVectors: Victor[]
+    ) => {
       const previousPoint = index > 0 ? shapeVectors[index - 1] : null;
       const distanceFromPreviousPoint = previousPoint
         ? previousPoint.distance(point)
@@ -115,24 +147,34 @@ export default class Interval {
     this.totalDistance = nDistances[0];
   }
 
-  static mapPointsToOffsets(shape, trackDistance, colors) {
-    // For each color return an array of pairs (each side
-    // of the shape line) of offset points (which are
-    // pairs of coordinates) that map to each pair of
+  static mapPointsToOffsets(
+    shape: [number, number][],
+    trackDistance: number,
+    colors: LineColor[]
+  ): { [key in LineColor]?: [number, number][][] } {
+    // For each color return an array of pairs (each side of the shape line) of
+    // offset points(which are pairs of coordinates) that map to each pair of
     // coordinates from the shape.
-    const colorOffsetPoints = {};
+    const colorOffsetPoints: {
+      [key in LineColor]?: ([number, number][] | null)[];
+    } = {};
     colors.forEach((color, index) => {
-      // Calculate the distance from the track shape center line each
-      // of the pair of each color's "tracks" should be. The placing
-      // depends on if there are an even number or odd number of colors
-      // running on that interval.
+      // Calculate the distance from the track shape center line each of the pair
+      // of each color's "tracks" should be. The placing depends on if there are
+      // an even number or odd number of colors running on that interval.
       const numberOfColors = colors.length;
-      let colorDistances;
+      let colorDistances: [number, number];
       let base;
       const side = index % 2 === 0 ? 1 : -1;
       const adjustment = trackDistance / 2;
-      // Odd number of colors
-      if (numberOfColors % 2 !== 0) {
+      const evenNumberOfColors = numberOfColors % 2 === 0;
+      if (evenNumberOfColors) {
+        base = trackDistance * (Math.floor(index / 2) * 2 + 1);
+        colorDistances = [
+          side * (base - adjustment),
+          side * (base + adjustment),
+        ];
+      } else {
         // On first index pair down the middle:
         if (index === 0) {
           colorDistances = [trackDistance / 2, -trackDistance / 2];
@@ -143,37 +185,38 @@ export default class Interval {
             side * (base + adjustment),
           ];
         }
-      } else {
-        // Even number of colors
-        base = trackDistance * (Math.floor(index / 2) * 2 + 1);
-        colorDistances = [
-          side * (base - adjustment),
-          side * (base + adjustment),
-        ];
       }
+
+      // // 🍄 could this use map or reduce?
+      // const colorOffsetPoints: {
+      //   [key in LineColor]: [number, number][][];
+      // } = _colorOffsetPoints as {
+      //   [key in LineColor]: [number, number][][];
+      // };
 
       // Map the shape's points to a pair of sets of points for each color
       // offset by a certain distance.
-      colorOffsetPoints[color] = shape.map((pointB, index) => {
+      const colorOffsetPoint = shape.map((pointB, index) => {
         let pointA = null;
         let pointC = null;
+        // 🍄 could this use optional chaining?
         if (index > 0) {
           pointA = shape[index - 1];
         }
         if (index < shape.length - 1) {
           pointC = shape[index + 1];
         }
-        const dcs = ["red", "orange", "yellow", "green", "violet", "black"];
 
         const op = Interval.findOffsetPoints(
           pointA,
           pointB,
           pointC,
-          colorDistances,
+          colorDistances
         );
-        return op;
+        return op?.filter((i) => i !== null) ?? [];
       });
 
+      colorOffsetPoints[color] = colorOffsetPoint;
       // If previous and next station are an equal distance from
       // the middle station, and at opposite angles, the vector
       // will be of magnitude 0, findOffsetPoints will return
@@ -181,17 +224,19 @@ export default class Interval {
       // This step replaces those null values with the previous non
       // null value since it would be a straight line to the next not
       // null value anyway.
-      colorOffsetPoints[color] = colorOffsetPoints[color].map((i, index) => {
+      colorOffsetPoints[color] = colorOffsetPoints[color]?.map((i, index) => {
         const oShape = colorOffsetPoints[color];
         if (i === null) {
           let prevNotNullRelativeIndex = 0;
-          while (!oShape[index - prevNotNullRelativeIndex]) {
+          while (!oShape?.[index - prevNotNullRelativeIndex]) {
             prevNotNullRelativeIndex += 1;
           }
           const notNullIndex = index - prevNotNullRelativeIndex;
+          // 🍄 can this type assertion be fixed?
+          const nonNullShape = oShape[notNullIndex] as [number, number][];
           return [
-            [oShape[notNullIndex][0][0], oShape[notNullIndex][0][1]],
-            [oShape[notNullIndex][1][0], oShape[notNullIndex][1][1]],
+            [nonNullShape[0][0], nonNullShape[0][1]],
+            [nonNullShape[1][0], nonNullShape[1][1]],
           ];
         }
         return i;
@@ -205,16 +250,31 @@ export default class Interval {
       //   return i;
       // });
     });
-    return colorOffsetPoints;
+
+    // 🍄 Type assertion
+    return colorOffsetPoints as { [key in LineColor]: [number, number][][] };
   }
 
-  static findOffsetPoints(pointA, pointB, pointC, offsetLengthsMeters) {
-    const pos = {};
+  static findOffsetPoints(
+    pointA: [number, number] | null,
+    pointB: [number, number],
+    pointC: [number, number] | null,
+    offsetLengthsMeters: [number, number]
+  ): [number, number][] | null {
+    const pos: {
+      a: [number, number] | null;
+      b: [number, number] | null;
+      c: [number, number] | null;
+    } = {
+      a: null,
+      b: null,
+      c: null,
+    };
     pos.a = pointA || null;
-    pos.b = pointB || null;
+    pos.b = pointB;
     pos.c = pointC || null;
     // Distance between points A & B and points B & C in meters:
-    let dLatAB, dLngAB, dLatCB, dLngCB;
+    let dLatAB: number, dLngAB: number, dLatCB: number, dLngCB: number;
     [dLatAB, dLngAB] = Interval.dLatLng(pointB, pointA);
     [dLatCB, dLngCB] = Interval.dLatLng(pointB, pointC);
     // Turn distances into vectors using Victor: http://victorjs.org/
@@ -222,6 +282,8 @@ export default class Interval {
     const cbVector = new Victor(dLatCB, dLngCB);
     // Point B is last in interval shape:
     if (!pointC) {
+      // 🍄 Combine points into an object with two type signatures?
+      pointA!;
       const offsetAVector = abVector
         .clone()
         .normalize()
@@ -236,19 +298,20 @@ export default class Interval {
         pos.b[1],
         offsetAVector.x,
         offsetAVector.y,
-        -offsetLengthsMeters[1],
+        -offsetLengthsMeters[1]
       );
       const pointBSOffset = Interval.offsetFromPoint(
         pos.b[0],
         pos.b[1],
         offsetAVector.x,
         offsetAVector.y,
-        -offsetLengthsMeters[0],
+        -offsetLengthsMeters[0]
       );
       return [pointBSOffset, pointBNOffset];
 
       // Point B is first in interval shape:
     } else if (!pointA) {
+      pointC!;
       const offsetCVector = cbVector
         .clone()
         .normalize()
@@ -264,14 +327,14 @@ export default class Interval {
         pos.b[1],
         offsetCVector.x,
         offsetCVector.y,
-        offsetLengthsMeters[0],
+        offsetLengthsMeters[0]
       );
       const pointBNOffset = Interval.offsetFromPoint(
         pos.b[0],
         pos.b[1],
         offsetCVector.x,
         offsetCVector.y,
-        offsetLengthsMeters[1],
+        offsetLengthsMeters[1]
       );
       return [pointBSOffset, pointBNOffset];
     }
@@ -306,14 +369,14 @@ export default class Interval {
       pos.b[1],
       offsetBVectorNormal.x,
       offsetBVectorNormal.y,
-      offsetLengthsMeters[0],
+      offsetLengthsMeters[0]
     );
     const sPos = Interval.offsetFromPoint(
       pos.b[0],
       pos.b[1],
       offsetBVectorNormal.x,
       offsetBVectorNormal.y,
-      offsetLengthsMeters[1],
+      offsetLengthsMeters[1]
     );
 
     const crossProduct = abVector.cross(cbVector);
@@ -327,12 +390,12 @@ export default class Interval {
 
   // Convert meter vector back to Lat/Lng and find offset from set point (Point B):
   static offsetFromPoint(
-    pointLat,
-    pointLng,
-    normalizedOffsetMetersX,
-    normalizedOffsetMetersY,
-    offsetLengthMeters = 1,
-  ) {
+    pointLat: number,
+    pointLng: number,
+    normalizedOffsetMetersX: number,
+    normalizedOffsetMetersY: number,
+    offsetLengthMeters: number = 1
+  ): [number, number] {
     const latOffset =
       METER_LAT_OFFSET * normalizedOffsetMetersX * offsetLengthMeters;
     const lngOffset =
@@ -343,23 +406,20 @@ export default class Interval {
   }
 
   // Extrat lat/lng and convert to meters:
-  static dLatLng(s0, s1) {
-    // s0 and s1 are [lat, lng]
-    if (!s0 || !s1) {
-      return [0, 0];
-    }
-    return [
-      (s1[0] - s0[0]) / METER_LAT_OFFSET,
-      (s1[1] - s0[1]) / METER_LNG_OFFSET,
-    ];
+  // 🍄 Lat/Lng type?
+  static dLatLng(s0: [number, number] | null, s1: [number, number] | null) {
+    if (!s0 || !s1) return [0, 0];
+    const latDiff = s1[0] - s0[0];
+    const lngDiff = s1[1] - s0[1];
+    return [latDiff / METER_LAT_OFFSET, lngDiff / METER_LNG_OFFSET];
   }
 
   // ☢️ endingIndex is inclusive!
   getPoints(
-    color,
-    direction,
-    sIndex = 0,
-    eIndex = this.distances.N.length - 1,
+    color: LineColor,
+    direction: TrainDirection,
+    sIndex: number = 0,
+    eIndex: number = this.distances.N.length - 1
   ) {
     let directionIndex = 1;
     let startingIndex = sIndex;
@@ -370,7 +430,7 @@ export default class Interval {
       endingIndex = sIndex;
     }
 
-    let points = this.offsets[color]
+    let points = (this.offsets[color] ?? [])
       .map((i, index) => {
         const ii = [...i[directionIndex]];
         ii.push(index);

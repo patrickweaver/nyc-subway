@@ -1,4 +1,10 @@
-const lineGroups = [
+import type { LineColor, LineName } from "../types";
+
+const lineGroups: {
+  lines: LineName[];
+  apiSuffix: string;
+  color: LineColor;
+}[] = [
   {
     lines: ["A", "C", "E"],
     apiSuffix: "ace",
