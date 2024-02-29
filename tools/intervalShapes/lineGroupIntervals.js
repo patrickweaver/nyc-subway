@@ -1,6 +1,6 @@
 // A list of pairs of stationIds, this is the same as /src/data/lineGroupIntervals.js
 
-module.exports = {
+export default {
   Blue: [
     ["H08", "H09", "Beach 44 St (A)", "Beach 36 St (A)"],
     ["H09", "H10", "Beach 36 St (A)", "Beach 25 St (A)"],

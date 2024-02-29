@@ -1,11 +1,11 @@
 require("dotenv").config();
-const fs = require("fs");
-const getFeed = require("../server/helpers/getFeed.js");
-const mergeTripUpdateAndVehicleEntities = require("./mergeTripUpdateAndVehicleEntities.js");
+import fs from "fs";
+import getFeed from "../server/helpers/getFeed.js";
+import mergeTripUpdateAndVehicleEntities from "./mergeTripUpdateAndVehicleEntities";
 
 var lineGroupIntervals = require("./lineGroupIntervals.js");
 
-const lineGroups = require("./lineGroups.js");
+import lineGroups from "./lineGroups.js";
 
 main();
 setInterval(main, 1000 * 60 * 5);
@@ -16,9 +16,7 @@ async function main() {
   }
 
   try {
-    const lineGroupIntervalsCopy = `// A list of pairs of stationIds, this is the same as /src/data/lineGroupIntervals.js
-
-    module.exports = `;
+    const lineGroupIntervalsCopy = `// A list of pairs of stationIds, this is the same as /src/data/lineGroupIntervals.js export default `;
 
     const filename = "./tools/lineGroupIntervals.js";
     fs.writeFile(
@@ -27,7 +25,7 @@ async function main() {
       function (err) {
         if (err) return console.log("Error:\n", err);
         console.log(`stop ID line data written to ${filename}`);
-      },
+      }
     );
   } catch (error) {
     console.log("Error writing file");
@@ -42,10 +40,10 @@ async function getLineGroup(lineGroup) {
     }
 
     // Request line group data from API:
-    const apiResponse = await getFeed(lineGroup.apiSuffix);
+    const apiResponse = await getFeed(lineGroup?.apiSuffix);
     // Filter to only entities with a tripUpdate property
     const tripUpdateEntities = apiResponse.entity.filter((i) =>
-      i.tripUpdate ? true : false,
+      i.tripUpdate ? true : false
     );
 
     // Filter to only valid South bound trips
@@ -74,7 +72,7 @@ async function getLineGroup(lineGroup) {
         if (!entity.tripUpdate.stopTimeUpdate[0]) return null;
         // remove direction from stopId string
         return entity.tripUpdate.stopTimeUpdate.map((stationUpdate) =>
-          stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1),
+          stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1)
         );
       })
       .filter((i) => i); // Filter out nulls
@@ -95,10 +93,10 @@ async function getLineGroup(lineGroup) {
       .filter((i) => i && i.length == 2); // Filter out empties;
 
     const currentIntervalStrings = lineGroupIntervals[lineGroup.color].map(
-      (i) => JSON.stringify(i),
+      (i) => JSON.stringify(i)
     );
     const updatedIntervalsStrings = updatedIntervals.map((i) =>
-      JSON.stringify(i),
+      JSON.stringify(i)
     );
 
     const newIntervals = updatedIntervals.filter((i, index) => {
@@ -116,14 +114,14 @@ async function getLineGroup(lineGroup) {
       new Set(
         lineGroupIntervals[lineGroup.color]
           .concat(newIntervals)
-          .map((i) => JSON.stringify(i)),
-      ),
+          .map((i) => JSON.stringify(i))
+      )
     ).map((i) => JSON.parse(i));
   } catch (error) {
     console.log(
       "👺 makeLineList Error for line",
       lineGroup.lines.join(""),
-      ":",
+      ":"
     );
     console.log("💋  💋  💋  💋  💋  💋  💋  💋  ");
     console.log(error);

@@ -1,6 +1,14 @@
 // Set up express server
-const express = require("express");
+import express from "express";
+import cors from "cors";
+// Get the current feed from the MTA API
+import { getFeed } from "./helpers/getFeed.js";
+// 🚸 Currently this does nothing
+import { logLocations } from "./helpers/logLocations.js";
+import { logResponse } from "./helpers/logResponse.js";
+
 const app = express();
+app.use(cors());
 app.use(express.static("server/public"));
 
 const mostRecentData = {};
@@ -22,13 +30,6 @@ if (
 // each stop.
 const LOG_LOCATIONS = process.env.LOG_LOCATIONS === "true";
 const LOG_RESPONSE = process.env.LOG_RESPONSE === "true";
-
-// Get the current feed from the MTA API
-const getFeed = require("./helpers/getFeed.js");
-
-// 🚸 Currently this does nothing
-const logLocations = require("./helpers/logLocations.js");
-const logResponse = require("./helpers/logResponse.js");
 
 // API endpoint to view all train data
 app.get("/api/all", async function (req, res) {

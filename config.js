@@ -1,12 +1,12 @@
-require("dotenv").config();
+import "dotenv/config";
 
-module.exports = {
+export default {
   MAP_CENTER: "[40.7055585, -73.989109 ]",
   MAP_ZOOM: 14,
   TILE_LAYER:
-    "https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png",
-  TIMEZONE: process.env.TIMEZONE,
+    "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png",
+  TIMEZONE: "America/New_York",
   UPDATE_FREQUENCY_IN_SECONDS: 10,
-  METER_LAT_OFFSET: process.env.METER_LAT_OFFSET,
-  METER_LNG_OFFSET: process.env.METER_LNG_OFFSET,
+  METER_LAT_OFFSET: 0.000011855720423170624,
+  METER_LNG_OFFSET: 0.000008983152841324227,
 };

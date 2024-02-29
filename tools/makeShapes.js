@@ -1,5 +1,5 @@
-const fs = require("fs");
-const shapes = require("./shapes.js");
+import fs from "fs";
+import shapes from "./shapes.js";
 
 // {"shape_id":"1..N03R","shape_pt_lat":"40.702068","shape_pt_lon":"-74.013664","shape_pt_sequence":"0","shape_dist_traveled":""},
 // {"shape_id":"1..N03R","shape_pt_lat":"40.703199","shape_pt_lon":"-74.014792","shape_pt_sequence":"1","shape_dist_traveled":""},
@@ -55,7 +55,7 @@ try {
 
   const shapesCopy = `// Parsed data from shapes.txt file from GTFS download
 
-  module.exports = `;
+  export default `;
 
   const filename = "./tools/shapesUpdated.js";
   fs.writeFile(
@@ -64,7 +64,7 @@ try {
     function (err) {
       if (err) return console.log("Error:\n", err);
       console.log(`Shapes file updated.`);
-    },
+    }
   );
 } catch (error) {
   console.log("Error writing file\n", error);
