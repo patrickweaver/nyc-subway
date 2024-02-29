@@ -1,29 +1,32 @@
 import StopTimeUpdate from "./StopTimeUpdate.js";
 import Train from "./Train.js";
 import Trip from "./Trip.js";
-import lines from "../data/lines.js";
+import lines from "../data/lines";
+import type { EntityTripUpdate, LineName } from "../types.js";
 
 export default class TripEntity {
-  constructor(tripEntity, index) {
-    const te = tripEntity;
+  index: number;
+  timestamp: number;
+  trip: Trip | null;
+  stopTimeUpdates: StopTimeUpdate[] | null;
+  vehicleCurrentStopSequence: number | null;
+  vehicleTimestamp: number | null;
+  vehicleStopId: string | null;
+  type: string;
+
+  constructor(te: EntityTripUpdate, index: number) {
     let type = "Invalid"; // Default
     let tripObject = null;
     if (
-      te.tripUpdate &&
-      te.tripUpdate.trip &&
-      te.tripUpdate.trip.tripId &&
+      te.tripUpdate?.trip?.tripId &&
       //&& te.tripUpdate.trip.startTime // Not always present
-      te.tripUpdate.trip.startDate &&
-      te.tripUpdate.trip.routeId
+      te.tripUpdate?.trip?.startDate &&
+      te.tripUpdate?.trip?.routeId
     ) {
       if (
         te.vehicle &&
-        te.tripUpdate.stopTimeUpdate &&
-        te.tripUpdate.stopTimeUpdate[0] &&
-        te.tripUpdate.stopTimeUpdate[0].arrival &&
-        te.tripUpdate.stopTimeUpdate[0].arrival.time &&
-        te.tripUpdate.stopTimeUpdate[0].departure &&
-        te.tripUpdate.stopTimeUpdate[0].departure.time &&
+        te.tripUpdate.stopTimeUpdate?.[0]?.arrival?.time &&
+        te.tripUpdate.stopTimeUpdate[0]?.departure?.time &&
         te.tripUpdate.stopTimeUpdate[0].stopId
       ) {
         if (
@@ -38,12 +41,12 @@ export default class TripEntity {
           tripObject = te.vehicle.trip;
         }
       } else if (te.vehicle && te.vehicle.currentStopSequence) {
-        const line = lines[te.tripUpdate.trip.routeId];
+        // 🍄 Type assertion
+        const line = lines[te.tripUpdate.trip.routeId as LineName];
         if (!line) throw "Invalid line: " + te.tripUpdate.trip.routeId;
         const currentStop = te.vehicle.currentStopSequence;
-        const firstStop = line[0];
-        const lastStop = line[line.length - 1];
-
+        const firstStop = parseInt(line[0], 10);
+        const lastStop = parseInt(line[line.length - 1], 10);
         if (currentStop === firstStop || currentStop === lastStop) {
           type = "Arrived";
           tripObject = te.vehicle.trip;
@@ -65,7 +68,7 @@ export default class TripEntity {
         "\n.trip.startDate",
         te.tripUpdate.trip.startDate,
         "\n.trip.routeId",
-        te.tripUpdate.trip.routeId,
+        te.tripUpdate.trip.routeId
       );
     }
 
@@ -74,12 +77,12 @@ export default class TripEntity {
 
     let trip = null;
     if (type === "Current" || type === "Scheduled") {
-      const startTime = tripObject.startTime || null;
+      const startTime = tripObject?.startTime || null;
       trip = new Trip(
-        tripObject.tripId,
+        tripObject?.tripId,
         startTime,
-        tripObject.startDate,
-        tripObject.routeId,
+        tripObject?.startDate,
+        tripObject?.routeId
       );
     }
 
@@ -88,25 +91,26 @@ export default class TripEntity {
     if (type === "Current") {
       const CURRENT_TRIPS_START_AT_MOST_IN_FUTURE = 30;
       if (
-        !trip.startTimestamp &&
+        !trip?.startTimestamp &&
         false // 🚸 Check if first stopTimeUpdate is first stop for direction and too far in future.
       ) {
         type = "noStartTime"; // Probably "Future" also
-      } else if (trip.startTimestamp > te.timestamp) {
+      } else if ((trip?.startTimestamp ?? 0) > te.timestamp) {
         type = "Future";
       }
 
       this.stopTimeUpdates = te.tripUpdate.stopTimeUpdate.map(
-        (i, index) => new StopTimeUpdate(index, i),
+        (i, index) => new StopTimeUpdate(index, i)
       );
     } else {
       this.stopTimeUpdates = null;
     }
 
     if (type === "Scheduled") {
-      this.vehicleCurrentStopSequence = te.vehicle.currentStopSequence;
-      this.vehicleTimestamp = te.vehicle.timestamp;
-      this.vehicleStopId = te.vehicle.stopId;
+      this.vehicleCurrentStopSequence = te.vehicle?.currentStopSequence ?? null;
+      this.vehicleTimestamp =
+        parseInt(te.vehicle?.timestamp ?? "0", 10) || null;
+      this.vehicleStopId = te.vehicle?.stopId ?? null;
     } else {
       this.vehicleCurrentStopSequence = null;
       this.vehicleTimestamp = null;
@@ -117,14 +121,14 @@ export default class TripEntity {
   }
 
   // Creates a Train object from the data in a TrainEntity object
-  createTrainOrFindTrainIn(trainsArray) {
+  createTrainOrFindTrainIn(trainsArray: Train[]) {
     try {
       const trip = this.trip;
 
       // Find or create Train object
-      let trainObject = trainsArray.filter((i) => i.id === trip.tripId)[0];
+      let trainObject = trainsArray.filter((i) => i.id === trip?.tripId)[0];
       if (!trainObject) {
-        trainObject = new Train(trip.tripId, this);
+        trainObject = new Train(trip?.tripId, this);
       } else {
         trainObject.mostRecentTripEntity = this;
       }
@@ -133,7 +137,7 @@ export default class TripEntity {
     } catch (error) {
       console.log(
         `Error parsing train at index ${this.index} update:\n`,
-        error,
+        error
       );
 
       return null;

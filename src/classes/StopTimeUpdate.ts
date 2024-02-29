@@ -1,5 +1,14 @@
+import type { TrainDirection } from "../types";
+
 export default class StopTimeUpdate {
-  constructor(index, stu) {
+  index: number;
+  arrival: string;
+  departure: string;
+  stopId: string;
+  GtfsStopId: string;
+  direction: TrainDirection;
+
+  constructor(index: number, stu) {
     this.index = index;
     this.arrival = stu.arrival ? stu.arrival.time || null : null;
     this.departure = stu.departure ? stu.departure.time || null : null;
@@ -8,7 +17,7 @@ export default class StopTimeUpdate {
     this.GtfsStopId = stu.stopId.substring(0, stu.stopId.length - 1); // Direction removed
     this.direction = stu.stopId.substring(
       stu.stopId.length - 1,
-      stu.stopId.length,
+      stu.stopId.length
     );
   }
 }

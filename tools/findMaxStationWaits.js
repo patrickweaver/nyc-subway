@@ -2,7 +2,7 @@ import fs from "fs";
 
 const tripsCsvFilePath = "./.data/logs/trips.csv";
 const csv = require("csvtojson");
-import lines from "./lines.js";
+import lines from "./lines";
 const saveFilePath = "./src/data/stationWaitTimes.js";
 
 let avg = (array) => Math.round(array.reduce((a, b) => a + b) / array.length);

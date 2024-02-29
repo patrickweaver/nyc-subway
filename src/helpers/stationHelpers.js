@@ -1,7 +1,7 @@
 import Station from "../classes/Station";
 
 import stationData from "../data/stationData";
-import lines from "../data/lines.js";
+import lines from "../data/lines";
 
 // Compare two stations by where they are in the train's route
 function compareByLineOrder(lineOrder, a, b) {

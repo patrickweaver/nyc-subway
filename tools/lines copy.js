@@ -1,4 +1,4 @@
-// A list of station Ids, this is the same as /src/data/lines.js
+// A list of station Ids, this is the same as /src/data/lines
 
 export default {
   1: [

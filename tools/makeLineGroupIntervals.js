@@ -1,7 +1,7 @@
 require("dotenv").config();
 import fs from "fs";
 import getFeed from "../server/helpers/getFeed.js";
-import mergeTripUpdateAndVehicleEntities from "./mergeTripUpdateAndVehicleEntities.js";
+import mergeTripUpdateAndVehicleEntities from "./mergeTripUpdateAndVehicleEntities";
 
 var lineGroupIntervals = require("./lineGroupIntervals.js");
 
@@ -40,7 +40,7 @@ async function getLineGroup(lineGroup) {
     }
 
     // Request line group data from API:
-    const apiResponse = await getFeed(lineGroup.apiSuffix);
+    const apiResponse = await getFeed(lineGroup?.apiSuffix);
     // Filter to only entities with a tripUpdate property
     const tripUpdateEntities = apiResponse.entity.filter((i) =>
       i.tripUpdate ? true : false

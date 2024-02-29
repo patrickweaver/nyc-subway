@@ -107,6 +107,7 @@ function drawShapeDots(shape) {
 }
 
 function drawTracks(offsetsA, offsetsB, color, index) {
+  // console.log({ offsetsA, offsetsB, color, index });
   try {
     // Draw offset line for station B
     //Leaflet.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
@@ -116,9 +117,12 @@ function drawTracks(offsetsA, offsetsB, color, index) {
     //Leaflet.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
     //Leaflet.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
 
-    //Draw lines between offsets:
-    Leaflet.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
-    Leaflet.polyline([offsetsA[1], offsetsB[1]], { color: color }).addTo(map);
+    // 🍄 Why are empty lat/lng pairs called?
+    if (offsetsA[0] && offsetsB[0] && offsetsA[1] && offsetsB[1]) {
+      //Draw lines between offsets:
+      Leaflet.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
+      Leaflet.polyline([offsetsA[1], offsetsB[1]], { color: color }).addTo(map);
+    }
   } catch (error) {
     console.log(error);
     debugger;
@@ -143,7 +147,7 @@ function drawTrain(train) {
   //   train.mostRecentTripEntity.trip.startTimestamp
   // );
 
-  let bounds = Leaflet.latLng(train.latitude, train.longitude).toBounds(250);
+  let bounds = Leaflet.latLng(train.latitude, train.longitude)?.toBounds(250);
 
   const trainPosition = [train.latitude, train.longitude];
   //var trainMarker = Leaflet.marker(trainPosition, {icon: trainIcon}).addTo(map);

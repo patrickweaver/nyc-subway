@@ -1,9 +1,9 @@
 require("dotenv").config();
 import fs from "fs";
 import getFeed from "../server/helpers/getFeed.js";
-import mergeTripUpdateAndVehicleEntities from "./mergeTripUpdateAndVehicleEntities.js";
+import mergeTripUpdateAndVehicleEntities from "./mergeTripUpdateAndVehicleEntities";
 
-var lines = require("./lines.js");
+var lines = require("./lines");
 
 import lineGroups from "./lineGroups.js";
 
@@ -16,11 +16,11 @@ async function main() {
   }
 
   try {
-    const linesCopy = `// A list of station Ids, this is the same as /src/data/lines.js
+    const linesCopy = `// A list of station Ids, this is the same as /src/data/lines
 
     export default `;
 
-    const filename = "./tools/lines.js";
+    const filename = "./tools/lines";
     fs.writeFile(filename, linesCopy + JSON.stringify(lines), function (err) {
       if (err) return console.log("Error:\n", err);
       console.log(`stop ID line data written to ${filename}`);

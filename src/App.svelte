@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { type StationData } from "./types.js";
+  import { type LineColor, type LineName, type StationData } from "./types.js";
   // Import classes
   import Station from "./classes/Station";
-  import TripEntity from "./classes/TripEntity.js";
+  import TripEntity from "./classes/TripEntity";
   import Interval from "./classes/Interval.js";
+  import Train from "./classes/Train.js";
 
   // Import hard coded data
   import { stationData } from "./data";
@@ -12,22 +13,26 @@
   import shapes from "./data/shapes.js";
 
   // Import helpers
-  import api from "./helpers/api.js";
-  import mergeTripUpdateAndVehicleEntities from "./helpers/mergeTripUpdateAndVehicleEntities.js";
+  import api from "./helpers/api";
+  import mergeTripUpdateAndVehicleEntities from "./helpers/mergeTripUpdateAndVehicleEntities";
   import stationHelpers from "./helpers/stationHelpers.js";
   import leaflet from "./helpers/leaflet.js";
 
   // Initialize variables
-  const trainsArray = []; // Array of Train objects
+  const trainsArray: Train[] = [];
   const stations: { [key: string]: Station } = {};
   const stationStopIds: string[] = [];
-  let combinedIntervals = {}; // Intervals with combined data per lineGroup
+  let combinedIntervals: {
+    [key: string]: {
+      [key: string]: Interval;
+    };
+  } = {}; // Intervals with combined data per lineGroup
 
   const UPDATE_FREQUENCY_IN_SECONDS = 10;
   const updateFreqency = UPDATE_FREQUENCY_IN_SECONDS * 1000;
 
   // lineColors keys are lineIds
-  const lineColors = {};
+  const lineColors: { [key in LineName]?: LineColor } = {};
   lineGroups.forEach((i) => {
     i.lines.forEach((j) => {
       lineColors[j] = i.color;
@@ -47,20 +52,20 @@
     // Add Interval objects to Station objects from hard coded interval data
     combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
 
-    // // Draw tracks by drawing each interval lines between stations
-    // Object.keys(combinedIntervals).forEach((nStationId) => {
-    //   Object.keys(combinedIntervals[nStationId]).forEach((sStationId) => {
-    //     const interval = combinedIntervals[nStationId][sStationId];
-    //     leaflet.drawInterval(interval);
-    //   });
-    // });
+    // Draw tracks by drawing each interval lines between stations
+    Object.keys(combinedIntervals).forEach((nStationId) => {
+      Object.keys(combinedIntervals[nStationId]).forEach((sStationId) => {
+        const interval = combinedIntervals[nStationId][sStationId];
+        leaflet.drawInterval(interval);
+      });
+    });
 
-    // // Draw dots for each station
-    // for (let i in stations) {
-    //   leaflet.drawStation(stations[i]);
-    // }
+    // Draw dots for each station
+    for (let i in stations) {
+      leaflet.drawStation(stations[i]);
+    }
 
-    // drawLoop();
+    drawLoop();
     // setInterval(drawLoop, updateFreqency);
   })();
 
@@ -68,27 +73,24 @@
   async function drawLoop() {
     try {
       lineGroups.forEach(async (lineGroup) => {
-        const activeLines = []; //["g"];
-        if (
-          activeLines.length > 0 &&
-          activeLines.indexOf(lineGroup.apiSuffix) < 0
-        ) {
-          return;
-        }
+        // 🍄 activeLines is not currently in use
+        const activeLines: string[] = ["ace"];
+        const lineGroupActive = activeLines.indexOf(lineGroup?.apiSuffix) >= 0;
+        if (activeLines.length > 0 && !lineGroupActive) return;
 
         // Get data from API for a specific line group
         // 🚸 Maybe this should have a callback instead of awaiting?
-        const tripEntities = await api.getMtaFeed(lineGroup.apiSuffix);
+        const feedEntityData = await api.getMtaFeed(lineGroup?.apiSuffix);
         //console.log(JSON.stringify(tripEntities))
 
         // Combine TripUpdate and Vehicle data:
         const combinedTripEntities =
-          mergeTripUpdateAndVehicleEntities(tripEntities);
+          mergeTripUpdateAndVehicleEntities(feedEntityData);
 
         console.log(
           `${
             combinedTripEntities.length
-          } train updates for ${lineGroup.apiSuffix.toUpperCase()}`
+          } train updates for ${lineGroup?.apiSuffix?.toUpperCase()}`
         );
         //console.log(`${tripEntities.length} entities becomes data for ${combinedTripEntities.length} trains`)
 
@@ -100,7 +102,7 @@
 
         // 🚸 Only use "Current" type trips for map
         const currentTrips = tripEntityObjects.filter(
-          (i) => i.type === "Current"
+          (i) => i?.type === "Current"
         );
 
         // const types = {}
@@ -115,19 +117,22 @@
         //console.log(`of those ${currentTrips.length} are current`);
 
         //Draw each train at its updated position on the map
-        drawEachTrain(currentTrips, lineGroup.apiSuffix);
+        drawEachTrain(currentTrips, lineGroup?.apiSuffix);
       });
     } catch (error) {
-      console.log("🖋Error:", error);
+      console.log("Draw Loop Error:", error);
     }
   }
 
   // Draw each train on map
-  function drawEachTrain(currentTrips, lines) {
+  function drawEachTrain(
+    currentTrips: TripEntity[],
+    lines: string | undefined
+  ) {
     console.log(
-      `drawing ${currentTrips.length} trains for ${lines.toUpperCase()}`
+      `drawing ${currentTrips.length} trains for ${lines?.toUpperCase()}`
     );
-    currentTrips.forEach((trainUpdate) => {
+    currentTrips.forEach((trainUpdate, i) => {
       try {
         let trainObject = trainUpdate.createTrainOrFindTrainIn(trainsArray);
 
@@ -158,43 +163,43 @@
     });
   }
 
-  function parseRoutes(routes) {
-    const combinedRoutes = routes.flatMap((i) => {
-      return i.stops.map((j) => {
-        j.colors = [i.color];
-        return j;
-      });
-    });
+  // function parseRoutes(routes) {
+  //   const combinedRoutes = routes.flatMap((i) => {
+  //     return i.stops.map((j) => {
+  //       j.colors = [i.color];
+  //       return j;
+  //     });
+  //   });
 
-    const uniqueStations = {};
-    combinedRoutes.forEach((i) => {
-      const latlng = `${i.latitude}_${i.longitude}`;
-      console.log(i);
-      if (!uniqueStations[latlng]) {
-        uniqueStations[latlng] = i;
-      } else {
-        uniqueStations[latlng];
-      }
-    });
-  }
+  //   const uniqueStations = {};
+  //   combinedRoutes.forEach((i) => {
+  //     const latlng = `${i.latitude}_${i.longitude}`;
+  //     console.log(i);
+  //     if (!uniqueStations[latlng]) {
+  //       uniqueStations[latlng] = i;
+  //     } else {
+  //       uniqueStations[latlng];
+  //     }
+  //   });
+  // }
 
-  function drawStations(routeStops, color) {
-    let prevStation = null;
-    for (let i = 0; i < routeStops.length; i++) {
-      // Create station object
-      const station = routeStops[i];
+  // function drawStations(routeStops, color) {
+  //   let prevStation = null;
+  //   for (let i = 0; i < routeStops.length; i++) {
+  //     // Create station object
+  //     const station = routeStops[i];
 
-      // Draw station on map
-      leaflet.drawStation(station);
+  //     // Draw station on map
+  //     leaflet.drawStation(station);
 
-      // Connect new station to previous station:
-      if (prevStation) {
-        leaflet.drawTracks(prevStation, station, color);
-      }
+  //     // Connect new station to previous station:
+  //     if (prevStation) {
+  //       leaflet.drawTracks(prevStation, station, color);
+  //     }
 
-      prevStation = station;
-    }
-  }
+  //     prevStation = station;
+  //   }
+  // }
 </script>
 
 <style>

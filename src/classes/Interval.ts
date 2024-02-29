@@ -36,7 +36,11 @@ export default class Interval {
   static combineIntervals(
     lineGroupIntervals: LineGroupIntervals,
     stations: { [key: string]: Station }
-  ) {
+  ): {
+    [key: string]: {
+      [key: string]: Interval;
+    };
+  } {
     // Object to store combined intervals, key is
     // nStation.stopId
     const combinedIntervals: {
@@ -80,7 +84,10 @@ export default class Interval {
             numberShape.unshift([nStation.latitude, nStation.longitude]);
           }
 
-          if (last[0] !== sStation.latitude && last[1] !== sStation.longitude) {
+          if (
+            last?.[0] !== sStation.latitude &&
+            last?.[1] !== sStation.longitude
+          ) {
             numberShape.push([sStation.latitude, sStation.longitude]);
           }
           const interval = new Interval(

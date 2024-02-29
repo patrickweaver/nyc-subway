@@ -1,4 +1,4 @@
-import LocalTime from "./LocalTime.js";
+import LocalTime from "./LocalTime";
 
 export default class Trip {
   constructor(tripId, startTime, startDate, routeId) {
