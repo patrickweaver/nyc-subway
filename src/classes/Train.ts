@@ -1,9 +1,9 @@
 import lines from "../data/lines";
-import stationWaitTimes from "../data/stationWaitTimes.js";
-import lineGroups from "../data/lineGroups.js";
+import stationWaitTimes from "../data/stationWaitTimes";
+import lineGroups from "../data/lineGroups";
 
 import Victor from "victor";
-import type { LineColor, LineName, TrainDirection } from "../types.js";
+import type { LineColor, LineName, TrainDirection } from "../types";
 import type TripEntity from "./TripEntity";
 import Interval from "./Interval";
 import Station from "./Station";
@@ -300,7 +300,7 @@ export default class Train {
 
         // console.log({ intervalLineColorOffsets, prevPointIndex });
         if (!intervalLineColorOffsets?.[prevPointIndex]) {
-          debugger;
+          // debugger;
         }
         // Save that point as lat/lng
         prevPoint =
@@ -532,12 +532,14 @@ export default class Train {
 
   // Calculate the train's progress based on the current wait time to the next
   // station and the average (or max) wait time for that interval.
-  getProgress(waitTimeEstimate) {
+  getProgress(waitTimeEstimate: number) {
     const nextStopId = this.nextStopId;
     const routeId = this.routeId;
     const direction = this.direction;
     let waitTimes = null;
+    // 🍄 Don't have stationWaitTimes for all routes
     if (
+      routeId &&
       stationWaitTimes[routeId] &&
       stationWaitTimes[routeId][nextStopId] &&
       stationWaitTimes[routeId][nextStopId][direction]

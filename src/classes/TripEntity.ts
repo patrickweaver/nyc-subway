@@ -1,8 +1,8 @@
-import StopTimeUpdate from "./StopTimeUpdate.js";
-import Train from "./Train.js";
-import Trip from "./Trip.js";
+import StopTimeUpdate from "./StopTimeUpdate";
+import Train from "./Train";
+import Trip from "./Trip";
 import lines from "../data/lines";
-import type { EntityTripUpdate, LineName } from "../types.js";
+import type { EntityTripUpdate, LineName } from "../types";
 
 export default class TripEntity {
   index: number;

@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { type LineColor, type LineName, type StationData } from "./types.js";
+  import { type LineColor, type LineName, type StationData } from "./types";
   // Import classes
   import Station from "./classes/Station";
   import TripEntity from "./classes/TripEntity";
-  import Interval from "./classes/Interval.js";
-  import Train from "./classes/Train.js";
+  import Interval from "./classes/Interval";
+  import Train from "./classes/Train";
 
   // Import hard coded data
   import { stationData } from "./data";
-  import lineGroups from "./data/lineGroups.js";
+  import lineGroups from "./data/lineGroups";
   import lineGroupIntervals from "./data/lineGroupIntervalsWithShapes";
-  import shapes from "./data/shapes.js";
+  import shapes from "./data/shapes";
 
   // Import helpers
   import api from "./helpers/api";
   import mergeTripUpdateAndVehicleEntities from "./helpers/mergeTripUpdateAndVehicleEntities";
-  import stationHelpers from "./helpers/stationHelpers.js";
-  import leaflet from "./helpers/leaflet.js";
+  import stationHelpers from "./helpers/stationHelpers";
+  import leaflet from "./helpers/leaflet";
 
   // Initialize variables
   const trainsArray: Train[] = [];
@@ -66,7 +66,7 @@
     }
 
     drawLoop();
-    // setInterval(drawLoop, updateFreqency);
+    setInterval(drawLoop, updateFreqency);
   })();
 
   // This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds

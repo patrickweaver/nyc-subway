@@ -1,7 +1,7 @@
 // Gets feed from backend
 
 // import LocalTime from "../classes/LocalTime";
-import { BASE_URI } from "../config.js";
+import { BASE_URI } from "../config";
 import type { FeedData, FeedEntityDataWithTimestamp } from "../types";
 
 async function getFeed(line: string = "all"): Promise<FeedData> {
