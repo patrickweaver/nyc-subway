@@ -1,2 +1,19 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+	import { onMount } from 'svelte';
+
+	onMount(async () => {
+		const leaflet = await import('$lib/leaflet');
+		leaflet.drawMap();
+	});
+</script>
+
+<div id="map"></div>
+
+<style>
+	#map {
+		height: 100vh;
+		flex: 0 0 100%;
+		z-index: 1;
+		cursor: default;
+	}
+</style>
