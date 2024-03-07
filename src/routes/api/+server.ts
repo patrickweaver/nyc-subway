@@ -1,6 +1,6 @@
-import type { RequestHandler } from './$types'
-import { isErrorWithMessage } from '$lib'
-import type { ApiResponseBody } from '$lib/types'
+import type { RequestHandler } from './$types';
+import { isErrorWithMessage } from '$lib';
+import type { ApiResponseBody } from '$lib/types';
 
 export const GET: RequestHandler = () => {
 	try {
@@ -9,19 +9,19 @@ export const GET: RequestHandler = () => {
 			success: true,
 			error: null,
 			data: null
-		}
+		};
 
 		return new Response(JSON.stringify(responseBody));
 	} catch (_error) {
-		const errorMesssage = isErrorWithMessage(_error) ? _error.message : 'Unknown error';
+		const errorMessage = isErrorWithMessage(_error) ? _error.message : 'Unknown error';
 		const errorResponseBody = {
-			message: errorMesssage,
+			message: errorMessage,
 			success: false,
 			error: {
-				message: errorMesssage
+				message: errorMessage
 			},
 			data: null
-		}
-		return new Response(JSON.stringify(errorResponseBody))
+		};
+		return new Response(JSON.stringify(errorResponseBody));
 	}
-}
+};

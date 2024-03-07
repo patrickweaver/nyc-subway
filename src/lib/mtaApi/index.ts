@@ -28,13 +28,16 @@ export const getParsedTripData: (feedId: string) => Promise<ParsedTripData[]> = 
 	const feed = await getFeed(feedId);
 	const parsedTripData = feed.entity.reduce((acc: { [key: string]: ParsedTripData }, entity) => {
 		const tripUpdate = entity.tripUpdate;
-		const stopTimeUpdates = tripUpdate?.stopTimeUpdate;
+		const stopTimeUpdates = tripUpdate?.stopTimeUpdate?.map((i) => ({
+			stopId: i.stopId,
+			time: String(i.arrival?.time) ?? null
+		}));
 		const vehicle = entity?.vehicle;
 		const trip = tripUpdate?.trip ?? vehicle?.trip;
 		const currentStopSequence = vehicle?.currentStopSequence;
-		const vehicleTimestamp = vehicle?.timestamp;
+		const vehicleTimestamp = vehicle?.timestamp ? String(vehicle.timestamp) : undefined;
 		const stopId = vehicle?.stopId;
-		const tripId = trip?.tripId ?? String(Math.random()).slice(2, 5);
+		const tripId = trip?.tripId ?? `unknown_${String(Math.random()).slice(2, 6)}`;
 		const newData = {
 			tripId,
 			trip,
@@ -54,17 +57,20 @@ export const getParsedTripData: (feedId: string) => Promise<ParsedTripData[]> = 
 					matchTrip: match.trip
 				});
 			}
+			const current = acc[tripId];
 			acc[tripId] = {
-				...acc[tripId],
-				...newData
+				...current,
+				stopTimeUpdates: current?.stopTimeUpdates ?? newData?.stopTimeUpdates,
+				currentStopSequence: current?.currentStopSequence ?? newData?.currentStopSequence,
+				vehicleTimestamp: current?.vehicleTimestamp ?? newData?.vehicleTimestamp,
+				stopId: current?.stopId ?? newData?.stopId
 			};
 		}
 		return acc;
 	}, {});
 
 	const parsedTripDataArray = Object.keys(parsedTripData).reduce((a: ParsedTripData[], c) => {
-		a.push(parsedTripData[c]);
-		return a;
+		return [...a, parsedTripData[c]];
 	}, []);
 
 	return parsedTripDataArray;
