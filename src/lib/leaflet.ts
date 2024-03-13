@@ -10,6 +10,8 @@ import {
 	PUBLIC_UPDATE_FREQUENCY_IN_SECONDS as UPDATE_FREQUENCY_IN_SECONDS
 } from '$env/static/public';
 import Station from '$lib/classes/Station';
+import Interval from '$lib/classes/Interval';
+import type { LatLng, LineColor } from '$lib/types';
 
 const mapCenter = JSON.parse(MAP_CENTER);
 const options: MapOptions = {
@@ -60,32 +62,40 @@ export function drawStation(station: Station, recenter = false) {
   */
 }
 
-// function drawInterval(interval) {
-// 	if (!interval.nStation || !interval.sStation) return;
-// 	if (interval.colors.length === 0) return;
-// 	if (interval.shape.length > 0) {
-// 		interval.shape.forEach((i, index) => {
-// 			if (index < interval.shape.length - 1) {
-// 				const pos1 = [interval.shape[index][0], interval.shape[index][1]];
-// 				const pos2 = [interval.shape[index + 1][0], interval.shape[index + 1][1]];
-// 				// Leaflet.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
-// 				interval.colors.forEach((color) => {
-// 					const offsets1 = [interval.offsets[color][index][0], interval.offsets[color][index][1]];
-// 					const offsets2 = [
-// 						interval.offsets[color][index + 1][0],
-// 						interval.offsets[color][index + 1][1]
-// 					];
-// 					drawTracks(offsets1, offsets2, color, index);
-// 				});
-// 			}
-// 		});
-// 	} else {
-// 		// Fallback for if interval.offsets is not set
-// 		const s1Pos = [interval.nStation.latitude, interval.nStation.longitude];
-// 		const s2Pos = [interval.sStation.latitude, interval.sStation.longitude];
-// 		Leaflet.polyline([s1Pos, s2Pos], { color: interval.colors[0] }).addTo(map);
-// 	}
-// }
+export function drawInterval(interval: Interval) {
+	if (!interval.nStation || !interval.sStation) return;
+	if (interval.colors.length === 0) return;
+	if (interval.shape.length > 0) {
+		interval.shape.forEach((i, index) => {
+			if (index < interval.shape.length - 1) {
+				const pos1 = [interval.shape[index][0], interval.shape[index][1]];
+				const pos2 = [interval.shape[index + 1][0], interval.shape[index + 1][1]];
+				// Leaflet.polyline([pos1, pos2], {color: interval.colors[0]}).addTo(map);
+				interval.colors.forEach((color) => {
+					const _offsets1 = [
+						interval.offsets[color]?.[index]?.[0],
+						interval.offsets[color]?.[index]?.[1]
+					];
+					const _offsets2 = [
+						interval.offsets[color]?.[index + 1]?.[0],
+						interval.offsets[color]?.[index + 1]?.[1]
+					];
+					if (_offsets1[0] && _offsets1[1] && _offsets2[0] && _offsets2[1]) {
+						// 🧼 Types!
+						const offsets1: LatLng[] = _offsets1 as LatLng[];
+						const offsets2: LatLng[] = _offsets2 as LatLng[];
+						drawTracks(offsets1, offsets2, color, index);
+					}
+				});
+			}
+		});
+	} else {
+		// Fallback for if interval.offsets is not set
+		const s1Pos: LatLng = [interval.nStation.latitude, interval.nStation.longitude];
+		const s2Pos: LatLng = [interval.sStation.latitude, interval.sStation.longitude];
+		Leaflet.polyline([s1Pos, s2Pos], { color: interval.colors[0] }).addTo(map);
+	}
+}
 
 // function drawSimpleLine(station1, station2) {
 // 	Leaflet.polyline([station1, station2], { color: 'green' }).addTo(map);
@@ -98,28 +108,28 @@ export function drawStation(station: Station, recenter = false) {
 // 	});
 // }
 
-// function drawTracks(offsetsA, offsetsB, color, index) {
-// 	// console.log({ offsetsA, offsetsB, color, index });
-// 	try {
-// 		// Draw offset line for station B
-// 		//Leaflet.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
+function drawTracks(offsetsA: LatLng[], offsetsB: LatLng[], color: LineColor, index: Number) {
+	// console.log({ offsetsA, offsetsB, color, index });
+	try {
+		// Draw offset line for station B
+		//Leaflet.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
-// 		// Draw N and S offest positions:
-// 		const dcs = ['red', 'orange', 'yellow', 'green', 'violet', 'black'];
-// 		//Leaflet.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
-// 		//Leaflet.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+		// Draw N and S offest positions:
+		const dcs = ['red', 'orange', 'yellow', 'green', 'violet', 'black'];
+		//Leaflet.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
+		//Leaflet.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
 
-// 		// 🍄 Why are empty lat/lng pairs called?
-// 		if (offsetsA[0] && offsetsB[0] && offsetsA[1] && offsetsB[1]) {
-// 			//Draw lines between offsets:
-// 			Leaflet.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
-// 			Leaflet.polyline([offsetsA[1], offsetsB[1]], { color: color }).addTo(map);
-// 		}
-// 	} catch (error) {
-// 		console.log(error);
-// 		debugger;
-// 	}
-// }
+		// 🍄 Why are empty lat/lng pairs called?
+		if (offsetsA[0] && offsetsB[0] && offsetsA[1] && offsetsB[1]) {
+			//Draw lines between offsets:
+			Leaflet.polyline([offsetsA[0], offsetsB[0]], { color: color }).addTo(map);
+			Leaflet.polyline([offsetsA[1], offsetsB[1]], { color: color }).addTo(map);
+		}
+	} catch (error) {
+		console.log(error);
+		debugger;
+	}
+}
 
 // function drawTrain(train) {
 // 	// console.log(

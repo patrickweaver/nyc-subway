@@ -50,3 +50,56 @@ export type StationData = {
 	'North Direction Label': string;
 	'South Direction Label': string;
 };
+
+export type LineGroupInterval = [string, string, string, string, [string, string][]];
+
+export type LineColor =
+	| 'Blue'
+	| 'Orange'
+	| 'LightGreen'
+	| 'Brown'
+	| 'Yellow'
+	| 'LightGrey'
+	| 'Red'
+	| 'Green'
+	| 'DarkGrey'
+	| 'Purple'
+	| 'SteelBlue';
+
+export type LineName =
+	| 'A'
+	| 'C'
+	| 'E'
+	| 'B'
+	| 'D'
+	| 'F'
+	| 'M'
+	| 'G'
+	| 'J'
+	| 'Z'
+	| 'N'
+	| 'Q'
+	| 'R'
+	| 'W'
+	| 'L'
+	| '1'
+	| '2'
+	| '3'
+	| '4'
+	| '5'
+	| '6'
+	| 'GS'
+	| '7'
+	| 'SIR'
+	| 'H'
+	| '5X'
+	| '6X'
+	| 'FS';
+
+export type LineGroupIntervals = {
+	[key in LineColor]: LineGroupInterval[];
+};
+
+export type TrainDirection = 'N' | 'S';
+
+export type LatLng = [number, number];
