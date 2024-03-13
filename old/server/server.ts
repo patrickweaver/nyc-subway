@@ -12,8 +12,8 @@ app.use(cors());
 app.use(express.static("server/public"));
 
 const mostRecentData = {};
-const updateEvery =
-  parseInt(process.env.UPDATE_FREQUENCY_IN_SECONDS) * 1000 - 200;
+const updateMs = process.env?.UPDATE_FREQUENCY_IN_SECONDS ?? "30";
+const updateEvery = parseInt(updateMs) * 1000 - 200;
 
 // Check that .env variables are set:
 if (

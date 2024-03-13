@@ -35,5 +35,12 @@ server/public/bundle.js
 .data/logs/*
 !.data/note.txt
 !.data/logs/note.txt
+
+/build
+/.svelte-kit
+/package
 .env
-.env.local
+.env.*
+!.env.example
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
