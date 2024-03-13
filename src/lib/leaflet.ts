@@ -9,6 +9,7 @@ import {
 	PUBLIC_TILE_LAYER as TILE_LAYER,
 	PUBLIC_UPDATE_FREQUENCY_IN_SECONDS as UPDATE_FREQUENCY_IN_SECONDS
 } from '$env/static/public';
+import Station from '$lib/classes/Station';
 
 const mapCenter = JSON.parse(MAP_CENTER);
 const options: MapOptions = {
@@ -46,18 +47,18 @@ export const markers = {
 	}
 };
 
-// // Draw stations on map (happens on first load)
-// function drawStation(station, recenter = false) {
-// 	if (!station.latitude || !station.longitude) return;
-// 	Leaflet.circle([station.latitude, station.longitude], markers.stationCircle).addTo(map);
-// 	// 🚸 Can implement functionality when a station is clicked on.
-// 	//.on("click", onMarkerClick);
-// 	/*
-//   if (recenter) {
-//     //recenterOnPlace(station);
-//   }
-//   */
-// }
+// Draw stations on map (happens on first load)
+export function drawStation(station: Station, recenter = false) {
+	if (!station.latitude || !station.longitude) return;
+	Leaflet.circle([station.latitude, station.longitude], markers.stationCircle).addTo(map);
+	// 🚸 Can implement functionality when a station is clicked on.
+	//.on("click", onMarkerClick);
+	/*
+  if (recenter) {
+    //recenterOnPlace(station);
+  }
+  */
+}
 
 // function drawInterval(interval) {
 // 	if (!interval.nStation || !interval.sStation) return;

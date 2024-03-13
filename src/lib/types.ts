@@ -34,3 +34,19 @@ export type ParsedTripData = {
 	vehicleTimestamp?: string | null;
 	stopId?: string | null;
 };
+
+export type StationData = {
+	'Station ID': number;
+	'Complex ID': number;
+	'GTFS Stop ID': string | number;
+	Division: string;
+	Line: string;
+	'Stop Name': string;
+	Borough: string;
+	'Daytime Routes': string | number;
+	Structure: string;
+	'GTFS Latitude': number;
+	'GTFS Longitude': number;
+	'North Direction Label': string;
+	'South Direction Label': string;
+};

@@ -1,9 +1,22 @@
 <script lang="ts">
+	import Station from '$lib/classes/Station';
+	import { stationData } from '$lib/data/stationData';
 	import { onMount } from 'svelte';
 
 	onMount(async () => {
 		const leaflet = await import('$lib/leaflet');
 		leaflet.drawMap();
+		const stations: { [key: string]: Station } = {};
+		const stationStopIds: string[] = [];
+		stationData.forEach((i) => {
+			const station = new Station(i);
+			stations[station.stopId] = station;
+			stationStopIds.push(station.stopId);
+		});
+
+		for (let i in stations) {
+			leaflet.drawStation(stations[i]);
+		}
 	});
 </script>
 
