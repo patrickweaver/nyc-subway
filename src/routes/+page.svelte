@@ -2,8 +2,11 @@
 	import Interval from '$lib/classes/Interval';
 	import Station from '$lib/classes/Station';
 	import { lineGroupIntervals } from '$lib/data/lineGroupIntervalsWithShapes';
+	import lineGroups from '$lib/data/lineGroups';
 	import { stationData } from '$lib/data/stationData';
+	import type { ApiResponseBody, FeedData } from '$lib/types';
 	import { onMount } from 'svelte';
+	import { PUBLIC_BASE_API_URI as BASE_API_URI } from '$env/static/public';
 
 	onMount(async () => {
 		const leaflet = await import('$lib/leaflet');
@@ -23,18 +26,47 @@
 		});
 
 		combinedIntervals = Interval.combineIntervals(lineGroupIntervals, stations);
-
-		Object.keys(combinedIntervals).forEach((nStationId) => {
-			Object.keys(combinedIntervals[nStationId]).forEach((sStationId) => {
-				const interval = combinedIntervals[nStationId][sStationId];
-				leaflet.drawInterval(interval);
-			});
-		});
+		drawAllLines(combinedIntervals, leaflet);
 
 		for (let i in stations) {
 			leaflet.drawStation(stations[i]);
 		}
+
+		drawLoop();
 	});
+
+	function drawAllLines(
+		intervals: {
+			[key: string]: {
+				[key: string]: Interval;
+			};
+		},
+		leaflet: typeof import('/Users/pw/Projects/nyc-subway/src/lib/leaflet')
+	) {
+		Object.keys(intervals).forEach((nStationId) => {
+			Object.keys(intervals[nStationId]).forEach((sStationId) => {
+				const interval = intervals[nStationId][sStationId];
+				leaflet.drawInterval(interval);
+			});
+		});
+	}
+
+	async function drawLoop() {
+		try {
+			const lineGroup = lineGroups[0];
+			const lineFeedData = await getFeed(lineGroup?.apiSuffix);
+			const trip = lineFeedData.tripData[0].stopTimeUpdates;
+		} catch (error) {
+			console.log('Draw Loop Error:', error);
+		}
+	}
+
+	async function getFeed(line: string = 'all'): Promise<FeedData> {
+		const response = await fetch(`${BASE_API_URI}/${line}`);
+		console.log(`Updating for ${line.toUpperCase()} lines`);
+		const responseJson: ApiResponseBody = await response.json();
+		return responseJson.data as FeedData;
+	}
 </script>
 
 <div id="map"></div>

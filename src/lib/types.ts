@@ -23,6 +23,13 @@ export const LineGroup = {
 	SIR: 'si'
 };
 
+export type FeedData = {
+	requestTime: number;
+	line: string;
+	tripData: ParsedTripData[];
+	count: number;
+};
+
 export type ParsedTripData = {
 	tripId: string;
 	trip: GtfsRealtimeBindings.transit_realtime.ITripDescriptor | null | undefined;
