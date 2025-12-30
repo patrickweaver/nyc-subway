@@ -1,4 +1,10 @@
-# create-svelte
+# Nyc Subway
+
+A real time map of the New York City Subway.
+
+## Note
+
+This project is currently being updated to use TypeScript, the `master` branch is not currently functional.
 
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
 
