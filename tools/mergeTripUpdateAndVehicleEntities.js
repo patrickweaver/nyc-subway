@@ -1,4 +1,4 @@
-module.exports = function mergeTripUpdateAndVehicleEntities(tripEntities) {
+export default function mergeTripUpdateAndVehicleEntities(tripEntities) {
   try {
     const tripUpdates = [],
       vehicles = [],
@@ -51,4 +51,4 @@ module.exports = function mergeTripUpdateAndVehicleEntities(tripEntities) {
     console.log("Error merging tripUpdates and vehicles:", error);
     return [];
   }
-};
+}

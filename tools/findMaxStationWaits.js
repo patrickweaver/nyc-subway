@@ -1,8 +1,8 @@
-const fs = require("fs");
+import fs from "fs";
 
 const tripsCsvFilePath = "./.data/logs/trips.csv";
 const csv = require("csvtojson");
-const lines = require("./lines.js");
+import lines from "./lines";
 const saveFilePath = "./src/data/stationWaitTimes.js";
 
 let avg = (array) => Math.round(array.reduce((a, b) => a + b) / array.length);
@@ -46,7 +46,7 @@ async function main() {
   console.log(JSON.stringify(allLinesWaitTimes));
 
   const data = new Uint8Array(
-    Buffer.from("export default " + JSON.stringify(allLinesWaitTimes)),
+    Buffer.from("export default " + JSON.stringify(allLinesWaitTimes))
   );
   fs.writeFile(saveFilePath, data, (err) => {
     if (err) throw err;

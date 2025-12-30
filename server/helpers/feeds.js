@@ -1,6 +1,6 @@
 // Each set of lines has a differnt MTA API endpoint
 // Values are the end of the MTA urls for each line
-const feeds = {
+export const feeds = {
   a: "-ace",
   c: "-ace",
   e: "-ace",
@@ -33,5 +33,3 @@ const feeds = {
   sir: "-si",
   si: "-si",
 };
-
-module.exports = feeds;

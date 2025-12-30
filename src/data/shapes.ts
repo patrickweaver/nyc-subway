@@ -1,6 +1,6 @@
 // Parsed data from shapes.txt file from GTFS download
 
-export default {
+const shapes = {
   1: {
     "1..N03R": [
       ["40.702068", "-74.013664"],
@@ -125170,3 +125170,5 @@ export default {
     ],
   },
 };
+
+export default shapes;

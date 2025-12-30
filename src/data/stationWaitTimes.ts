@@ -1,4 +1,4 @@
-export default {
+const stationWaitTimes = {
   G: {
     G22: { N: { avg: 60, max: 71 }, S: null },
     G24: { N: { avg: 123, max: 180 }, S: { avg: 60, max: 106 } },
@@ -23,3 +23,5 @@ export default {
     F27: { N: null, S: { avg: 81, max: 120 } },
   },
 };
+
+export default stationWaitTimes;

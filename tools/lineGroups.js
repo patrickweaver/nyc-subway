@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   {
     lines: ["A", "C", "E"],
     apiSuffix: "ace",

@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   {
     shape_id: "1..N03R",
     shape_pt_lat: "40.702068",

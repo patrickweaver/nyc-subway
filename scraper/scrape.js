@@ -1,7 +1,6 @@
-const fs = require("fs");
-const rp = require("request-promise");
+import fs from "fs";
 
-const feedIds = require("./feeds.js");
+import feedIds from "./feeds.js";
 
 // init sqlite db
 const dbFile = __dirname + "/data/sqlite.db";
@@ -14,7 +13,7 @@ const db = new sqlite3.Database(dbFile);
     // Create db table if db didn't previously exist:
     if (!exists) {
       db.run(
-        "CREATE TABLE WaitTimes (id INTEGER PRIMARY KEY AUTOINCREMENT, stopId TEXT, gTFSStopId TEXT, direction TEXT, seconds INTEGER, timestamp INTEGER, tripId TEXT, startDate TEXT, dayOfWeek INTEGER, line TEXT)",
+        "CREATE TABLE WaitTimes (id INTEGER PRIMARY KEY AUTOINCREMENT, stopId TEXT, gTFSStopId TEXT, direction TEXT, seconds INTEGER, timestamp INTEGER, tripId TEXT, startDate TEXT, dayOfWeek INTEGER, line TEXT)"
       );
       console.log("New table WaitTimes created!");
     }
@@ -93,7 +92,7 @@ const db = new sqlite3.Database(dbFile);
             const gTFSStopId = stopId.substring(0, stopId.length - 1);
             const direction = stopId.substring(
               gTFSStopId.length,
-              stopId.length,
+              stopId.length
             );
 
             const seconds =
@@ -123,7 +122,7 @@ const db = new sqlite3.Database(dbFile);
       const wt = stopUpdates[i];
       db.serialize(() => {
         db.run(
-          `INSERT INTO WaitTimes (stopId, gTFSStopId, direction, seconds, timestamp, tripId, startDate, dayOfWeek, line) VALUES ("${wt.stopId}", "${wt.gTFSStopId}", "${wt.direction}", "${wt.seconds}", "${wt.timestamp}", "${wt.tripId}", "${wt.startDate}", "${wt.dayOfWeek}", "${wt.line}")`,
+          `INSERT INTO WaitTimes (stopId, gTFSStopId, direction, seconds, timestamp, tripId, startDate, dayOfWeek, line) VALUES ("${wt.stopId}", "${wt.gTFSStopId}", "${wt.direction}", "${wt.seconds}", "${wt.timestamp}", "${wt.tripId}", "${wt.startDate}", "${wt.dayOfWeek}", "${wt.line}")`
         );
       });
     }
@@ -131,15 +130,25 @@ const db = new sqlite3.Database(dbFile);
 })();
 
 async function getFeedData(feedId) {
-  var options = {
-    uri: `http://localhost:${process.env.PORT}/api/${feedId}`,
-    json: true,
-  };
-
-  console.log(options);
-
   try {
-    const feedResponse = await rp(options);
+    const url = `http://localhost:${process.env.PORT}/api/${feedId}`;
+    const headers = [
+      // ["x-api-key", process.env.MTA_API_KEY],
+      ["Content-Type", "application/json"],
+    ];
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      const error = new Error(
+        `${response.url}: ${response.status} ${response.statusText}`
+      );
+      error.response = response;
+      throw error;
+    }
+    const buffer = await response.arrayBuffer();
+    const feedResponse =
+      GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
+        new Uint8Array(buffer)
+      );
     return feedResponse;
   } catch (error) {
     console.log("Error:");

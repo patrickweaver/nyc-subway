@@ -1,6 +1,8 @@
+import type { LineName } from "../types";
+
 // A list of station Ids
 
-export default {
+const lineStationIds: { [key in LineName]: string[] } = {
   1: [
     "101",
     "103",
@@ -865,4 +867,7 @@ export default {
   "5X": [],
   H: [],
   FS: [],
+  SIR: [],
 };
+
+export default lineStationIds;

@@ -1,7 +1,7 @@
-const fs = require("fs");
-const timestampFromDateAndTime = require("./timestampFromDateAndTime.js");
+import fs from "fs";
+import { timestampFromDateAndTime } from "./timestampFromDateAndTime.js";
 
-module.exports = function (apiResponse) {
+export function logLocations(apiResponse) {
   // Log data to figure out time between stops
 
   if (!apiResponse) {
@@ -63,8 +63,8 @@ module.exports = function (apiResponse) {
       const type = e.tripUpdate
         ? "Trip Update"
         : e.vehicle
-          ? "Vehicle"
-          : "Unknown";
+        ? "Vehicle"
+        : "Unknown";
 
       let tripRow = `${timestamp}, ${e.id}, ${type}, `;
       let stuMetaRow = `${timestamp}, ${e.id}, ${type}, `;
@@ -73,7 +73,7 @@ module.exports = function (apiResponse) {
         const tu = e.tripUpdate;
         const startTimestamp = timestampFromDateAndTime(
           tu.trip.startDate,
-          tu.trip.startTime,
+          tu.trip.startTime
         );
         tripRow += `${tu.trip.tripId}, ${tu.trip.startTime}, ${tu.trip.startDate}, ${tu.trip.routeId}, ${startTimestamp}, ${index}, ${apiResponse.entity.length}, `;
         stuMetaRow += `${tu.trip.tripId}, ${tu.trip.startTime}, ${tu.trip.startDate}, ${tu.trip.routeId}, ${startTimestamp}, ${index}, ${apiResponse.entity.length}, `;
@@ -98,7 +98,11 @@ module.exports = function (apiResponse) {
           const stu = tu.stopTimeUpdate[i];
           let stuRow =
             stuMetaRow +
-            `${i}, ${stuCount}, ${stu.arrival.time}, ${parseInt(stu.arrival.time) - timestamp}, ${stu.departure.time}, ${parseInt(stu.departure.time) - timestamp}, ${stu.stopId},\n`;
+            `${i}, ${stuCount}, ${stu.arrival.time}, ${
+              parseInt(stu.arrival.time) - timestamp
+            }, ${stu.departure.time}, ${
+              parseInt(stu.departure.time) - timestamp
+            }, ${stu.stopId},\n`;
           newStuRows += stuRow;
         }
       } else if (type === "Vehicle") {
@@ -134,4 +138,4 @@ module.exports = function (apiResponse) {
     console.log("Data written to " + filename);
   });
   */
-};
+}

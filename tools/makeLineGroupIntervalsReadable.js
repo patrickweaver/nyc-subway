@@ -1,10 +1,10 @@
 require("dotenv").config();
-const fs = require("fs");
+import fs from "fs";
 
 var lineGroupIntervals = require("./lineGroupIntervals.js");
 
-const lineGroups = require("./lineGroups.js");
-const stationData = require("./stationData.js");
+import lineGroups from "./lineGroups.js";
+import stationData from "./stationData.js";
 const stationIds = {};
 stationData.forEach((i, index) => {
   stationIds[i["GTFS Stop ID"]] = index;
@@ -36,7 +36,7 @@ async function main() {
   try {
     const lineGroupIntervalsReadableCopy = `// A list of pairs of stationIds, this is the same as /src/data/lineGroupIntervals.js
 
-    module.exports = `;
+    export default `;
 
     const filename = "./tools/lineGroupIntervalsReadable.js";
     fs.writeFile(
@@ -45,7 +45,7 @@ async function main() {
       function (err) {
         if (err) return console.log("Error:\n", err);
         console.log(`stop ID line data written to ${filename}`);
-      },
+      }
     );
   } catch (error) {
     console.log("Error writing file");

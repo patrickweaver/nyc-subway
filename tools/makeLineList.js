@@ -1,11 +1,11 @@
 require("dotenv").config();
-const fs = require("fs");
-const getFeed = require("../server/helpers/getFeed.js");
-const mergeTripUpdateAndVehicleEntities = require("./mergeTripUpdateAndVehicleEntities.js");
+import fs from "fs";
+import getFeed from "../server/helpers/getFeed.js";
+import mergeTripUpdateAndVehicleEntities from "./mergeTripUpdateAndVehicleEntities";
 
-var lines = require("./lines.js");
+var lines = require("./lines");
 
-const lineGroups = require("./lineGroups.js");
+import lineGroups from "./lineGroups.js";
 
 main();
 setInterval(main, 1000 * 60 * 5);
@@ -16,11 +16,11 @@ async function main() {
   }
 
   try {
-    const linesCopy = `// A list of station Ids, this is the same as /src/data/lines.js
+    const linesCopy = `// A list of station Ids, this is the same as /src/data/lines
 
-    module.exports = `;
+    export default `;
 
-    const filename = "./tools/lines.js";
+    const filename = "./tools/lines";
     fs.writeFile(filename, linesCopy + JSON.stringify(lines), function (err) {
       if (err) return console.log("Error:\n", err);
       console.log(`stop ID line data written to ${filename}`);
@@ -36,7 +36,7 @@ async function getLineGroup(lineGroup) {
     const apiResponse = await getFeed(lineGroup.apiSuffix);
     // Filter to only entities with a tripUpdate property
     const tripUpdateEntities = apiResponse.entity.filter((i) =>
-      i.tripUpdate ? true : false,
+      i.tripUpdate ? true : false
     );
 
     // Filter to only valid South bound trips for each line.
@@ -73,7 +73,7 @@ async function getLineGroup(lineGroup) {
         if (!update.tripUpdate.stopTimeUpdate[0]) return null;
         // remove direction from stopId string
         return update.tripUpdate.stopTimeUpdate.map((stationUpdate) =>
-          stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1),
+          stationUpdate.stopId.substring(0, stationUpdate.stopId.length - 1)
         );
       });
     });
@@ -108,7 +108,7 @@ async function getLineGroup(lineGroup) {
           ") at",
           new Date().getHours(),
           ":",
-          new Date().getMinutes(),
+          new Date().getMinutes()
         );
         lines[line] = lineStopIdsUpdates[longestIndex];
       }
@@ -117,7 +117,7 @@ async function getLineGroup(lineGroup) {
     console.log(
       "👺 makeLineList Error for line",
       lineGroup.lines.join(""),
-      ":",
+      ":"
     );
     console.log("💋  💋  💋  💋  💋  💋  💋  💋  ");
     console.log(error);
