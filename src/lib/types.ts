@@ -21,7 +21,9 @@ export const LineGroup = {
 	ONE_TWO_THREE_FOUR_FIVE_SIX_GS: '123456',
 	SEVEN: '7',
 	SIR: 'si'
-};
+} as const;
+
+export type LineGroup = (typeof LineGroup)[keyof typeof LineGroup];
 
 export type FeedData = {
 	requestTime: number;
@@ -110,3 +112,17 @@ export type LineGroupIntervals = {
 export type TrainDirection = 'N' | 'S';
 
 export type LatLng = [number, number];
+
+export type NYCSU_StopTimeUpdate = {
+	stopId: string | null;
+	time: string | null;
+};
+
+export type NYCSU_Entity = {
+	tripId: string;
+	trip: GtfsRealtimeBindings.transit_realtime.ITripDescriptor | null;
+	stopTimeUpdates: NYCSU_StopTimeUpdate[];
+	currentStopSequence: number | null;
+	vehicleTimestamp: string | null;
+	stopId: string | null;
+};

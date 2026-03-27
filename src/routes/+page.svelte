@@ -41,7 +41,7 @@
 				[key: string]: Interval;
 			};
 		},
-		leaflet: typeof import('/Users/pw/Projects/nyc-subway/src/lib/leaflet')
+		leaflet: typeof import('$lib/leaflet')
 	) {
 		Object.keys(intervals).forEach((nStationId) => {
 			Object.keys(intervals[nStationId]).forEach((sStationId) => {
@@ -56,6 +56,7 @@
 			const lineGroup = lineGroups[0];
 			const lineFeedData = await getFeed(lineGroup?.apiSuffix);
 			const trip = lineFeedData.tripData[0].stopTimeUpdates;
+			console.log({ trip })
 		} catch (error) {
 			console.log('Draw Loop Error:', error);
 		}
