@@ -1,11 +1,13 @@
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import { feeds } from './feeds';
 
-import { MTA_API_KEY } from '$env/static/private';
+// import { MTA_API_KEY } from '$env/static/private';
 import type { ParsedTripData } from '$lib/types';
 
 const baseUri = 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs';
-const apiKey = MTA_API_KEY ?? '';
+const apiKey =
+	// MTA_API_KEY ??
+	'';
 
 export const getFeed: (
 	feedId?: string

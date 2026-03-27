@@ -62,9 +62,12 @@
 	}
 
 	async function getFeed(line: string = 'all'): Promise<FeedData> {
-		const response = await fetch(`${BASE_API_URI}/${line}`);
+		const url = `${BASE_API_URI}${line}`;
+		console.log({ url })
+		const response = await fetch(url);
 		console.log(`Updating for ${line.toUpperCase()} lines`);
 		const responseJson: ApiResponseBody = await response.json();
+		console.log(responseJson)
 		return responseJson.data as FeedData;
 	}
 </script>
