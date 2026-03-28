@@ -25,23 +25,11 @@ export const LineGroup = {
 
 export type LineGroup = (typeof LineGroup)[keyof typeof LineGroup];
 
-export type FeedData = {
+export type NYCSU_FeedData = {
 	requestTime: number;
 	line: string;
-	tripData: ParsedTripData[];
+	tripData: NYCSU_Entity[];
 	count: number;
-};
-
-export type ParsedTripData = {
-	tripId: string;
-	trip: GtfsRealtimeBindings.transit_realtime.ITripDescriptor | null | undefined;
-	stopTimeUpdates:
-		| GtfsRealtimeBindings.transit_realtime.TripUpdate.IStopTimeUpdate[]
-		| null
-		| undefined;
-	currentStopSequence?: number | null;
-	vehicleTimestamp?: string | null;
-	stopId?: string | null;
 };
 
 export type StationData = {
@@ -125,4 +113,11 @@ export type NYCSU_Entity = {
 	currentStopSequence: number | null;
 	vehicleTimestamp: string | null;
 	stopId: string | null;
+};
+
+export type NYCSU_Train = {
+	lineId: string;
+	nextStationId: string | null;
+	nextStationArrivalTime: number | null;
+	lastUpdatedAt: number;
 };

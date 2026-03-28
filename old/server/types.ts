@@ -134,7 +134,7 @@ export type FeedEntityDataWithTimestamp = FeedEntityData & {
   timestamp: number;
 };
 
-export type FeedData = {
+export typeNYCSU_FeedData = {
   header: {
     gtfsRealtimeVersion: string;
     incrementality: string;

@@ -1,23 +1,20 @@
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import { feeds } from './feeds';
 
-// import { MTA_API_KEY } from '$env/static/private';
-import type { LineGroup, NYCSU_Entity, ParsedTripData } from '$lib/types';
+import type { LineGroup, NYCSU_Entity } from '$lib/types';
 
 const baseUri = 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs';
-const apiKey =
-	// MTA_API_KEY ??
-	'';
+const apiKey = '';
 
-export async function getParsedTripData(feedId: LineGroup): Promise<ParsedTripData[]> {
+export async function getNYCSU_Entity(feedId: LineGroup): Promise<NYCSU_Entity[]> {
 	const feed = await getFeed(feedId);
 	const mappedEntities = feed.entity.map(mapApiResponse);
-	const parsedTripData = mappedEntities.reduce(reduceFeed, {});
-	const parsedTripDataArray = Object.keys(parsedTripData).reduce((a: ParsedTripData[], c) => {
-		return [...a, parsedTripData[c]];
+	const NYCSU_Entity = mappedEntities.reduce(reduceFeed, {});
+	const NYCSU_EntityArray = Object.keys(NYCSU_Entity).reduce((a: NYCSU_Entity[], c) => {
+		return [...a, NYCSU_Entity[c]];
 	}, []);
 
-	return parsedTripDataArray;
+	return NYCSU_EntityArray;
 }
 
 async function getFeed(
@@ -58,13 +55,13 @@ function mapApiResponse(entity: GtfsRealtimeBindings.transit_realtime.IFeedEntit
 	return mappedEntity;
 }
 
-function reduceFeed(acc: { [key: string]: ParsedTripData }, entity: NYCSU_Entity, index: number) {
+function reduceFeed(acc: { [key: string]: NYCSU_Entity }, entity: NYCSU_Entity, index: number) {
 	const tripId = entity.tripId;
 	const match = acc?.[tripId];
 	if (!match) {
 		acc[tripId] = entity;
 	} else {
-		if (JSON.stringify(entity.trip) !== JSON.stringify(match.trip)) {
+		if (!compareTrips(entity.trip, match.trip ?? null)) {
 			console.log('ALERT_BAD_DATA', {
 				tripId,
 				trip: entity.trip,
@@ -81,4 +78,14 @@ function reduceFeed(acc: { [key: string]: ParsedTripData }, entity: NYCSU_Entity
 		};
 	}
 	return acc;
+}
+
+function compareTrips(
+	trip1: GtfsRealtimeBindings.transit_realtime.ITripDescriptor | null,
+	trip2: GtfsRealtimeBindings.transit_realtime.ITripDescriptor | null
+) {
+	const trip1String = JSON.stringify(trip1);
+	const trip2String = JSON.stringify(trip2);
+	if (trip1String !== trip2String) return false;
+	return true;
 }
