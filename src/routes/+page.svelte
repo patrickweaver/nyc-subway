@@ -56,7 +56,7 @@
 
 	async function drawLoop() {
 		try {
-			const lineGroup = lineGroups[0];
+			const lineGroup = lineGroups[2];
 			const lineFeedData = await getFeed(lineGroup.apiSuffix);
 			const trip = lineFeedData.tripData[0].stopTimeUpdates;
 			console.log({ trip })
@@ -67,12 +67,12 @@
 					lineId: lineGroup.apiSuffix,
 					nextStationId: trip.stopTimeUpdates?.[0]?.stopId ?? null,
 					nextStationArrivalTime: trip.stopTimeUpdates?.[0]?.time ? parseInt(trip.stopTimeUpdates[0].time) : null,
-					lastUpdatedAt: lineFeedData.requestTime
+					lastUpdatedAt: lineFeedData.requestTime,
+					longitude: null,
+					latitude: null
 				}
 				updatedStore[tripId] = updatedTrain;
 				trains.set(updatedStore)
-
-
 			})
 		} catch (error) {
 			console.log('Draw Loop Error:', error);
@@ -96,7 +96,9 @@
 	<h1>Trains</h1>
 	<ul id="train-list">
 		{#each Object.keys($trains) as itemId}
-			<li>{$trains[itemId].lineId}: {$trains[itemId].nextStationId} ({new Date($trains[itemId].lastUpdatedAt).toLocaleTimeString('en-us', { timeZone: 'America/New_York'})})</li>
+			<li>
+				{$trains[itemId].lineId}: {$trains[itemId].nextStationId} ({new Date($trains[itemId].lastUpdatedAt).toLocaleTimeString('en-us', { timeZone: 'America/New_York'})})
+			</li>
 		{/each}
 	</ul>
 </div>

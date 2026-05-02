@@ -10,6 +10,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		const line = LineGroupEnum.parse(params.line);
 		const _tripData = await getNYCSU_Entity(line);
 		const tripData = _tripData.filter((i: NYCSU_Entity) => !!i.stopTimeUpdates?.length);
+		console.log(line, ':', tripData.length, 'of', _tripData.length);
 		const count = tripData.length;
 		const data = { requestTime, line, tripData, count };
 		const responseBody: ApiResponseBody = {

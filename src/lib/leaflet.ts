@@ -11,7 +11,7 @@ import {
 } from '$env/static/public';
 import Station from '$lib/classes/Station';
 import Interval from '$lib/classes/Interval';
-import type { LatLng, LineColor } from '$lib/types';
+import type { LatLng, LineColor, NYCSU_Train } from '$lib/types';
 
 const mapCenter = JSON.parse(MAP_CENTER);
 const options: MapOptions = {
@@ -131,32 +131,32 @@ function drawTracks(offsetsA: LatLng[], offsetsB: LatLng[], color: LineColor, in
 	}
 }
 
-// function drawTrain(train) {
-// 	// console.log(
-// 	//   "🚇 New Train: (index:",
-// 	//   train.mostRecentTripEntity.index,
-// 	//   "), id:",
-// 	//   train.id,
-// 	//   "at",
-// 	//   train.latitude,
-// 	//   ",",
-// 	//   train.longitude,
-// 	//   "going",
-// 	//   train.direction,
-// 	//   "type:",
-// 	//   train.mostRecentTripEntity.type,
-// 	//   ", startimeTimestamp:",
-// 	//   train.mostRecentTripEntity.trip.startTimestamp
-// 	// );
+function drawTrain(train: NYCSU_Train) {
+	// console.log(
+	//   "🚇 New Train: (index:",
+	//   train.mostRecentTripEntity.index,
+	//   "), id:",
+	//   train.id,
+	//   "at",
+	//   train.latitude,
+	//   ",",
+	//   train.longitude,
+	//   "going",
+	//   train.direction,
+	//   "type:",
+	//   train.mostRecentTripEntity.type,
+	//   ", startimeTimestamp:",
+	//   train.mostRecentTripEntity.trip.startTimestamp
+	// );
 
-// 	let bounds = Leaflet.latLng(train.latitude, train.longitude)?.toBounds(250);
+	let bounds = Leaflet.latLng(train.latitude, train.longitude)?.toBounds(250);
 
-// 	const trainPosition = [train.latitude, train.longitude];
-// 	//var trainMarker = Leaflet.marker(trainPosition, {icon: trainIcon}).addTo(map);
-// 	const tmo = train.direction === 'N' ? markers.trainCircleN : markers.trainCircleS;
-// 	const trainMarker = Leaflet.circle(trainPosition, tmo).addTo(map);
-// 	return trainMarker;
-// }
+	const trainPosition = [train.latitude, train.longitude];
+	//var trainMarker = Leaflet.marker(trainPosition, {icon: trainIcon}).addTo(map);
+	const tmo = train.direction === 'N' ? markers.trainCircleN : markers.trainCircleS;
+	const trainMarker = Leaflet.circle(trainPosition, tmo).addTo(map);
+	return trainMarker;
+}
 
 // function moveTrain(train) {
 // 	console.log('🛎 Moving train:', train.id, 'going', train.direction);

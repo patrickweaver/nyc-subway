@@ -1,4 +1,4 @@
-import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
+import type GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 
 export type ApiResponseError = {
 	message: string;
@@ -107,11 +107,16 @@ export type NYCSU_StopTimeUpdate = {
 };
 
 export type NYCSU_Entity = {
-	tripId: string;
+	trip_id: string;
+	route_id: string;
+	trip_direction: string;
+	trip_start_timestamp: string;
+	trip_start_timestamp_utc: string;
 	trip: GtfsRealtimeBindings.transit_realtime.ITripDescriptor | null;
 	stopTimeUpdates: NYCSU_StopTimeUpdate[];
 	currentStopSequence: number | null;
 	vehicleTimestamp: string | null;
+	vehicle_timestamp_utc: string;
 	stopId: string | null;
 };
 
@@ -120,4 +125,6 @@ export type NYCSU_Train = {
 	nextStationId: string | null;
 	nextStationArrivalTime: number | null;
 	lastUpdatedAt: number;
+	longitude: number | null;
+	latitude: number | null;
 };
