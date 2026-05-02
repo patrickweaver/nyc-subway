@@ -9,14 +9,15 @@ export const GET: RequestHandler = async ({ params }) => {
 		const requestTime = new Date().getTime();
 		const line = LineGroupEnum.parse(params.line);
 		const _tripData = await getNYCSU_Entity(line);
-		const tripData = _tripData.filter((i: NYCSU_Entity) => !!i.stopTimeUpdates?.length);
-		console.log(line, ':', tripData.length, 'of', _tripData.length);
+		// TODO don't filter out items almost at last stop
+		const tripData = _tripData.filter((i: NYCSU_Entity) => !!i.updates_next_stop_id);
 		const count = tripData.length;
-		const data = { requestTime, line, tripData, count };
+		const data = { entities: tripData, entity_count: count };
 		const responseBody: ApiResponseBody = {
 			message: 'NYC Subway',
 			success: true,
 			error: null,
+			request_time: requestTime,
 			data
 		};
 

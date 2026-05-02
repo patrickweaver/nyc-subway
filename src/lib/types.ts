@@ -8,7 +8,11 @@ export type ApiResponseBody = {
 	message: string;
 	success: boolean;
 	error: ApiResponseError | null;
-	data: unknown | null;
+	request_time: number;
+	data: {
+		entities: NYCSU_Entity[];
+		entity_count: number;
+	};
 };
 
 export const LineGroup = {
@@ -108,23 +112,24 @@ export type NYCSU_StopTimeUpdate = {
 
 export type NYCSU_Entity = {
 	trip_id: string;
-	route_id: string;
+	trip_route_id: string | null;
 	trip_direction: string;
-	trip_start_timestamp: string;
-	trip_start_timestamp_utc: string;
-	trip: GtfsRealtimeBindings.transit_realtime.ITripDescriptor | null;
-	stopTimeUpdates: NYCSU_StopTimeUpdate[];
-	currentStopSequence: number | null;
-	vehicleTimestamp: string | null;
-	vehicle_timestamp_utc: string;
-	stopId: string | null;
+	trip_start_timestamp_string: string;
+	trip_start: number;
+	updates_next_stop_id: string | null;
+	updates_next_stop_arrival: number;
+	updates_next_stop_departure: number;
+	vehicle_current_stop_id: string | null;
+	vehicle_current_stop_sequence: number | null;
+	vehicle_current_status: GtfsRealtimeBindings.transit_realtime.VehiclePosition.VehicleStopStatus | null;
+	vehicle_timestamp: number;
 };
 
 export type NYCSU_Train = {
-	lineId: string;
-	nextStationId: string | null;
-	nextStationArrivalTime: number | null;
-	lastUpdatedAt: number;
+	line_id: string;
+	updates_next_stop_id: string | null;
+	updates_next_stop_arrival: Date;
+	last_updated_at: Date;
 	longitude: number | null;
 	latitude: number | null;
 };

@@ -9,9 +9,9 @@ export async function getNYCSU_Entity(feedId: LineGroup): Promise<NYCSU_Entity[]
 	const feed = await getFeed(feedId);
 	const _mappedEntities = feed.entity.map(mapApiResponse);
 	const mappedEntities = _mappedEntities.filter((i) => !!i);
-	const NYCSU_Entity = mappedEntities.reduce(reduceFeed, {});
-	const NYCSU_EntityArray = Object.keys(NYCSU_Entity).reduce((a: NYCSU_Entity[], c) => {
-		return [...a, NYCSU_Entity[c]];
+	const NYCSU_EntityByKey = mappedEntities.reduce(reduceFeed, {});
+	const NYCSU_EntityArray = Object.keys(NYCSU_EntityByKey).reduce((a: NYCSU_Entity[], c) => {
+		return [...a, NYCSU_EntityByKey[c]];
 	}, []);
 
 	return NYCSU_EntityArray;
@@ -34,47 +34,56 @@ function mapApiResponse(
 	entity: GtfsRealtimeBindings.transit_realtime.IFeedEntity
 ): NYCSU_Entity | null {
 	const tripUpdate = entity.tripUpdate ?? null;
-	const stopTimeUpdates =
-		tripUpdate?.stopTimeUpdate?.map((i) => ({
-			stopId: i.stopId ?? null,
-			// arrival and departure times are always identical
-			time: i.arrival?.time ? String(i.arrival.time) : null
-		})) ?? [];
 	const vehicle = entity?.vehicle ?? null;
 	const trip = tripUpdate?.trip ?? vehicle?.trip ?? null;
-	const currentStopSequence = vehicle?.currentStopSequence ?? null;
-	const vehicleTimestamp = vehicle?.timestamp ? String(vehicle.timestamp) : null;
-	const stopId = vehicle?.stopId ?? null;
+
 	const tripId = trip?.tripId ?? randomTripId();
 	const tripIdParsed = tripId.split(/[._]/).filter((i) => !!i);
 	if (tripIdParsed.length !== 3) {
 		console.log('ALERT_ERROR_INVALID_TRIP_ID', tripId);
 		return null;
 	}
-	const routeId = tripIdParsed[1];
+	const tripRouteId = trip?.routeId ?? null;
 	const tripDirection = tripIdParsed[2][0];
 
-	let tripStartTimestamp = '-1';
+	let tripStartTimestampString = '-1';
 	if (trip?.startDate && trip?.startTime) {
 		const year = trip.startDate.slice(0, 4);
 		const month = trip.startDate.slice(4, 6);
 		const day = trip.startDate.slice(6, 8);
-		tripStartTimestamp = `${year}-${month}-${day}T${trip.startTime}-04:00`;
+		tripStartTimestampString = `${year}-${month}-${day}T${trip.startTime}-04:00`;
 	}
+
+	const nextStopTimeUpdate = tripUpdate?.stopTimeUpdate?.[0];
+	const updatesNextStopId = nextStopTimeUpdate?.stopId ?? null;
+	const updatesNextStopArrival = nextStopTimeUpdate?.arrival?.time
+		? String(nextStopTimeUpdate.arrival.time)
+		: '0';
+	const updatesNextStopArrivalMs = parseInt(updatesNextStopArrival) * 1000;
+	const updatesNextStopDeparture = nextStopTimeUpdate?.departure?.time
+		? String(nextStopTimeUpdate.departure.time)
+		: '0';
+	const updatesNextStopDepartureMs = parseInt(updatesNextStopDeparture) * 1000;
+
+	const vehicleCurrentStopId = vehicle?.stopId ?? null;
+	const vehicleCurrentStopSequence = vehicle?.currentStopSequence ?? null;
+	const vehicleCurrentStatus = vehicle?.currentStatus ?? null;
+	const vehicleTimestamp = vehicle?.timestamp ? String(vehicle.timestamp) : null;
 	const vehicleTimestampMs = vehicleTimestamp ? parseInt(vehicleTimestamp) * 1000 : 0;
-	console.log(tripId, vehicleTimestamp, vehicleTimestampMs);
+
 	const mappedEntity = {
 		trip_id: tripId,
-		route_id: routeId,
+		trip_route_id: tripRouteId,
 		trip_direction: tripDirection,
-		trip_start_timestamp: tripStartTimestamp,
-		trip_start_timestamp_utc: new Date(tripStartTimestamp).toISOString(),
-		trip,
-		stopTimeUpdates,
-		currentStopSequence,
-		vehicleTimestamp,
-		vehicle_timestamp_utc: new Date(vehicleTimestampMs).toISOString(),
-		stopId
+		trip_start_timestamp_string: tripStartTimestampString,
+		trip_start: new Date(tripStartTimestampString).getTime(),
+		updates_next_stop_id: updatesNextStopId,
+		updates_next_stop_arrival: updatesNextStopArrivalMs,
+		updates_next_stop_departure: updatesNextStopDepartureMs,
+		vehicle_current_stop_id: vehicleCurrentStopId,
+		vehicle_current_stop_sequence: vehicleCurrentStopSequence,
+		vehicle_current_status: vehicleCurrentStatus,
+		vehicle_timestamp: vehicleTimestampMs
 	};
 	return mappedEntity;
 }
@@ -85,14 +94,6 @@ function reduceFeed(acc: { [key: string]: NYCSU_Entity }, entity: NYCSU_Entity) 
 	if (!current) {
 		acc[tripId] = entity;
 	} else {
-		// TODO: This is expensive and shouldn't happen on every request
-		if (!compareTrips(entity.trip, current.trip ?? null)) {
-			console.log('ALERT_BAD_DATA', {
-				trip_id: tripId,
-				trip: entity.trip,
-				matchTrip: current.trip
-			});
-		}
 		const merged = mergeFeedItems(current, entity);
 		acc[tripId] = merged;
 	}
@@ -100,26 +101,27 @@ function reduceFeed(acc: { [key: string]: NYCSU_Entity }, entity: NYCSU_Entity) 
 }
 
 function mergeFeedItems(item1: NYCSU_Entity, item2: NYCSU_Entity): NYCSU_Entity {
-	const vehicleTimestampUtcIsNull = new Date(item1.vehicle_timestamp_utc).getTime() === 0;
+	if (!item1?.trip_id || item1.trip_id !== item2?.trip_id) {
+		console.log('ERROR_INVALID_ITEMS_FOR_MERGE', item1, item2);
+	}
+
+	const vehicleTimestampIsNull = item1.vehicle_timestamp === 0;
 
 	return {
-		...item1,
-		stopTimeUpdates: item1?.stopTimeUpdates ?? item2?.stopTimeUpdates,
-		currentStopSequence: item1?.currentStopSequence ?? item2?.currentStopSequence,
-		vehicleTimestamp: item1?.vehicleTimestamp ?? item2?.vehicleTimestamp,
-		stopId: item1?.stopId ?? item2?.stopId,
-		vehicle_timestamp_utc: vehicleTimestampUtcIsNull
-			? item2.vehicle_timestamp_utc
-			: item1.vehicle_timestamp_utc
+		trip_id: item1.trip_id,
+		trip_route_id: item1?.trip_route_id ?? item2?.trip_route_id,
+		trip_direction: item1?.trip_direction ?? item2?.trip_direction,
+		trip_start: item1?.trip_start ?? item2?.trip_start,
+		trip_start_timestamp_string:
+			item1?.trip_start_timestamp_string ?? item2?.trip_start_timestamp_string,
+		updates_next_stop_id: item1?.updates_next_stop_id ?? item2?.updates_next_stop_id,
+		updates_next_stop_arrival: item1?.updates_next_stop_arrival ?? item2?.updates_next_stop_arrival,
+		updates_next_stop_departure:
+			item1?.updates_next_stop_departure ?? item2?.updates_next_stop_departure,
+		vehicle_current_stop_id: item1?.vehicle_current_stop_id ?? item2?.vehicle_current_stop_id,
+		vehicle_current_stop_sequence:
+			item1?.vehicle_current_stop_sequence ?? item2?.vehicle_current_stop_sequence,
+		vehicle_current_status: item1?.vehicle_current_status ?? item2?.vehicle_current_status,
+		vehicle_timestamp: vehicleTimestampIsNull ? item2.vehicle_timestamp : item1.vehicle_timestamp
 	};
-}
-
-function compareTrips(
-	trip1: GtfsRealtimeBindings.transit_realtime.ITripDescriptor | null,
-	trip2: GtfsRealtimeBindings.transit_realtime.ITripDescriptor | null
-) {
-	const trip1String = JSON.stringify(trip1);
-	const trip2String = JSON.stringify(trip2);
-	if (trip1String !== trip2String) return false;
-	return true;
 }

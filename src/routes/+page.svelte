@@ -4,7 +4,7 @@
 	import { lineGroupIntervals } from '$lib/data/lineGroupIntervalsWithShapes';
 	import lineGroups from '$lib/data/lineGroups';
 	import { stationData } from '$lib/data/stationData';
-	import type { ApiResponseBody,NYCSU_FeedData, NYCSU_Train } from '$lib/types';
+	import type { ApiResponseBody, NYCSU_Train } from '$lib/types';
 	import { onMount } from 'svelte';
 	import { PUBLIC_BASE_API_URI as BASE_API_URI } from '$env/static/public';
 
@@ -57,17 +57,16 @@
 	async function drawLoop() {
 		try {
 			const lineGroup = lineGroups[2];
-			const lineFeedData = await getFeed(lineGroup.apiSuffix);
-			const trip = lineFeedData.tripData[0].stopTimeUpdates;
-			console.log({ trip })
-			lineFeedData.tripData.forEach((trip) => {
-				const tripId = trip.tripId;
+			const response = await getFeed(lineGroup.apiSuffix);
+			const data = response.data
+			data.entities.forEach((trip) => {
+				const tripId = trip.trip_id;
 				const updatedStore = { ...$trains };
 				const updatedTrain: NYCSU_Train = { 
-					lineId: lineGroup.apiSuffix,
-					nextStationId: trip.stopTimeUpdates?.[0]?.stopId ?? null,
-					nextStationArrivalTime: trip.stopTimeUpdates?.[0]?.time ? parseInt(trip.stopTimeUpdates[0].time) : null,
-					lastUpdatedAt: lineFeedData.requestTime,
+					line_id: lineGroup.apiSuffix,
+					updates_next_stop_id: trip.updates_next_stop_id,
+					updates_next_stop_arrival: new Date(trip.updates_next_stop_arrival),
+					last_updated_at: new Date(response.request_time),
 					longitude: null,
 					latitude: null
 				}
@@ -79,14 +78,12 @@
 		}
 	}
 
-	async function getFeed(line: string = 'all'): Promise<NYCSU_FeedData> {
+	async function getFeed(line: string = 'all'): Promise<ApiResponseBody> {
 		const url = `${BASE_API_URI}/${line}`;
-		console.log({ url })
 		const response = await fetch(url);
 		console.log(`Updating for ${line.toUpperCase()} lines`);
 		const responseJson: ApiResponseBody = await response.json();
-		console.log(responseJson)
-		return responseJson.data as NYCSU_FeedData;
+		return responseJson;
 	}
 </script>
 
@@ -97,7 +94,7 @@
 	<ul id="train-list">
 		{#each Object.keys($trains) as itemId}
 			<li>
-				{$trains[itemId].lineId}: {$trains[itemId].nextStationId} ({new Date($trains[itemId].lastUpdatedAt).toLocaleTimeString('en-us', { timeZone: 'America/New_York'})})
+				{$trains[itemId].line_id}: {$trains[itemId].updates_next_stop_id} at {$trains[itemId].updates_next_stop_arrival.toLocaleTimeString('en-us', { timeZone: 'America/New_York'})} (updated: {new Date($trains[itemId].last_updated_at).toLocaleTimeString('en-us', { timeZone: 'America/New_York'})})
 			</li>
 		{/each}
 	</ul>
