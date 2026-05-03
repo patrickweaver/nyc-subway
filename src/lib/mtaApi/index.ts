@@ -1,7 +1,7 @@
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import { feeds } from './feeds';
 
-import type { LineGroup, NYCSU_Entity } from '$lib/types';
+import type { LineGroup, NYCSU_Entity, TrainDirection } from '$lib/types';
 
 const baseUri = 'https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs';
 
@@ -44,7 +44,11 @@ function mapApiResponse(
 		return null;
 	}
 	const tripRouteId = trip?.routeId ?? null;
-	const tripDirection = tripIdParsed[2][0];
+	const _tripDirection = tripIdParsed[2][0];
+	if (_tripDirection !== 'N' && _tripDirection !== 'S') {
+		throw new Error('Invalid tripDirection: ' + _tripDirection);
+	}
+	const tripDirection: TrainDirection = _tripDirection;
 
 	let tripStartTimestampString = '-1';
 	if (trip?.startDate && trip?.startTime) {
@@ -56,6 +60,9 @@ function mapApiResponse(
 
 	const nextStopTimeUpdate = tripUpdate?.stopTimeUpdate?.[0];
 	const updatesNextStopId = nextStopTimeUpdate?.stopId ?? null;
+	const updatesNextStopIdWithoutDirection = updatesNextStopId
+		? updatesNextStopId.slice(0, updatesNextStopId.length - 1)
+		: null;
 	const updatesNextStopArrival = nextStopTimeUpdate?.arrival?.time
 		? String(nextStopTimeUpdate.arrival.time)
 		: '0';
@@ -77,7 +84,7 @@ function mapApiResponse(
 		trip_direction: tripDirection,
 		trip_start_timestamp_string: tripStartTimestampString,
 		trip_start: new Date(tripStartTimestampString).getTime(),
-		updates_next_stop_id: updatesNextStopId,
+		updates_next_stop_id: updatesNextStopIdWithoutDirection,
 		updates_next_stop_arrival: updatesNextStopArrivalMs,
 		updates_next_stop_departure: updatesNextStopDepartureMs,
 		vehicle_current_stop_id: vehicleCurrentStopId,

@@ -1,94 +1,107 @@
-import lines from '../data/lines';
-import stationWaitTimes from '../data/stationWaitTimes';
-import lineGroups from '../data/lineGroups';
-
+import type { LineColor, LineName, NYCSU_Entity, TrainDirection } from '$lib/types';
+import type GtfsRealtimeBindings from 'gtfs-realtime-bindings';
+import type TrackSection from './TrackSection';
+import type Station from './Station';
+import lineGroups from '$lib/data/lineGroups';
+import { lineStationIds } from '$lib/data/lineStationIds';
+import { stationWaitTimes } from '$lib/data/stationWaitTimes';
 import Victor from 'victor';
-import type { LineColor, LineName, TrainDirection } from '../types';
-import type TripEntity from './TripEntity';
-import Interval from './Interval';
-import Station from './Station';
 
 export default class Train {
 	id: string;
-	mostRecentTripEntity: any;
 	direction: TrainDirection | null;
-	intermediateDestinations: any[];
+	routeId: LineName | null;
+	currentStopId: string | null;
+	currentStatus: GtfsRealtimeBindings.transit_realtime.VehiclePosition.VehicleStopStatus | null;
 	nextStopId: string | null;
-	currentInterval: any;
-	currentIntervalNextPointIndex: number | null;
+	nextStopArrivalTimestamp: Date | null;
+	// TODO what type is this?
+	currentTrackSection: any;
+	currentTrackSectionNextPointIndex: number | null;
+	updateTimestamp: Date | null;
 	latitude: number | null;
 	longitude: number | null;
+	// TODO what type is this?
 	marker: any;
 	move: boolean;
-	draw: boolean;
-	remove: boolean;
-	routeId: LineName | null;
-	scheduledAt: number | null;
 	progress: number;
+	data: any;
 
-	constructor(id: string, tripEntity: string) {
-		this.id = id;
-		this.mostRecentTripEntity = tripEntity;
+	constructor(entity: NYCSU_Entity) {
+		let routeId: string | null = entity.trip_route_id;
+		if (
+			routeId !== 'A' &&
+			routeId !== 'C' &&
+			routeId !== 'E' &&
+			routeId !== 'B' &&
+			routeId !== 'D' &&
+			routeId !== 'F' &&
+			routeId !== 'M' &&
+			routeId !== 'G' &&
+			routeId !== 'J' &&
+			routeId !== 'Z' &&
+			routeId !== 'N' &&
+			routeId !== 'Q' &&
+			routeId !== 'R' &&
+			routeId !== 'W' &&
+			routeId !== 'L' &&
+			routeId !== '1' &&
+			routeId !== '2' &&
+			routeId !== '3' &&
+			routeId !== '4' &&
+			routeId !== '5' &&
+			routeId !== '6' &&
+			routeId !== 'GS' &&
+			routeId !== '7' &&
+			routeId !== 'SIR' &&
+			routeId !== 'H' &&
+			routeId !== '5X' &&
+			routeId !== '6X' &&
+			routeId !== 'FS'
+		)
+			routeId = null;
 
-		this.direction = null;
-		this.intermediateDestinations = [];
-		this.nextStopId = null;
-		this.currentInterval = null;
-		this.currentIntervalNextPointIndex = null;
+		this.id = entity.trip_id;
+		this.direction = entity.trip_direction;
+		this.routeId = routeId;
+		this.currentStopId = entity.vehicle_current_stop_id;
+		this.currentStatus = entity.vehicle_current_status;
+		this.nextStopId = entity.updates_next_stop_id;
+		this.nextStopArrivalTimestamp = new Date(entity.updates_next_stop_arrival);
+		this.currentTrackSection = null;
+		this.currentTrackSectionNextPointIndex = null;
+		this.updateTimestamp = new Date(entity.vehicle_timestamp);
 		this.latitude = null;
 		this.longitude = null;
-		this.marker = null;
 		this.move = false;
-		this.draw = false;
-		this.remove = false;
-		this.routeId = null;
-		this.scheduledAt = null;
 		this.progress = 0;
+		this.data = entity;
 	}
 
 	// Update a train's lat/long based on it's most recent
-	// next stationand expected arrival time.
+	// next station and expected arrival time.
 	locate(
-		combinedIntervals: {
-			[key: string]: {
-				[key: string]: Interval;
-			};
+		combinedTrackSections: {
+			[key: string]: { [key: string]: TrackSection };
 		},
 		stations: {
 			[key: string]: Station;
 		}
 	) {
 		try {
-			if (!this.id || !this.mostRecentTripEntity) {
+			if (!this.id) {
 				throw 'Incomplete train data.';
 			}
 
-			let te = this.mostRecentTripEntity;
-
-			let nextStopUpdate;
-			// In case arrivalEstimate is negative loop through
-			let index = 0;
-			let arrivalEstimate = 0;
-			while (arrivalEstimate < te.timestamp) {
-				nextStopUpdate = te.stopTimeUpdates[index];
-				arrivalEstimate = parseInt(nextStopUpdate.arrival);
-				index += 1;
-				if (index === te.stopTimeUpdates.length) {
-					// 🚸 When does this happen?
-					console.log('All arrival estimates are in the past.');
-					arrivalEstimate = te.timestamp;
-					break;
-				}
-			}
-
-			// 🚸 These shouldn't change, but what if they do?
-			this.routeId = te.trip.routeId;
-			this.direction = te.trip.direction;
-			const nextStopId = nextStopUpdate.GtfsStopId;
-			const waitTimeEstimate = arrivalEstimate - te.timestamp;
+			// TODO backend should not send next stop arrival estimates in the past
+			const waitTimeEstimate =
+				this.nextStopArrivalTimestamp && this.updateTimestamp
+					? this.nextStopArrivalTimestamp.getTime() - this.updateTimestamp.getTime()
+					: 0;
 
 			if (waitTimeEstimate < 0) {
-				debugger;
+				console.log('ERROR: negative wait time estimate');
+				// debugger;
 			}
 
 			// All trains are either N or S (uptown/downtown)
@@ -96,10 +109,7 @@ export default class Train {
 				throw 'Invalid train direction: ' + this.direction;
 			}
 
-			// Update .nextStopId for next update to read.
-			this.nextStopId = nextStopId;
-
-			const trainPos = this.findPosition(waitTimeEstimate, combinedIntervals, stations);
+			const trainPos = this.findPosition(waitTimeEstimate, combinedTrackSections, stations);
 
 			if (!trainPos?.latitude || !trainPos?.longitude) {
 				throw 'Error finding lat/long.';
@@ -114,7 +124,7 @@ export default class Train {
 
 			this.latitude = trainPos.latitude;
 			this.longitude = trainPos.longitude;
-			this.intermediateDestinations = trainPos.intermediateDestinations;
+			// this.intermediateDestinations = trainPos.intermediateDestinations;
 		} catch (error) {
 			console.log('Error locating train:', error);
 		}
@@ -122,55 +132,49 @@ export default class Train {
 
 	findPosition(
 		waitTimeEstimate: number,
-		combinedIntervals: {
-			[key: string]: {
-				[key: string]: Interval;
-			};
+		combinedTrackSections: {
+			[key: string]: { [key: string]: TrackSection };
 		},
 		stations: {
 			[key: string]: Station;
 		}
 	) {
-		// ✍️console.log(`\n\n🗺 Locating train ${this.id} going ${this.direction}`);
-		const nextStopId = this.nextStopId;
-		const routeId = this.routeId;
-		const direction = this.direction;
-		const N = direction === 'N';
+		const N = this.direction === 'N';
 		const lineColors: { [key in LineName]?: LineColor } = {};
-		// 🚸 This is repeated in App.svelete
+		// 🚸 This is repeated in App.svelte
 		lineGroups.forEach((i) => {
 			i.lines.forEach((j) => {
 				lineColors[j] = i.color;
 			});
 		});
 
-		if (!routeId) {
-			throw 'Invalid routeId: ' + routeId;
+		if (!this.routeId) {
+			throw 'Invalid routeId: ' + this.routeId;
 		}
 
-		if (!nextStopId) {
-			throw 'Invalid nextStopId: ' + nextStopId;
+		if (!this.nextStopId) {
+			throw 'Invalid nextStopId: ' + this.nextStopId;
 		}
 
-		const lineColor = lineColors[routeId];
-		const directionIntervalOffsetIndex = N ? 0 : 1;
-		const directionOffset = N ? -1 : 1; // "S" if not "N"
+		const lineColor = lineColors[this.routeId];
 
 		if (!lineColor) {
-			throw 'Invalid lineColor: ' + lineColor;
+			throw 'Invalid lineColor : ' + lineColor;
 		}
+		const directionTrackSectionOffsetIndex = N ? 0 : 1;
+		const directionOffset = N ? -1 : 1; // "S" if not "N"
 
 		try {
 			// Confirm route is valid:
-			if (!lines[routeId]) {
-				throw 'Invalid routeId: ' + routeId;
+			if (!lineStationIds[this.routeId]) {
+				throw 'Invalid routeId: ' + this.routeId;
 			}
 
 			// Locate train between two stations based on the direction and the nextStation
-			let nextStation = stations[nextStopId];
-			let nextStationIndex = lines[routeId].indexOf(String(nextStation?.stopId));
+			let nextStation = stations[this.nextStopId];
+			let nextStationIndex = lineStationIds[this.routeId].indexOf(String(nextStation?.stopId));
 			if (nextStationIndex == -1) {
-				throw `Can't find next station in line. (${nextStation?.stopId}, ${routeId})`;
+				throw `Can't find next station in line. (${nextStation?.stopId}, nextStopId: ${this.nextStopId}, ${this.routeId})`;
 			}
 			let prevStation;
 			let prevStationIndex;
@@ -182,23 +186,22 @@ export default class Train {
 			if (
 				!prevStation &&
 				prevStationIndex >= 0 && // nextStation is first in array, direction is "S"
-				prevStationIndex < lines[routeId].length // nextStation is last, direction is "N"
+				prevStationIndex < lineStationIds[this.routeId].length // nextStation is last, direction is "N"
 			) {
-				const prevStationId = lines[routeId][prevStationIndex];
+				const prevStationId = lineStationIds[this.routeId][prevStationIndex];
 				prevStation = stations[prevStationId];
-			} else {
-				// 🚧 Trains waiting to begin journey have next stop as first or last
-				// but will not have a previous station index.
-				console.log('⏱ Next Stop:', nextStopId, 'Route Id:', routeId, 'Direction:', direction);
-				debugger;
-				throw 'Invalid previous station index.';
+			}
+
+			const current = new Date(this.updateTimestamp ?? 0).getTime();
+			const start = new Date(this.data.trip_start_timestamp_string ?? 0).getTime();
+
+			if (current === start) {
+				throw `${this.id} has not started trip`;
 			}
 
 			if (!prevStation) {
 				throw "Can't find previous station";
 			}
-
-			// ✍️console.log(`🦄 ${this.id} prevStop: ${prevStation.name}, Next stop: ${nextStation.name}, arriving in ${waitTimeEstimate}`)
 
 			// Set the order of the nextStation and prevStation based on whether
 			// the train is going N or S. The order will be used to look up the
@@ -210,30 +213,31 @@ export default class Train {
 				(aStation: string, bStation: string) => {
 					return bound === direction ? [aStation, bStation] : [bStation, aStation];
 				};
-			const [nStationId, sStationId] = establish('N')(direction)(
+			const [nStationId, sStationId] = establish('N')(this.direction)(
 				nextStation.stopId,
 				prevStation.stopId
 			);
 
 			// Find interval based on nStation and sStation from nextStation and prevStation
-			// and retreive what was previously the currentInterval
-			const interval = combinedIntervals[nStationId][sStationId];
+			// and retrieve what was previously the currentInterval
+			const interval = combinedTrackSections[nStationId][sStationId];
 			const intervalLineColorOffsets = interval?.offsets[lineColor];
 
-			let lastUpdateInterval, lastUpdateNextPointIndex, lastUpdateIntervalPoints;
-			if (this.currentInterval) {
-				lastUpdateInterval = this.currentInterval;
-				lastUpdateNextPointIndex = this.currentIntervalNextPointIndex; // saving becuase property will be overwritten
-				const lastUpdateIntervalLineColorOffsets = lastUpdateInterval.offsets[lineColor];
-				lastUpdateIntervalPoints = lastUpdateIntervalLineColorOffsets[directionIntervalOffsetIndex];
+			let lastUpdateTrackSection, lastUpdateNextPointIndex, lastUpdateTrackSectionPoints;
+			if (this.currentTrackSection) {
+				lastUpdateTrackSection = this.currentTrackSection;
+				lastUpdateNextPointIndex = this.currentTrackSectionNextPointIndex; // saving because property will be overwritten
+				const lastUpdateTrackSectionLineColorOffsets = lastUpdateTrackSection.offsets[lineColor];
+				lastUpdateTrackSectionPoints =
+					lastUpdateTrackSectionLineColorOffsets[directionTrackSectionOffsetIndex];
 			}
 
-			this.currentInterval = interval;
+			this.currentTrackSection = interval;
 
 			let progress = this.getProgress(waitTimeEstimate);
 			// Don't let trains go backwards on the same interval
 			// even if progress goes down
-			if (lastUpdateInterval && lastUpdateInterval.id === interval.id) {
+			if (lastUpdateTrackSection && lastUpdateTrackSection.id === interval.id) {
 				if (progress < this.progress) {
 					progress = this.progress;
 				}
@@ -243,36 +247,36 @@ export default class Train {
 			// Progress through the current interval's total distance
 			const progressDistance = progress * (interval?.totalDistance ?? 0);
 
-			// ✍️console.log(`🎞 ${this.id} -- ${direction} bound train has progressed ${Math.floor(progress * 100)}% or ${progress * interval.totalDistance} (raw p:${progress})through ${interval.id} which has ${interval.distances[direction].length} points and is ${interval.totalDistance} long`)
 			let nextPoint, nextPointIndex, prevPoint, prevPointIndex, pointProgress;
-			if (!direction) {
+			if (!this.direction) {
 				throw 'Invalid direction.';
 			}
-			const lastPointIndex = interval?.distances[direction].length - 1;
+			const lastPointIndex = interval?.distances[this.direction].length - 1;
 			const penultimatePointIndex = lastPointIndex - 1;
 			if (progress === 1) {
 				// Train has reached exactly the end of the interval (0 seconds)
-				// ✍️console.log(`🖲🖲🖲🖲🖲🖲 ${this.id} PROGRESS EXACTLY 1`)
 				nextPointIndex = N ? 0 : lastPointIndex;
 				prevPointIndex = N ? 1 : penultimatePointIndex;
 				pointProgress = 1;
 			} else if (progress === 0) {
-				// Train has reached exactly the beginning of the interval (reported wait
-				// time matches estimate)
-				// ✍️console.log(`💿💿💿💿💿💿 ${this.id} PROGRESS EXACTLY 0`)
+				// Train has reached exactly the beginning of the interval
+				// (reported wait time matches estimate)
 				nextPointIndex = N ? penultimatePointIndex : 1;
 				prevPointIndex = N ? lastPointIndex : 0;
 				pointProgress = 0;
 			} else {
 				// Find the last point in the interval the train passed
 				// 🚸 Double check this
-				prevPointIndex = interval.distances[direction].reduce((prevPointIndex, distance, index) => {
-					if (N) {
-						return distance < progressDistance ? prevPointIndex : index + 1;
-					} else {
-						return distance > progressDistance ? prevPointIndex : index;
-					}
-				}, 0);
+				prevPointIndex = interval.distances[this.direction].reduce(
+					(prevPointIndex, distance, index) => {
+						if (N) {
+							return distance < progressDistance ? prevPointIndex : index + 1;
+						} else {
+							return distance > progressDistance ? prevPointIndex : index;
+						}
+					},
+					0
+				);
 
 				nextPointIndex = prevPointIndex + directionOffset;
 
@@ -281,11 +285,11 @@ export default class Train {
 					// debugger;
 				}
 				// Save that point as lat/lng
-				prevPoint = intervalLineColorOffsets?.[prevPointIndex][directionIntervalOffsetIndex];
+				prevPoint = intervalLineColorOffsets?.[prevPointIndex][directionTrackSectionOffsetIndex];
 
 				// Find how far in distance the train has progressed between prev  and next points
-				const prevDistance = interval.distances[direction][prevPointIndex];
-				const nextDistance = interval.distances[direction][nextPointIndex];
+				const prevDistance = interval.distances[this.direction][prevPointIndex];
+				const nextDistance = interval.distances[this.direction][nextPointIndex];
 				const dNextPrev = nextDistance - prevDistance;
 				const dCurrentPrev = progressDistance - prevDistance;
 				pointProgress = dCurrentPrev / dNextPrev;
@@ -304,8 +308,8 @@ export default class Train {
 				// debugger;
 			}
 
-			nextPoint = intervalLineColorOffsets?.[nextPointIndex][directionIntervalOffsetIndex];
-			this.currentIntervalNextPointIndex = nextPointIndex;
+			nextPoint = intervalLineColorOffsets?.[nextPointIndex][directionTrackSectionOffsetIndex];
+			this.currentTrackSectionNextPointIndex = nextPointIndex;
 
 			// If train is at exactly the end of the interval there is no previous point
 			let trainPos;
@@ -336,22 +340,22 @@ export default class Train {
 			let intermediatePoints = [];
 
 			// If this is the first time we have seen the train there is no previousInterval.
-			if (lastUpdateInterval) {
-				// ✍️console.log(this.id, `🕰 lastUpdateInterval: ${lastUpdateInterval.id}`);
+			if (lastUpdateTrackSection) {
+				// ✍️console.log(this.id, `🕰 lastUpdateTrackSection: ${lastUpdateTrackSection.id}`);
 				// Train is not still in the same interval
-				if (lastUpdateInterval.id !== interval.id) {
+				if (lastUpdateTrackSection.id !== interval.id) {
 					// ✍️console.log(this.id, `🏡 in new interval (${interval.id}), previous was ${lastUpdateInterval.id}`);
 					// Add the rest of the points in the interval it was in
-					const lastIndex = N ? 0 : lastUpdateInterval.distances[direction].length - 1;
-					const pointsFromLastUpdateInterval = lastUpdateInterval.getPoints(
+					const lastIndex = N ? 0 : lastUpdateTrackSection.distances[this.direction].length - 1;
+					const pointsFromLastUpdateInterval = lastUpdateTrackSection.getPoints(
 						lineColor,
-						direction,
+						this.direction,
 						lastUpdateNextPointIndex,
 						lastIndex
 					);
 					intermediateDestinations = intermediateDestinations.concat(pointsFromLastUpdateInterval);
 					intermediatePoints.push(
-						`${lastUpdateNextPointIndex} to ${lastIndex} from ${lastUpdateInterval.id}`
+						`${lastUpdateNextPointIndex} to ${lastIndex} from ${lastUpdateTrackSection.id}`
 					);
 					// ✍️console.log(`💎 ${this.id} finishing interval from %c${lastUpdateNextPointIndex}%c to %c${lastIndex}%c`, "color: red;", "color: black;", "color: red;", "color: black;")
 					// ✍️console.log("💚", this.id, intermediatePoints);
@@ -360,9 +364,9 @@ export default class Train {
 					// 🧱 Find the rest of the intervals we may have passed and add their points
 					const intermediateIntervals = [];
 					const ciNStopId = interval.nStation.stopId;
-					const cNStationIndex = lines[routeId].indexOf(ciNStopId);
-					const luiNStopId = lastUpdateInterval.nStation.stopId;
-					const luiNStationIndex = lines[routeId].indexOf(luiNStopId);
+					const cNStationIndex = lineStationIds[this.routeId].indexOf(ciNStopId);
+					const luiNStopId = lastUpdateTrackSection.nStation.stopId;
+					const luiNStationIndex = lineStationIds[this.routeId].indexOf(luiNStopId);
 
 					//
 					for (
@@ -370,11 +374,11 @@ export default class Train {
 						i !== cNStationIndex + directionOffset;
 						i += directionOffset
 					) {
-						const piNStationStopId = lines[routeId][i];
-						const piSStationStopId = lines[routeId][i + 1];
+						const piNStationStopId = lineStationIds[this.routeId][i];
+						const piSStationStopId = lineStationIds[this.routeId][i + 1];
 						if (
-							!combinedIntervals[piNStationStopId] ||
-							!combinedIntervals[piNStationStopId][piSStationStopId]
+							!combinedTrackSections[piNStationStopId] ||
+							!combinedTrackSections[piNStationStopId][piSStationStopId]
 						) {
 							console.log('Invalid Interval!');
 							// What seems to happen here is that the previous update
@@ -382,20 +386,20 @@ export default class Train {
 							// 🚸 Maybe remove train?
 							debugger;
 						}
-						const prevInterval = combinedIntervals[piNStationStopId][piSStationStopId];
+						const prevInterval = combinedTrackSections[piNStationStopId][piSStationStopId];
 						// ✍️console.log(`🔋 ${this.id} -- Looping intervals: N: ${piNStationStopId} (${stations[piNStationStopId].name}), S: ${piSStationStopId} (${stations[piSStationStopId].name}), Interval: ${prevInterval ? prevInterval.id : 'Invalid Interval'}`);
 						if (!prevInterval) {
 							debugger;
 						}
 						// ✍️console.log(`🌋 ${this.id} -- Also passed interval ${prevInterval.id}`)
 						// If this is the current interval:
-						const startIndex = N ? prevInterval.distances[direction].length - 1 : 0;
-						let endIndex = N ? 0 : prevInterval.distances[direction].length - 1;
+						const startIndex = N ? prevInterval.distances[this.direction].length - 1 : 0;
+						let endIndex = N ? 0 : prevInterval.distances[this.direction].length - 1;
 						if (interval.id === prevInterval.id) {
 							endIndex = prevPointIndex;
 						}
 						intermediateDestinations = intermediateDestinations.concat(
-							prevInterval.getPoints(lineColor, direction, startIndex, endIndex)
+							prevInterval.getPoints(lineColor, this.direction, startIndex, endIndex)
 						);
 						intermediatePoints.push(`${startIndex} to ${endIndex} from ${prevInterval.id}`);
 					}
@@ -405,7 +409,7 @@ export default class Train {
 						intermediateDestinations = intermediateDestinations.concat(
 							interval.getPoints(
 								lineColor,
-								direction,
+								this.direction,
 								lastUpdateNextPointIndex ?? Infinity,
 								prevPointIndex
 							)
@@ -476,9 +480,6 @@ export default class Train {
 				);
 			}
 
-			// ✍️console.log("🧡", this.id, intermediatePoints);
-			// ✍️console.log(this.id, intermediateDestinations.length, intermediateDestinations)
-
 			return {
 				latitude: trainPos?.[0],
 				longitude: trainPos?.[1],
@@ -492,22 +493,14 @@ export default class Train {
 
 	// Calculate the train's progress based on the current wait time to the next
 	// station and the average (or max) wait time for that interval.
+	// TODO currently most lines have wait times hard coded to 2 minutes
 	getProgress(waitTimeEstimate: number) {
-		const nextStopId = this.nextStopId;
-		const routeId = this.routeId;
-		const direction = this.direction;
-		let waitTimes = null;
-		// 🍄 Don't have stationWaitTimes for all routes
-		if (
-			routeId &&
-			stationWaitTimes[routeId] &&
-			stationWaitTimes[routeId][nextStopId] &&
-			stationWaitTimes[routeId][nextStopId][direction]
-		) {
-			waitTimes = stationWaitTimes[routeId][nextStopId][direction];
-		} else {
-			waitTimes = { avg: 120, max: 120 };
-		}
+		if (!this.routeId || !this.nextStopId || !this.direction) return 0;
+		// TODO Don't have stationWaitTimes for all routes
+		const waitTimes = stationWaitTimes?.[this.routeId]?.[this.nextStopId]?.[this.direction] ?? {
+			avg: 120,
+			max: 120
+		};
 		let progressRemaining = waitTimeEstimate / waitTimes.avg;
 		// Wait time is longer than average
 		if (progressRemaining > 1) {
@@ -519,7 +512,6 @@ export default class Train {
 		}
 
 		const progress = 1 - progressRemaining;
-		//console.log(`⌚️ Checking Progress for ${this.id} going ${direction}, wait time is ${waitTimeEstimate}, average is ${waitTimes.avg}, max is ${waitTimes.max}, progress is ${Math.floor(progress * 100)}`)
 		return progress;
 	}
 }

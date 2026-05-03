@@ -10,8 +10,9 @@ import {
 	PUBLIC_UPDATE_FREQUENCY_IN_SECONDS as UPDATE_FREQUENCY_IN_SECONDS
 } from '$env/static/public';
 import Station from '$lib/classes/Station';
-import Interval from '$lib/classes/Interval';
-import type { LatLng, LineColor, NYCSU_Train } from '$lib/types';
+import TrackSection from '$lib/classes/TrackSection';
+import type { LatLng, LineColor } from '$lib/types';
+import type Train from './classes/Train';
 
 const mapCenter = JSON.parse(MAP_CENTER);
 const options: MapOptions = {
@@ -62,7 +63,7 @@ export function drawStation(station: Station, recenter = false) {
   */
 }
 
-export function drawInterval(interval: Interval) {
+export function drawTrackSection(interval: TrackSection) {
 	if (!interval.nStation || !interval.sStation) return;
 	if (interval.colors.length === 0) return;
 	if (interval.shape.length > 0) {
@@ -114,7 +115,7 @@ function drawTracks(offsetsA: LatLng[], offsetsB: LatLng[], color: LineColor, in
 		// Draw offset line for station B
 		//Leaflet.polyline(offsetsB, { color: "#00fff2" }).addTo(map); // Aqua
 
-		// Draw N and S offest positions:
+		// Draw N and S offset positions:
 		const dcs = ['red', 'orange', 'yellow', 'green', 'violet', 'black'];
 		//Leaflet.circle(offsetsA[0], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
 		//Leaflet.circle(offsetsA[1], {radius: 1, color: dcs[index % dcs.length]}).addTo(map);
@@ -131,27 +132,12 @@ function drawTracks(offsetsA: LatLng[], offsetsB: LatLng[], color: LineColor, in
 	}
 }
 
-function drawTrain(train: NYCSU_Train) {
-	// console.log(
-	//   "🚇 New Train: (index:",
-	//   train.mostRecentTripEntity.index,
-	//   "), id:",
-	//   train.id,
-	//   "at",
-	//   train.latitude,
-	//   ",",
-	//   train.longitude,
-	//   "going",
-	//   train.direction,
-	//   "type:",
-	//   train.mostRecentTripEntity.type,
-	//   ", startimeTimestamp:",
-	//   train.mostRecentTripEntity.trip.startTimestamp
-	// );
+export function drawTrain(train: Train) {
+	if (!train.latitude || !train.longitude) return;
 
 	let bounds = Leaflet.latLng(train.latitude, train.longitude)?.toBounds(250);
 
-	const trainPosition = [train.latitude, train.longitude];
+	const trainPosition: [number, number] = [train.latitude, train.longitude];
 	//var trainMarker = Leaflet.marker(trainPosition, {icon: trainIcon}).addTo(map);
 	const tmo = train.direction === 'N' ? markers.trainCircleN : markers.trainCircleS;
 	const trainMarker = Leaflet.circle(trainPosition, tmo).addTo(map);

@@ -52,7 +52,7 @@ export type StationData = {
 	'South Direction Label': string;
 };
 
-export type LineGroupInterval = [string, string, string, string, [string, string][]];
+export type LineGroupTrackSection = [string, string, string, string, [string, string][]];
 
 export type LineColor =
 	| 'Blue'
@@ -97,8 +97,8 @@ export type LineName =
 	| '6X'
 	| 'FS';
 
-export type LineGroupIntervals = {
-	[key in LineColor]: LineGroupInterval[];
+export type LineGroupTrackSections = {
+	[key in LineColor]: LineGroupTrackSection[];
 };
 
 export type TrainDirection = 'N' | 'S';
@@ -113,7 +113,7 @@ export type NYCSU_StopTimeUpdate = {
 export type NYCSU_Entity = {
 	trip_id: string;
 	trip_route_id: string | null;
-	trip_direction: string;
+	trip_direction: TrainDirection;
 	trip_start_timestamp_string: string;
 	trip_start: number;
 	updates_next_stop_id: string | null;
@@ -123,13 +123,4 @@ export type NYCSU_Entity = {
 	vehicle_current_stop_sequence: number | null;
 	vehicle_current_status: GtfsRealtimeBindings.transit_realtime.VehiclePosition.VehicleStopStatus | null;
 	vehicle_timestamp: number;
-};
-
-export type NYCSU_Train = {
-	line_id: string;
-	updates_next_stop_id: string | null;
-	updates_next_stop_arrival: Date;
-	last_updated_at: Date;
-	longitude: number | null;
-	latitude: number | null;
 };

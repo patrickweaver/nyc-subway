@@ -1,7 +1,7 @@
 // Parsed data from shapes.txt file from GTFS download
 // and logged (and cleaned up) intervals from stopTimeUpdates
-import type { LineGroupIntervals } from '../types';
-export const lineGroupIntervals: LineGroupIntervals = {
+import type { LineGroupTrackSections } from '../types';
+export const lineGroupTrackSections: LineGroupTrackSections = {
 	Blue: [
 		[
 			'H08',

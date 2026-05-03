@@ -1,9 +1,9 @@
 import Victor from 'victor';
 import Station from '$lib/classes/Station';
-import type { LineColor, LineGroupIntervals, TrainDirection } from '$lib/types';
+import type { LineColor, LineGroupTrackSections, TrainDirection } from '$lib/types';
 import { METER_LAT_OFFSET, METER_LNG_OFFSET, TRACK_DISTANCE_METERS } from '$lib/constants';
 
-export default class Interval {
+export default class TrackSection {
 	id: string;
 	nStation: Station;
 	sStation: Station;
@@ -31,33 +31,33 @@ export default class Interval {
 		this.totalDistance = 0;
 	}
 
-	static combineIntervals(
-		lineGroupIntervals: LineGroupIntervals,
+	static combineTrackSections(
+		lineGroupTrackSections: LineGroupTrackSections,
 		stations: { [key: string]: Station }
 	): {
 		[key: string]: {
-			[key: string]: Interval;
+			[key: string]: TrackSection;
 		};
 	} {
 		// Object to store combined intervals, key is
 		// nStation.stopId
-		const combinedIntervals: {
+		const combinedTrackSections: {
 			[key: string]: {
-				[key: string]: Interval;
+				[key: string]: TrackSection;
 			};
 		} = {};
 		// Loop over each set of logged intervals organized by line color
-		Object.keys(lineGroupIntervals).forEach((_color) => {
+		Object.keys(lineGroupTrackSections).forEach((_color) => {
 			const color = _color as LineColor;
 			// Loop over each logged interval for the color
-			lineGroupIntervals[color].forEach((intervalData) => {
+			lineGroupTrackSections[color].forEach((intervalData) => {
 				// Get station objects from stations
 				const nStationId = intervalData[0];
 				const sStationId = intervalData[1];
 				const nStation = stations[nStationId];
 				const sStation = stations[sStationId];
 
-				const intervalInMap = combinedIntervals[nStation.stopId]?.[sStation.stopId];
+				const intervalInMap = combinedTrackSections[nStation.stopId]?.[sStation.stopId];
 				if (intervalInMap) {
 					intervalInMap.colors.push(color);
 				} else {
@@ -80,22 +80,22 @@ export default class Interval {
 					if (last?.[0] !== sStation.latitude && last?.[1] !== sStation.longitude) {
 						numberShape.push([sStation.latitude, sStation.longitude]);
 					}
-					const interval = new Interval(nStation, sStation, [color], numberShape);
+					const interval = new TrackSection(nStation, sStation, [color], numberShape);
 					// Add new interval to combinedIntervals
-					if (!combinedIntervals[nStation.stopId]) {
-						combinedIntervals[nStation.stopId] = {};
+					if (!combinedTrackSections[nStation.stopId]) {
+						combinedTrackSections[nStation.stopId] = {};
 					}
-					combinedIntervals[nStation.stopId][sStation.stopId] = interval;
+					combinedTrackSections[nStation.stopId][sStation.stopId] = interval;
 				}
 			});
 		});
 
-		// Loop over combinedIntervals to create offsetShapes:
-		Object.keys(combinedIntervals).forEach((nStationId) => {
-			Object.keys(combinedIntervals[nStationId]).forEach((sStationId) => {
-				const interval = combinedIntervals[nStationId][sStationId];
+		// Loop over combinedTrackSections to create offsetShapes:
+		Object.keys(combinedTrackSections).forEach((nStationId) => {
+			Object.keys(combinedTrackSections[nStationId]).forEach((sStationId) => {
+				const interval = combinedTrackSections[nStationId][sStationId];
 				// 🚸 IDK why I'm using TRACK_DISTANCE_METERS as a param here even though the functions are in the same file.
-				const offsets = Interval.mapPointsToOffsets(
+				const offsets = TrackSection.mapPointsToOffsets(
 					interval.shape,
 					TRACK_DISTANCE_METERS,
 					interval.colors
@@ -105,7 +105,7 @@ export default class Interval {
 			});
 		});
 
-		return combinedIntervals;
+		return combinedTrackSections;
 	}
 
 	calculateDistances() {
@@ -187,7 +187,7 @@ export default class Interval {
 					pointC = shape[index + 1];
 				}
 
-				const op = Interval.findOffsetPoints(pointA, pointB, pointC, colorDistances);
+				const op = TrackSection.findOffsetPoints(pointA, pointB, pointC, colorDistances);
 				return op?.filter((i) => i !== null) ?? [];
 			});
 
@@ -250,12 +250,12 @@ export default class Interval {
 		pos.c = pointC || null;
 		// Distance between points A & B and points B & C in meters:
 		let dLatAB: number, dLngAB: number, dLatCB: number, dLngCB: number;
-		[dLatAB, dLngAB] = Interval.dLatLng(pointB, pointA);
-		[dLatCB, dLngCB] = Interval.dLatLng(pointB, pointC);
+		[dLatAB, dLngAB] = TrackSection.dLatLng(pointB, pointA);
+		[dLatCB, dLngCB] = TrackSection.dLatLng(pointB, pointC);
 		// Turn distances into vectors using Victor: http://victorjs.org/
 		const abVector = new Victor(dLatAB, dLngAB);
 		const cbVector = new Victor(dLatCB, dLngCB);
-		// Point B is last in interval shape:
+		// Point B is last in TrackSection shape:
 		if (!pointC) {
 			// 🍄 Combine points into an object with two type signatures?
 			pointA!;
@@ -268,14 +268,14 @@ export default class Interval {
 				offsetAVector.rotate(Math.PI);
 			}
 
-			const pointBNOffset = Interval.offsetFromPoint(
+			const pointBNOffset = TrackSection.offsetFromPoint(
 				pos.b[0],
 				pos.b[1],
 				offsetAVector.x,
 				offsetAVector.y,
 				-offsetLengthsMeters[1]
 			);
-			const pointBSOffset = Interval.offsetFromPoint(
+			const pointBSOffset = TrackSection.offsetFromPoint(
 				pos.b[0],
 				pos.b[1],
 				offsetAVector.x,
@@ -284,7 +284,7 @@ export default class Interval {
 			);
 			return [pointBSOffset, pointBNOffset];
 
-			// Point B is first in interval shape:
+			// Point B is first in TrackSection shape:
 		} else if (!pointA) {
 			pointC!;
 			const offsetCVector = cbVector
@@ -297,14 +297,14 @@ export default class Interval {
 			}
 
 			// Swap N and S for first point:
-			const pointBSOffset = Interval.offsetFromPoint(
+			const pointBSOffset = TrackSection.offsetFromPoint(
 				pos.b[0],
 				pos.b[1],
 				offsetCVector.x,
 				offsetCVector.y,
 				offsetLengthsMeters[0]
 			);
-			const pointBNOffset = Interval.offsetFromPoint(
+			const pointBNOffset = TrackSection.offsetFromPoint(
 				pos.b[0],
 				pos.b[1],
 				offsetCVector.x,
@@ -337,16 +337,16 @@ export default class Interval {
 			offsetBVectorNormal.rotate(Math.PI);
 		}
 
-		// Create 2 points, each of the offsetLenghts away from Point B
+		// Create 2 points, each of the offsetLengths away from Point B
 		// where the angles bisect the lines to Points A and C:
-		const nPos = Interval.offsetFromPoint(
+		const nPos = TrackSection.offsetFromPoint(
 			pos.b[0],
 			pos.b[1],
 			offsetBVectorNormal.x,
 			offsetBVectorNormal.y,
 			offsetLengthsMeters[0]
 		);
-		const sPos = Interval.offsetFromPoint(
+		const sPos = TrackSection.offsetFromPoint(
 			pos.b[0],
 			pos.b[1],
 			offsetBVectorNormal.x,
@@ -378,7 +378,7 @@ export default class Interval {
 		return [lat, lng];
 	}
 
-	// Extrat lat/lng and convert to meters:
+	// Extract lat/lng and convert to meters:
 	// 🍄 Lat/Lng type?
 	static dLatLng(s0: [number, number] | null, s1: [number, number] | null) {
 		if (!s0 || !s1) return [0, 0];

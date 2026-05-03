@@ -54,7 +54,7 @@ stationStopIds []: Just stopIds, same order as stations
     1. Draw map tiles [leaflet.drawMap()]
     2. Create station objects from stationData [new Station(i)] and insert into staitons array
     3. Create stationStopIds array with just stopIds and same order as stations
-    4. Interval.combineIntervals
+    4. TrackSection.combineIntervals
         1. Loop through colors in lineGroupIntervals
             a. Loop through each interval in color
                 i. Store interval in nStation of interval
