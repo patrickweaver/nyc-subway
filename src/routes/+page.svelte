@@ -6,7 +6,7 @@
 	import { stationData } from '$lib/data/stationData';
 	import type { ApiResponseBody } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { PUBLIC_BASE_API_URI as BASE_API_URI } from '$env/static/public';
+	import { PUBLIC_BASE_API_URI as BASE_API_URI, PUBLIC_UPDATE_FREQUENCY_IN_SECONDS } from '$env/static/public';
 
 	import { writable, type Writable } from 'svelte/store';
 	import Train from '$lib/classes/Train';
@@ -40,6 +40,7 @@
 		}
 
 		drawLoop();
+		setInterval(drawLoop, parseInt(PUBLIC_UPDATE_FREQUENCY_IN_SECONDS) * 1000);
 	});
 
 	function drawAllLines(
@@ -62,15 +63,32 @@
 			const lineGroup = lineGroups[2];
 			const response = await getFeed(lineGroup.apiSuffix);
 			const data = response.data
+			const updatedStore = { ...$trains };
 			data.entities.forEach((entity) => {
 				const tripId = entity.trip_id;
-				const updatedStore = { ...$trains };
-				const updatedTrain = new Train(entity)
-				updatedTrain.locate(combinedTrackSections, stations)
-				leaflet.drawTrain(updatedTrain)
-				updatedStore[tripId] = updatedTrain;
-				trains.set(updatedStore)
+				
+				const train = $trains[tripId]
+				const isNewTrain = !train
+				if (isNewTrain) {
+					const updatedTrain = new Train(entity)
+					updatedTrain.locate(combinedTrackSections, stations)
+					leaflet.drawTrain(updatedTrain)
+					updatedStore[tripId] = updatedTrain;
+				} else {
+					console.log("Already tracking train,", tripId)
+					train.nextStopId = entity.updates_next_stop_id
+					train.nextStopArrivalTimestamp = new Date(entity.updates_next_stop_arrival)
+					train.updateTimestamp = new Date(entity.vehicle_timestamp)
+					train.direction = entity.trip_direction
+					const prevLocation = [train.latitude, train.longitude]
+					train.locate(combinedTrackSections, stations)
+					console.log("Should move from: ", prevLocation, [train.latitude, train.longitude])
+					if (train.leafletMarker) {
+						leaflet.moveTrain(train)
+					}
+				}
 			})
+			trains.set(updatedStore)
 		} catch (error) {
 			console.log('Draw Loop Error:', error);
 		}

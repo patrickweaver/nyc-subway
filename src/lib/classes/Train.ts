@@ -1,4 +1,10 @@
-import type { LineColor, LineName, NYCSU_Entity, TrainDirection } from '$lib/types';
+import type {
+	LineColor,
+	LineName,
+	NYCSU_Entity,
+	NYCSU_TrainLocation,
+	TrainDirection
+} from '$lib/types';
 import type GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import type TrackSection from './TrackSection';
 import type Station from './Station';
@@ -6,6 +12,7 @@ import lineGroups from '$lib/data/lineGroups';
 import { lineStationIds } from '$lib/data/lineStationIds';
 import { stationWaitTimes } from '$lib/data/stationWaitTimes';
 import Victor from 'victor';
+import type { Circle } from 'leaflet';
 
 export default class Train {
 	id: string;
@@ -21,8 +28,9 @@ export default class Train {
 	updateTimestamp: Date | null;
 	latitude: number | null;
 	longitude: number | null;
+	intermediateDestinations: Array<NYCSU_TrainLocation>;
 	// TODO what type is this?
-	marker: any;
+	leafletMarker: Circle | null;
 	move: boolean;
 	progress: number;
 	data: any;
@@ -73,6 +81,8 @@ export default class Train {
 		this.updateTimestamp = new Date(entity.vehicle_timestamp);
 		this.latitude = null;
 		this.longitude = null;
+		this.intermediateDestinations = [];
+		this.leafletMarker = null;
 		this.move = false;
 		this.progress = 0;
 		this.data = entity;
@@ -116,7 +126,7 @@ export default class Train {
 			}
 
 			if (
-				(this.marker && this.latitude != trainPos.latitude) ||
+				(this.leafletMarker && this.latitude != trainPos.latitude) ||
 				this.longitude != trainPos.longitude
 			) {
 				this.move = true;
@@ -124,7 +134,7 @@ export default class Train {
 
 			this.latitude = trainPos.latitude;
 			this.longitude = trainPos.longitude;
-			// this.intermediateDestinations = trainPos.intermediateDestinations;
+			this.intermediateDestinations = trainPos.intermediateDestinations;
 		} catch (error) {
 			console.log('Error locating train:', error);
 		}
@@ -292,15 +302,11 @@ export default class Train {
 				const nextDistance = interval.distances[this.direction][nextPointIndex];
 				const dNextPrev = nextDistance - prevDistance;
 				const dCurrentPrev = progressDistance - prevDistance;
-				pointProgress = dCurrentPrev / dNextPrev;
+				// TODO avoid dividing by 0
+				pointProgress = dNextPrev !== 0 ? dCurrentPrev / dNextPrev : 0;
 
 				//console.log(`The previous point was index ${prevPointIndex} at distance ${prevDistance}, the next point is index ${nextPointIndex} at distance ${nextDistance}`);
 				//console.log(`The distance between those two is ${dNextPrev} and the distance between the train and the previous is ${dCurrentPrev}`);
-
-				// 🚸 Saw NaN point progress
-				if (Number.isNaN(pointProgress) || pointProgress < 0) {
-					debugger;
-				}
 			}
 
 			// 🚸 This was happening sometimes
@@ -330,13 +336,7 @@ export default class Train {
 
 			// Find every point on the track that the train is on between what was previously
 			// the next point and what the current location is and save in intermediateDestinations.
-			let intermediateDestinations: {
-				latitude: number | undefined;
-				longitude: number | undefined;
-				index: number;
-				interval: string;
-				distance?: number;
-			}[] = [];
+			let intermediateDestinations: NYCSU_TrainLocation[] = [];
 			let intermediatePoints = [];
 
 			// If this is the first time we have seen the train there is no previousInterval.

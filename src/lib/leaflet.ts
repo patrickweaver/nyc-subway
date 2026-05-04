@@ -1,4 +1,4 @@
-import Leaflet, { latLng, type MapOptions } from 'leaflet';
+import Leaflet, { Circle, latLng, Marker, type MapOptions } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 // import leafletMarkerSlideTo from "leaflet.marker.slideto";
 import {
@@ -6,12 +6,13 @@ import {
 	PUBLIC_MAP_CENTER as MAP_CENTER,
 	PUBLIC_MAP_ZOOM_DEFAULT as MAP_ZOOM_DEFAULT,
 	PUBLIC_MAP_ZOOM_MAX as MAP_ZOOM_MAX,
+	PUBLIC_UPDATE_FREQUENCY_IN_SECONDS,
 	PUBLIC_TILE_LAYER as TILE_LAYER,
 	PUBLIC_UPDATE_FREQUENCY_IN_SECONDS as UPDATE_FREQUENCY_IN_SECONDS
 } from '$env/static/public';
 import Station from '$lib/classes/Station';
 import TrackSection from '$lib/classes/TrackSection';
-import type { LatLng, LineColor } from '$lib/types';
+import type { LatLng, LineColor, NYCSU_TrainLocation } from '$lib/types';
 import type Train from './classes/Train';
 
 const mapCenter = JSON.parse(MAP_CENTER);
@@ -132,8 +133,8 @@ function drawTracks(offsetsA: LatLng[], offsetsB: LatLng[], color: LineColor, in
 	}
 }
 
-export function drawTrain(train: Train) {
-	if (!train.latitude || !train.longitude) return;
+export function drawTrain(train: Train): Circle | null {
+	if (!train.latitude || !train.longitude) return null;
 
 	let bounds = Leaflet.latLng(train.latitude, train.longitude)?.toBounds(250);
 
@@ -144,43 +145,72 @@ export function drawTrain(train: Train) {
 	return trainMarker;
 }
 
-// function moveTrain(train) {
-// 	console.log('🛎 Moving train:', train.id, 'going', train.direction);
-// 	const totalDuration = UPDATE_FREQUENCY_IN_SECONDS * 1000;
-// 	let destinations = train.intermediateDestinations;
-// 	train.intermediateDestinations = [];
+function animateTrain(
+	marker: Circle,
+	from: [number, number],
+	to: [number, number],
+	duration: number
+) {
+	const startTime = Date.now();
+	const animate = () => {
+		const elapsed = Date.now() - startTime;
+		const progress = Math.min(elapsed / duration, 1);
 
-// 	// There may be duplicate destinations from beginning/end of intervals
-// 	// or if progress is 0:
-// 	destinations = destinations.reduce((acc, cur, index) => {
-// 		if (index === 0) {
-// 			acc.push(cur);
-// 		} else {
-// 			const last = acc[acc.length - 1];
-// 			if (last.latitude !== cur.latitude || last.longitude !== cur.longitude) {
-// 				acc.push(cur);
-// 			}
-// 		}
-// 		return acc;
-// 	}, []);
+		const lat = from[0] + (to[0] - from[0]) * progress;
+		const lng = from[1] + (to[1] - from[1]) * progress;
 
-// 	const totalDistance = destinations.reduce((a, c) => a + c.distance, 0);
-// 	let durationElapsed = 0;
+		marker.setLatLng([lat, lng]);
 
-// 	destinations.forEach((loc) => {
-// 		const timer = durationElapsed;
-// 		const duration = totalDuration * (loc.distance / totalDistance);
-// 		// 🚸 Why does the "in" timing change?
-// 		setTimeout(() => {
-// 			// console.log("⏱ moving ", train.id, "to:", loc.latitude, ",", loc.longitude, "via", destinations.length, "destinations, for", durationEach / 1000, "in", timer / 1000, "seconds.");
-// 			train.marker.slideTo([loc.latitude, loc.longitude], {
-// 				duration: duration,
-// 				keepAtCenter: false
-// 			});
-// 		}, timer);
-// 		durationElapsed += duration;
-// 	});
-// }
+		if (progress < 1) {
+			requestAnimationFrame(animate);
+		}
+	};
+	animate();
+}
+
+export function moveTrain(train: Train) {
+	console.log('🛎 Moving train:', train.id, 'going', train.direction);
+	const totalDuration = parseInt(PUBLIC_UPDATE_FREQUENCY_IN_SECONDS) * 1000;
+	let destinations = train.intermediateDestinations;
+	train.intermediateDestinations = [];
+
+	// There may be duplicate destinations from beginning/end of intervals
+	// or if progress is 0:
+	let reducedDestinations: NYCSU_TrainLocation[] = [];
+	reducedDestinations = destinations.reduce((acc, cur, index) => {
+		if (index === 0) {
+			acc.push(cur);
+		} else {
+			const last = acc[acc.length - 1];
+			if (last.latitude !== cur.latitude || last.longitude !== cur.longitude) {
+				acc.push(cur);
+			}
+		}
+		return acc;
+	}, reducedDestinations);
+
+	// TODO remove fallbacks for undefined distance
+	const totalDistance = destinations.reduce((a, c) => a + (c.distance ?? 0), 0);
+	let durationElapsed = 0;
+	let currentPosition: [number, number] = [
+		train.leafletMarker?.getLatLng().lat ?? train.latitude ?? 0,
+		train.leafletMarker?.getLatLng().lng ?? train.longitude ?? 0
+	];
+
+	destinations.forEach((loc) => {
+		const timer = durationElapsed;
+		const duration = totalDuration * ((loc.distance ?? totalDistance) / totalDistance);
+		const destination: [number, number] = [loc.latitude ?? 0, loc.longitude ?? 0];
+
+		setTimeout(() => {
+			if (train.leafletMarker && loc.latitude && loc.longitude) {
+				animateTrain(train.leafletMarker, currentPosition, destination, duration);
+				currentPosition = destination;
+			}
+		}, timer);
+		durationElapsed += duration;
+	});
+}
 
 export function drawMap() {
 	map = Leaflet.map('map', options);

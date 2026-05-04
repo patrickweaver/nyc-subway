@@ -29,7 +29,7 @@
 	} = {}; // Intervals with combined data per lineGroup
 
 	const UPDATE_FREQUENCY_IN_SECONDS = 10;
-	const updateFreqency = UPDATE_FREQUENCY_IN_SECONDS * 1000;
+	const updateFrequency = UPDATE_FREQUENCY_IN_SECONDS * 1000;
 
 	// lineColors keys are lineIds
 	const lineColors: { [key in LineName]?: LineColor } = {};
@@ -66,7 +66,7 @@
 		}
 
 		drawLoop();
-		setInterval(drawLoop, updateFreqency);
+		setInterval(drawLoop, updateFrequency);
 	})();
 
 	// This function will be run every UPDATE_FREQUENCY_IN_SECONDS seconds

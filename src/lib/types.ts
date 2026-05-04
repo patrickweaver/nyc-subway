@@ -124,3 +124,11 @@ export type NYCSU_Entity = {
 	vehicle_current_status: GtfsRealtimeBindings.transit_realtime.VehiclePosition.VehicleStopStatus | null;
 	vehicle_timestamp: number;
 };
+
+export type NYCSU_TrainLocation = {
+	latitude: number | undefined;
+	longitude: number | undefined;
+	index: number;
+	interval: string;
+	distance?: number;
+};
