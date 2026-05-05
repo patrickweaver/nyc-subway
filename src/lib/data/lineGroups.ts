@@ -1,6 +1,6 @@
 import type { LineColor, LineName } from '../types';
 
-const lineGroups: {
+export const lineGroups: {
 	lines: LineName[];
 	apiSuffix: string;
 	color: LineColor;
@@ -52,4 +52,10 @@ const lineGroups: {
 	}
 ];
 
-export default lineGroups;
+export const lineColors: { [key in LineName]?: LineColor } = lineGroups.reduce((acc, lineGroup) => {
+	const colorLines = lineGroup.lines.reduce(
+		(innerAcc, lineName) => ({ ...innerAcc, [lineName]: lineGroup.color }),
+		{}
+	);
+	return { ...acc, ...colorLines };
+}, {});

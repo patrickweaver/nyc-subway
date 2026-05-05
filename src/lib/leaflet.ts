@@ -133,9 +133,11 @@ function drawTracks(offsetsA: LatLng[], offsetsB: LatLng[], color: LineColor, in
 	}
 }
 
-export function drawTrain(train: Train): Circle | null {
+export function drawTrain(
+	train: Train | { latitude: number; longitude: number; direction: 'N' | 'S' }
+): Circle | null {
 	if (!train.latitude || !train.longitude) return null;
-
+	console.log(train);
 	let bounds = Leaflet.latLng(train.latitude, train.longitude)?.toBounds(250);
 
 	const trainPosition: [number, number] = [train.latitude, train.longitude];

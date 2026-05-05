@@ -10,7 +10,11 @@ export const GET: RequestHandler = async ({ params }) => {
 		const line = LineGroupEnum.parse(params.line);
 		const _tripData = await getNYCSU_Entity(line);
 		// TODO don't filter out items almost at last stop
-		const tripData = _tripData.filter((i: NYCSU_Entity) => !!i.updates_next_stop_id);
+		const tripData = _tripData
+			.filter((i: NYCSU_Entity) => !!i.updates_next_stop_id)
+			// TODO REMOVE filtering to two active trains
+			.filter((i) => i.trip_start < i.vehicle_timestamp)
+			.slice(0, 2);
 		const count = tripData.length;
 		const data = { entities: tripData, entity_count: count };
 		const responseBody: ApiResponseBody = {

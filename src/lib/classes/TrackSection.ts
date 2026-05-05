@@ -1,7 +1,17 @@
 import Victor from 'victor';
 import Station from '$lib/classes/Station';
-import type { LineColor, LineGroupTrackSections, TrainDirection } from '$lib/types';
+import type {
+	LatLng,
+	LineColor,
+	LineGroupTrackSection,
+	LineGroupTrackSections,
+	TrainDirection
+} from '$lib/types';
 import { METER_LAT_OFFSET, METER_LNG_OFFSET, TRACK_DISTANCE_METERS } from '$lib/constants';
+import { lineGroupTrackSections } from '$lib/data/lineGroupTrackSectionsWithShapes';
+import { getDistanceFromLatLong } from '$lib/mapping/distance';
+
+const stations = Station.getAllStations();
 
 export default class TrackSection {
 	id: string;
@@ -10,7 +20,7 @@ export default class TrackSection {
 	colors: LineColor[];
 	shape: [number, number][];
 	offsets: { [key in LineColor]?: [number, number][][] };
-	distances: { N: number[]; S: number[] };
+	distances: number[];
 	totalDistance: number;
 
 	constructor(
@@ -27,85 +37,80 @@ export default class TrackSection {
 		this.colors = colors;
 		this.shape = shape;
 		this.offsets = {};
-		this.distances = { N: [], S: [] };
+		this.distances = [];
 		this.totalDistance = 0;
 	}
 
-	static combineTrackSections(
-		lineGroupTrackSections: LineGroupTrackSections,
-		stations: { [key: string]: Station }
-	): {
-		[key: string]: {
-			[key: string]: TrackSection;
-		};
-	} {
-		// Object to store combined intervals, key is
-		// nStation.stopId
-		const combinedTrackSections: {
-			[key: string]: {
-				[key: string]: TrackSection;
-			};
+	static getAllTrackSections() {
+		let trackSections: {
+			[key: string]: { [key: string]: TrackSection };
 		} = {};
-		// Loop over each set of logged intervals organized by line color
+
+		// Loop over each set of track sections organized by line color
 		Object.keys(lineGroupTrackSections).forEach((_color) => {
 			const color = _color as LineColor;
-			// Loop over each logged interval for the color
-			lineGroupTrackSections[color].forEach((intervalData) => {
+			lineGroupTrackSections[color].forEach((trackSectionData) => {
 				// Get station objects from stations
-				const nStationId = intervalData[0];
-				const sStationId = intervalData[1];
+				const nStationId = trackSectionData[0];
+				const sStationId = trackSectionData[1];
+
+				const existingTrackSection = trackSections[nStationId]?.[sStationId];
+				if (!!existingTrackSection) {
+					existingTrackSection.colors.push(color);
+					return;
+				}
+
 				const nStation = stations[nStationId];
 				const sStation = stations[sStationId];
+				const trackSection = this.createTrackSection(trackSectionData, nStation, sStation, color);
 
-				const intervalInMap = combinedTrackSections[nStation.stopId]?.[sStation.stopId];
-				if (intervalInMap) {
-					intervalInMap.colors.push(color);
-				} else {
-					// Otherwise create Interval object
-					// 🚸 Could find next interval and add first point (or second?) of that interval to shape so points meet.
-					const shape = intervalData[4];
-					const numberShape = shape.map((i) => i.map(parseFloat)) as [number, number][];
-					// Add in station lat/longs
-					// 🍄 Not sure why this needs to happen
-					const first = numberShape[0];
-					const last = numberShape[numberShape.length - 1];
-					if (
-						// 🍄 is this necessary?
-						!shape[0] ||
-						(first?.[0] !== nStation.latitude && first?.[1] !== nStation.longitude)
-					) {
-						numberShape.unshift([nStation.latitude, nStation.longitude]);
-					}
-
-					if (last?.[0] !== sStation.latitude && last?.[1] !== sStation.longitude) {
-						numberShape.push([sStation.latitude, sStation.longitude]);
-					}
-					const interval = new TrackSection(nStation, sStation, [color], numberShape);
-					// Add new interval to combinedIntervals
-					if (!combinedTrackSections[nStation.stopId]) {
-						combinedTrackSections[nStation.stopId] = {};
-					}
-					combinedTrackSections[nStation.stopId][sStation.stopId] = interval;
+				if (!trackSections[nStation.stopId]) {
+					trackSections[nStation.stopId] = {};
 				}
+				trackSections[nStation.stopId][sStation.stopId] = trackSection;
 			});
 		});
 
-		// Loop over combinedTrackSections to create offsetShapes:
-		Object.keys(combinedTrackSections).forEach((nStationId) => {
-			Object.keys(combinedTrackSections[nStationId]).forEach((sStationId) => {
-				const interval = combinedTrackSections[nStationId][sStationId];
-				// 🚸 IDK why I'm using TRACK_DISTANCE_METERS as a param here even though the functions are in the same file.
-				const offsets = TrackSection.mapPointsToOffsets(
-					interval.shape,
-					TRACK_DISTANCE_METERS,
-					interval.colors
-				);
-				interval.offsets = offsets;
-				interval.calculateDistances();
+		// Loop over combinedTrackSections to create offsetShapes for each line:
+		Object.keys(trackSections).forEach((nStationId) => {
+			Object.keys(trackSections[nStationId]).forEach((sStationId) => {
+				const trackSection = trackSections[nStationId][sStationId];
+				trackSection.mapPointsToOffsets();
+				trackSection.calculateDistances();
 			});
 		});
 
-		return combinedTrackSections;
+		return trackSections;
+	}
+
+	static createTrackSection(
+		intervalData: LineGroupTrackSection,
+		nStation: Station,
+		sStation: Station,
+		color: LineColor
+	): TrackSection {
+		// Otherwise create TrackSection object
+		// 🚸 Could find next TrackSection and add first point (or second?) of that TrackSection to shape so points meet.
+		const shape = intervalData[4];
+		const numberShape = shape.map((i) => i.map(parseFloat)) as [number, number][];
+		// Add in station lat/longs
+		// 🍄 Not sure why this needs to happen
+		const first = numberShape[0];
+		const last = numberShape[numberShape.length - 1];
+		if (
+			// 🍄 is this necessary?
+			!shape[0] ||
+			(first?.[0] !== nStation.latitude && first?.[1] !== nStation.longitude)
+		) {
+			numberShape.unshift([nStation.latitude, nStation.longitude]);
+		}
+
+		if (last?.[0] !== sStation.latitude && last?.[1] !== sStation.longitude) {
+			numberShape.push([sStation.latitude, sStation.longitude]);
+		}
+		const trackSection = new TrackSection(nStation, sStation, [color], numberShape);
+
+		return trackSection;
 	}
 
 	calculateDistances() {
@@ -127,28 +132,25 @@ export default class TrackSection {
 			return distancesElapsed;
 		};
 
-		const sDistances = shapeVectors.reduce(shapeToDistances, []);
-		const nDistances = [...shapeVectors].reverse().reduce(shapeToDistances, []).reverse();
-		this.distances = { N: nDistances, S: sDistances };
-		this.totalDistance = nDistances[0];
+		const distances = shapeVectors.reduce(shapeToDistances, []);
+		this.distances = distances;
+		// TODO fallback not possible
+		this.totalDistance = distances.at(-1) ?? 0;
 	}
 
-	static mapPointsToOffsets(
-		shape: [number, number][],
-		TRACK_DISTANCE_METERS: number,
-		colors: LineColor[]
-	): { [key in LineColor]?: [number, number][][] } {
-		// For each color return an array of pairs (each side of the shape line) of
-		// offset points(which are pairs of coordinates) that map to each pair of
-		// coordinates from the shape.
+	mapPointsToOffsets() {
+		// For each line color in the track section return an array of
+		// coordinate pairs (each side of the shape line) of offset points
+		// that map to each pair of coordinates from the shape.
 		const colorOffsetPoints: {
-			[key in LineColor]?: ([number, number][] | null)[];
+			[key in LineColor]?: [number, number][][];
 		} = {};
-		colors.forEach((color, index) => {
-			// Calculate the distance from the track shape center line each of the pair
-			// of each color's "tracks" should be. The placing depends on if there are
-			// an even number or odd number of colors running on that interval.
-			const numberOfColors = colors.length;
+		this.colors.forEach((color, index) => {
+			// Calculate the distance from the track shape center line each of
+			// the pair of each color's "tracks" should be. The placing depends
+			// on if there are an even number or odd number of colors running
+			// on that track section.
+			const numberOfColors = this.colors.length;
 			let colorDistances: [number, number];
 			let base;
 			const side = index % 2 === 0 ? 1 : -1;
@@ -167,31 +169,23 @@ export default class TrackSection {
 				}
 			}
 
-			// // 🍄 could this use map or reduce?
-			// const colorOffsetPoints: {
-			//   [key in LineColor]: [number, number][][];
-			// } = _colorOffsetPoints as {
-			//   [key in LineColor]: [number, number][][];
-			// };
-
-			// Map the shape's points to a pair of sets of points for each color
-			// offset by a certain distance.
-			const colorOffsetPoint = shape.map((pointB, index) => {
+			// Map the shape's points to two sets (North/South) of coordinates
+			// for each color offset by the specified distance.
+			const colorOffsetPoint = this.shape.map((pointB, index) => {
 				let pointA = null;
 				let pointC = null;
-				// 🍄 could this use optional chaining?
-				if (index > 0) {
-					pointA = shape[index - 1];
+				const firstIndex = 0;
+				const lastIndex = this.shape.length - 1;
+				if (index > firstIndex) {
+					pointA = this.shape[index - 1];
 				}
-				if (index < shape.length - 1) {
-					pointC = shape[index + 1];
+				if (index < lastIndex) {
+					pointC = this.shape[index + 1];
 				}
-
 				const op = TrackSection.findOffsetPoints(pointA, pointB, pointC, colorDistances);
 				return op?.filter((i) => i !== null) ?? [];
 			});
 
-			colorOffsetPoints[color] = colorOffsetPoint;
 			// If previous and next station are an equal distance from
 			// the middle station, and at opposite angles, the vector
 			// will be of magnitude 0, findOffsetPoints will return
@@ -199,7 +193,7 @@ export default class TrackSection {
 			// This step replaces those null values with the previous non
 			// null value since it would be a straight line to the next not
 			// null value anyway.
-			colorOffsetPoints[color] = colorOffsetPoints[color]?.map((i, index) => {
+			const fixedColorOffsetPoint: [number, number][][] = colorOffsetPoint?.map((i, index) => {
 				const oShape = colorOffsetPoints[color];
 				if (i === null) {
 					let prevNotNullRelativeIndex = 0;
@@ -216,31 +210,28 @@ export default class TrackSection {
 				}
 				return i;
 			});
+			colorOffsetPoints[color] = fixedColorOffsetPoint;
 
 			// // Reverse direction of S bound offset shapes:
-			// const sOffsetPoints = colorOffsetPoints[color].map(i => i[1]);
+			// const sOffsetPoints = colorOffsetPoints[color].map((i) => i[1]);
 			// sOffsetPoints.reverse();
 			// colorOffsetPoints[color] = colorOffsetPoints[color].map((i, index) => {
-			//   i[1] = sOffsetPoints[index];
-			//   return i;
+			// 	i[1] = sOffsetPoints[index];
+			// 	return i;
 			// });
 		});
 
-		// 🍄 Type assertion
-		return colorOffsetPoints as { [key in LineColor]: [number, number][][] };
+		// TODO Type assertion
+		this.offsets = colorOffsetPoints as { [key in LineColor]: [number, number][][] };
 	}
 
 	static findOffsetPoints(
-		pointA: [number, number] | null,
-		pointB: [number, number],
-		pointC: [number, number] | null,
+		pointA: LatLng | null,
+		pointB: LatLng,
+		pointC: LatLng | null,
 		offsetLengthsMeters: [number, number]
 	): [number, number][] | null {
-		const pos: {
-			a: [number, number] | null;
-			b: [number, number] | null;
-			c: [number, number] | null;
-		} = {
+		const pos: { a: LatLng | null; b: LatLng | null; c: LatLng | null } = {
 			a: null,
 			b: null,
 			c: null
@@ -250,8 +241,8 @@ export default class TrackSection {
 		pos.c = pointC || null;
 		// Distance between points A & B and points B & C in meters:
 		let dLatAB: number, dLngAB: number, dLatCB: number, dLngCB: number;
-		[dLatAB, dLngAB] = TrackSection.dLatLng(pointB, pointA);
-		[dLatCB, dLngCB] = TrackSection.dLatLng(pointB, pointC);
+		[dLatAB, dLngAB] = getDistanceFromLatLong(pointB, pointA);
+		[dLatCB, dLngCB] = getDistanceFromLatLong(pointB, pointC);
 		// Turn distances into vectors using Victor: http://victorjs.org/
 		const abVector = new Victor(dLatAB, dLngAB);
 		const cbVector = new Victor(dLatCB, dLngCB);
@@ -378,21 +369,12 @@ export default class TrackSection {
 		return [lat, lng];
 	}
 
-	// Extract lat/lng and convert to meters:
-	// 🍄 Lat/Lng type?
-	static dLatLng(s0: [number, number] | null, s1: [number, number] | null) {
-		if (!s0 || !s1) return [0, 0];
-		const latDiff = s1[0] - s0[0];
-		const lngDiff = s1[1] - s0[1];
-		return [latDiff / METER_LAT_OFFSET, lngDiff / METER_LNG_OFFSET];
-	}
-
 	// ☢️ endingIndex is inclusive!
 	getPoints(
 		color: LineColor,
 		direction: TrainDirection,
 		sIndex: number = 0,
-		eIndex: number = this.distances.N.length - 1
+		eIndex: number = this.distances.length - 1
 	) {
 		let directionIndex = 1;
 		let startingIndex = sIndex;
@@ -421,5 +403,131 @@ export default class TrackSection {
 		}
 
 		return points;
+	}
+
+	getNextPrevPoints(
+		direction: TrainDirection,
+		progress: number,
+		lineColor: LineColor
+	): {
+		next: { point: [number, number]; index: number };
+		prev: { point: [number, number]; index: number };
+		progress: number;
+	} {
+		const isNorthbound = direction === 'N';
+		const directionTrackSectionOffsetIndex = isNorthbound ? 0 : 1;
+		const directionOffset = isNorthbound ? -1 : 1; // "S" if not "N"
+		const ultimatePointIndex = this.distances.length - 1;
+		const penultimatePointIndex = ultimatePointIndex - 1;
+		const arrivedAtEndOfTrackSection = progress === 1;
+		const isAtBeginningOfTrackSection = progress === 0;
+		let nextPointIndex: number;
+		let prevPointIndex: number;
+		let pointProgress: number;
+		let nextPoint: [number, number];
+		let prevPoint: [number, number];
+
+		if (arrivedAtEndOfTrackSection) {
+			nextPointIndex = isNorthbound ? 0 : ultimatePointIndex;
+			prevPointIndex = isNorthbound ? 1 : penultimatePointIndex;
+			pointProgress = 1;
+		} else if (isAtBeginningOfTrackSection) {
+			nextPointIndex = isNorthbound ? penultimatePointIndex : 1;
+			prevPointIndex = isNorthbound ? ultimatePointIndex : 0;
+			pointProgress = 0;
+		} else {
+			const progressDistance = progress * this.totalDistance;
+			// Find the last point in the interval the train passed
+			// TODO Double check this
+
+			const _prevPointIndex = this.distances.reduce((prevPointIndex, distance, index) => {
+				if (isNorthbound) {
+					return distance < progressDistance ? prevPointIndex : index + 1;
+				} else {
+					return distance > progressDistance ? prevPointIndex : index;
+				}
+			}, 0);
+
+			const distanceProgress = this.totalDistance * progress;
+			const passedPoints = this.distances.filter((distance) => distance <= distanceProgress);
+			prevPointIndex = passedPoints.length - 1;
+
+			console.log(
+				'*** DEBUG\n',
+				this.distances,
+				progress,
+				distanceProgress,
+				direction,
+				_prevPointIndex,
+				prevPointIndex
+			);
+
+			nextPointIndex = prevPointIndex + directionOffset;
+
+			const intervalLineColorOffsets = this.offsets[lineColor];
+			if (!intervalLineColorOffsets?.[nextPointIndex]) {
+				throw new Error('TODO_ERROR Invalid nextPointIndex');
+			}
+
+			// console.log({ intervalLineColorOffsets, prevPointIndex });
+			if (!intervalLineColorOffsets?.[prevPointIndex]) {
+				// debugger;
+			}
+			// Save that point as lat/lng
+			prevPoint = intervalLineColorOffsets?.[prevPointIndex][directionTrackSectionOffsetIndex];
+
+			// Find how far in distance the train has progressed between prev  and next points
+			const prevDistance = this.distances[prevPointIndex];
+			const nextDistance = this.distances[nextPointIndex];
+			const dNextPrev = nextDistance - prevDistance;
+			const dCurrentPrev = progressDistance - prevDistance;
+			// TODO avoid dividing by 0
+			pointProgress = dNextPrev !== 0 ? dCurrentPrev / dNextPrev : 0;
+
+			//console.log(`The previous point was index ${prevPointIndex} at distance ${prevDistance}, the next point is index ${nextPointIndex} at distance ${nextDistance}`);
+			//console.log(`The distance between those two is ${dNextPrev} and the distance between the train and the previous is ${dCurrentPrev}`);
+		}
+
+		const intervalLineColorOffsets = this.offsets[lineColor];
+		if (!intervalLineColorOffsets?.[nextPointIndex]) {
+			throw new Error('TODO_ERROR Invalid nextPointIndex');
+		}
+
+		nextPoint = intervalLineColorOffsets?.[nextPointIndex][directionTrackSectionOffsetIndex];
+		prevPoint = intervalLineColorOffsets?.[prevPointIndex][directionTrackSectionOffsetIndex];
+
+		return {
+			next: { point: nextPoint, index: nextPointIndex },
+			prev: { point: prevPoint, index: prevPointIndex },
+			progress: pointProgress
+		};
+	}
+
+	static getTrackSection(
+		nextStation: Station,
+		prevStation: Station,
+		direction: TrainDirection
+	): TrackSection {
+		// Set the order of the nextStation and prevStation based on whether
+		// the train is going N or S. The order will be used to look up the
+		// current interval which has the nStation as the first key and the
+		// sStation as the second key.
+		const establish =
+			(bound: TrainDirection) =>
+			(direction: TrainDirection | null) =>
+			(aStation: string, bStation: string) => {
+				return bound === direction ? [aStation, bStation] : [bStation, aStation];
+			};
+		const [nStationId, sStationId] = establish('N')(direction)(
+			nextStation.stopId,
+			prevStation.stopId
+		);
+
+		const allTrackSections = TrackSection.getAllTrackSections();
+
+		// Find interval based on nStation and sStation from nextStation and prevStation
+		// and retrieve what was previously the currentInterval
+		const trackSection = allTrackSections[nStationId][sStationId];
+		return trackSection;
 	}
 }
